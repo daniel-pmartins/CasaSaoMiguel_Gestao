@@ -1,0 +1,511 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{--marrom:#071D2C;--creme:#FDF7EC;--texto:#071D2C;--borda:#D6BE9B;--muted:#284150;--verde:#31734a;--branco:#fff;--sombra:0 4px 20px #071D2C14}
+    *{box-sizing:border-box}body{margin:0;background:var(--creme);color:var(--texto);font-family:Arial,Helvetica,sans-serif;font-size:14px}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.46;cursor:not-allowed}
+    .app{width:min(calc(100% - 28px),900px);margin:18px auto 30px}
+    .barra{min-height:70px;background:var(--marrom);color:var(--creme);border-radius:12px;display:grid;grid-template-columns:110px 1fr 110px;align-items:center;padding:13px 18px}
+    .barra h1{font-size:20px;letter-spacing:.3px;margin:0;text-align:center}.voltar{border:0;background:none;color:var(--creme);text-align:left;font-weight:700;padding:9px 0}
+    .abas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+    .aba{background:#fff;border:1px solid var(--borda);color:var(--marrom);border-radius:8px;padding:12px 5px;font-weight:700;min-width:0}.aba.ativa{background:var(--marrom);color:var(--creme);border-color:var(--marrom)}
+    .painel{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:16px;box-shadow:var(--sombra)}
+    .titulo{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.titulo h2{font-size:16px;margin:0}.sub{font-size:12px;color:var(--muted);line-height:1.45}
+    .linha{display:flex;align-items:center;justify-content:space-between;gap:12px}.flex{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.crescer{flex:1;min-width:0}
+    .pesquisa{padding:10px 12px;width:100%;max-width:360px;border:1px solid var(--borda);border-radius:8px;background:white;color:var(--texto)}
+    .botao{background:#fff;color:var(--marrom);border:1px solid var(--marrom);border-radius:8px;padding:10px 14px;font-weight:700;white-space:normal}.botao.primario{background:var(--marrom);color:var(--creme)}.botao.leve{border-color:var(--borda)}.botao.perigo{color:#a32a28;border-color:#b95753}
+    .linha-final{display:flex;justify-content:flex-end;gap:9px;margin-top:14px;flex-wrap:wrap}
+    .rolagem{overflow:auto;max-height:calc(100dvh - 270px);min-height:130px;border:1px solid var(--borda);border-radius:8px;overscroll-behavior:contain}
+    table{width:100%;border-collapse:collapse;font-size:12.5px}th{background:#F7EFE1;color:var(--marrom);position:sticky;top:0;text-align:left;z-index:1;padding:12px 10px;white-space:nowrap;border-bottom:1px solid var(--borda)}td{padding:10px;border-bottom:1px solid #eae3d9;vertical-align:middle;line-height:1.3}tr:last-child td{border-bottom:0}
+    .direita{text-align:right}.centro{text-align:center}.num{font-variant-numeric:tabular-nums;white-space:nowrap}.descricao{max-width:205px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;display:block}
+    .aviso{color:var(--muted);border-bottom:1px dotted var(--muted);cursor:help;font-weight:bold;margin-left:3px}.vazio{padding:20px;text-align:center;color:var(--muted)}
+    .caixa{border:1px solid var(--borda);border-radius:10px;padding:13px;margin:10px 0}.caixa h3{margin:0 0 7px;font-size:15px}.caixa p{margin:0 0 8px;line-height:1.55}
+    .campos{display:flex;gap:5px;align-items:center;justify-content:flex-start}.campo{min-width:0;width:78px;border:1px solid var(--borda);border-radius:6px;padding:8px 7px;background:#fff;color:var(--texto);font-size:13px}.campo:focus,.pesquisa:focus{outline:2px solid #a47d59;outline-offset:0}.campo:disabled{background:#f1eee9;color:#76675f}.emb-num{width:60px}.emb-un{width:62px}.preco{width:76px}.comp{width:72px}.rotulo-un{white-space:nowrap;font-size:11px;color:var(--muted)}
+    .subabas{display:flex;gap:7px;margin:12px 0}.subaba{flex:1;border:1px solid var(--borda);border-radius:8px;padding:10px;background:#fff;color:var(--texto);font-weight:700}.subaba.ativa{background:#eee3d7}
+    .status{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}.status.erro{color:#ab3528}.status.ok{color:var(--verde)}
+    .etiqueta{padding:3px 7px;border:1px solid var(--borda);border-radius:30px;color:var(--muted);font-size:11px;white-space:nowrap}.etiqueta.ok{border-color:#a8c8b0;color:var(--verde)}
+    .botao.mini{padding:6px 8px;font-size:11px}.modal-corpo input,.modal-corpo select{max-width:100%;min-width:0}.modal-corpo .formlinha{display:grid;grid-template-columns:1.5fr .65fr .7fr .7fr 30px;align-items:center;gap:5px;margin:6px 0}.modal-corpo .formlinha input,.modal-corpo .formlinha select{width:100%;border:1px solid var(--borda);border-radius:6px;padding:9px 5px;font-size:12px}.modal-corpo .formlinha label{font-size:10px;color:var(--muted)}.modal-corpo .formlinha .mini{padding:7px}.modal-corpo .campo-largo{width:100%;padding:10px;border:1px solid var(--borda);border-radius:7px}.modal-corpo .lado{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.modal-corpo .contagem-total{background:#F7EFE1;border-radius:8px;padding:10px;margin:10px 0;font-weight:700}.btn-conferir{display:inline-block;margin-top:5px}.btn-editar{border:1px solid var(--borda);background:white;color:var(--marrom);border-radius:5px;padding:4px 6px;margin-right:6px;vertical-align:middle;font-size:12px;cursor:pointer}.mov-lupa{border:1px solid var(--borda);background:white;border-radius:6px;padding:5px 8px;font-size:15px;min-width:32px}
+    .saida-cab,.saida-linha{display:grid;grid-template-columns:minmax(0,1fr) 76px 75px 30px;gap:5px;align-items:center;margin:5px 0}.saida-cab{font-size:10px;color:var(--marrom);font-weight:bold}.saida-linha input,.saida-linha select{width:100%;min-width:0;padding:8px 5px;font-size:12px;border:1px solid var(--borda);border-radius:6px;min-height:34px;background:white}.saida-busca{position:relative;min-width:0}.saida-sugestoes{position:absolute;top:100%;left:0;right:0;z-index:8;max-height:170px;overflow:auto;background:white;border:1px solid var(--borda);border-radius:5px;box-shadow:0 8px 18px #0003}.saida-sugestoes button{display:block;border:0;background:white;color:var(--texto);font-size:11px;text-align:left;padding:8px 5px;width:100%;white-space:normal}.saida-sugestoes button.ativo,.saida-sugestoes button:hover{background:#FDF7EC}.saida-conferencia{font-size:11px;background:#f7f0e8;padding:9px;border-radius:7px;margin:12px 0;line-height:1.55}.saida-saldo{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;border-top:1px solid #e7d9c7;margin-top:6px;padding-top:5px}.saida-saldo.falta{color:#a32e28;font-weight:bold}.saida-linha .botao{padding:6px 4px;min-height:33px}.saida-linha select{font-size:11px}
+    .lista-cards{display:none}.erro-principal{background:#fff2f0;border:1px solid #e2a29a;border-radius:8px;padding:12px;margin:10px 0;color:#9e271f;white-space:pre-line}
+    dialog{border:0;border-radius:12px;padding:0;box-shadow:0 20px 70px #0005;width:min(92vw,490px);max-height:85dvh;color:var(--texto)}dialog[open]{position:fixed;top:50%;left:50%;right:auto;bottom:auto;margin:0;transform:translate(-50%,-50%)}dialog::backdrop{background:#24120eb2}.modal-corpo{padding:20px}.modal-corpo h3{margin:0 0 12px}.modal-corpo p{line-height:1.5}.modal-corpo textarea{width:100%;min-height:85px;padding:9px;border:1px solid var(--borda);border-radius:7px}
+  
+/* CABEÇALHO ÚNICO DESKTOP — mesmo padrão de título da FICHA TÉCNICA */
+@media(min-width:850px){
+ header,.barra,.head{min-height:80px!important;background:#071D2C!important;color:#FDF7EC!important;
+  border-radius:12px!important;border-bottom:3px solid #E9A348!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;position:relative!important}
+ header h1,.barra h1,.head h1{color:#FFCC66!important;font-size:22px!important;text-align:center!important;margin:0!important}
+ header .voltar,.barra .voltar,.barra #voltarMenu,.head a.desktopOnly{position:absolute!important;left:16px!important;top:50%!important;transform:translateY(-50%)!important;
+   color:#FDF7EC!important;background:transparent!important;text-decoration:none!important}
+}
+/* CASA SÃO MIGUEL | V13-11.8 TESTE | foco e maiúsculas em todos os módulos */
+input:not([type=number]):not([type=date]):not([type=email]):not([type=url]):not([type=tel]):not([type=file]):not([type=password]), textarea {text-transform:uppercase}
+input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline:2px solid #E9A348 !important; outline-offset:2px !important;
+  border-color:#B87829 !important; box-shadow:0 0 0 3px rgba(233,163,72,.22) !important;
+}
+
+</style>
+
+<style>@media(min-width:850px){html,body{overflow-y:hidden!important} .app{margin-top:22px!important}}</style>
+<style>@media (min-width:651px){.voltar,#btnMenu,#voltarMenu,.head>a.desktopOnly{display:none!important} header,.barra,.head{margin-top:0!important}}</style>
+
+</head>
+<body>
+<div class="app">
+  <div class="barra"><button class="voltar" id="btnMenu">← Menu</button><h1>ESTOQUE</h1><span></span></div>
+  <nav class="abas" aria-label="Áreas de estoque">
+    <button data-aba="saldos" class="aba ativa">SALDOS</button><button data-aba="inventarios" class="aba">INVENTÁRIOS</button><button data-aba="movimentacoes" class="aba">MOVIMENTAÇÕES</button>
+  </nav>
+  <div id="erro" hidden class="erro-principal" role="alert"></div>
+  <main id="conteudo" class="painel"><p class="vazio">Carregando dados de estoque...</p></main>
+</div>
+<dialog id="modal"><div class="modal-corpo" id="modalConteudo"></div></dialog><dialog id="confirmModal"><div class="modal-corpo" id="confirmModalContent"></div></dialog>
+<script>
+'use strict';
+const APP_URL = '/';
+const abaSolicitada=new URLSearchParams(window.location.search).get('aba');
+const S={aba:['saldos','inventarios','movimentacoes'].includes(abaSolicitada)?abaSolicitada:'saldos',situacao:null,inv:null,sub:'a-contar',dadosInv:null,historico:[],movimentos:[],dirty:{},contagemTimer:null,camposRecentes:new Set(),salvando:null,pesquisa:''};
+const el=id=>document.getElementById(id);
+const escapar=v=>String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+function rpc(nome,...args){return new Promise((resolve,reject)=>{localApi.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(e?.message||String(e))))[nome](...args);});}
+function erro(msg){el('erro').hidden=!msg;if(msg)el('erro').textContent=msg;}
+function notificacao(txt,classe=''){let n=el('estadoSalvamento');if(n){n.className='status '+classe;n.textContent=txt;} }
+function botoes(t){return `<button class="botao ${t.cls||''}" data-action="${t.action}" ${t.extra||''}>${t.label}</button>`;}
+function modal(titulo,html,acoes){const dlg=el('modal');el('modalConteudo').innerHTML=`<h3>${escapar(titulo)}</h3>${html}<div class="linha-final">${acoes.map(a=>`<button class="botao ${a.primary?'primario':''}" data-modal="${escapar(a.id)}">${escapar(a.label)}</button>`).join('')}</div>`;dlg.showModal();return new Promise(resolve=>{const run=e=>{const b=e.target.closest('[data-modal]');if(!b)return;dlg.removeEventListener('click',run);dlg.close();resolve({id:b.dataset.modal,text:el('justificativaModal')?.value||''});};dlg.addEventListener('click',run);dlg.addEventListener('cancel',function onCancel(e){e.preventDefault();dlg.removeEventListener('cancel',onCancel);dlg.removeEventListener('click',run);dlg.close();resolve({id:'voltar',text:''});},{once:true});});}
+async function solicitar(titulo,descricao,botao='CONFIRMAR'){const dlg=el('confirmModal'),corpo=el('confirmModalContent');corpo.innerHTML=`<h3>${escapar(titulo)}</h3><p>${escapar(descricao)}</p><div class="linha-final"><button class="botao primario" data-confirm="sim">${escapar(botao)}</button><button class="botao leve" data-confirm="nao">VOLTAR</button></div>`;dlg.showModal();return await new Promise(resolve=>{const run=e=>{const b=e.target.closest('[data-confirm]');if(!b)return;dlg.removeEventListener('click',run);dlg.close();resolve(b.dataset.confirm==='sim');};dlg.addEventListener('click',run);dlg.addEventListener('cancel',function onCancel(e){e.preventDefault();dlg.removeEventListener('cancel',onCancel);dlg.removeEventListener('click',run);dlg.close();resolve(false);},{once:true});});}
+async function carregar(){try{erro('');S.situacao=await rpc('estoqueSituacao');exibir();}catch(e){erro(e.message);}}
+function exibir(){document.querySelectorAll('.aba').forEach(b=>b.classList.toggle('ativa',b.dataset.aba===S.aba));if(S.inv)exibirContagem();else if(S.aba==='saldos')exibirSaldos();else if(S.aba==='inventarios')exibirInventarios();else exibirMovimentos();}
+function exibirSaldos(){const lista=(S.situacao?.saldos||[]).filter(x=>x.nome.toLocaleUpperCase('pt-BR').includes(S.pesquisa.toLocaleUpperCase('pt-BR')));
+  el('conteudo').innerHTML=`<div class="titulo"><h2>POSIÇÃO ATUAL DO ESTOQUE</h2><span class="sub">Unidades de custo: G / ML / UN / CM / kWh</span></div><div style="margin-bottom:12px" class="flex"><input id="filtroSaldos" class="pesquisa" placeholder="Pesquisar insumo..." value="${escapar(S.pesquisa)}" aria-label="Pesquisar insumo">${S.situacao&&S.situacao.normalizacaoPendente?'<button class="botao leve mini" data-action="normalizar-referencias" title="Normalizar valores históricos de insumos sem controle físico">NORMALIZAR REFERÊNCIAS</button>':''}</div><div id="tabelaSaldos" class="rolagem desktop"><table><thead><tr><th>INSUMO</th><th class="direita">SALDO</th><th class="direita">CUSTO UN</th><th class="direita">VALOR TOTAL</th></tr></thead><tbody>${lista.map(x=>`<tr><td><div class="flex" style="flex-wrap:nowrap"><button class="btn-editar" type="button" data-action="editar-saldo" data-id="${escapar(x.id)}" title="Editar ${escapar(x.nome)}" aria-label="Editar ${escapar(x.nome)}">✎</button><span class="descricao" title="${escapar(x.nome)}">${escapar(x.nome)}${x.pendente?` <span class="aviso" title="Custo pendente para próxima entrada: ${escapar(x.pendente)}">ⓘ</span>`:''}</span></div></td><td class="direita num">${escapar(x.quantidade)}</td><td class="direita num">${escapar(x.custo)}</td><td class="direita num">${escapar(x.valor)}</td></tr>`).join('')||'<tr><td colspan="4" class="vazio">Nenhum insumo com histórico de movimentação.</td></tr>'}</tbody></table></div><div class="lista-cards">${lista.map(x=>`<div class="card-item"><div class="linha"><b title="${escapar(x.nome)}"><button class="btn-editar" data-action="editar-saldo" data-id="${escapar(x.id)}" title="Editar insumo">✎</button>${escapar(x.nome)}${x.pendente?` <span class="aviso" title="Custo pendente para próxima entrada: ${escapar(x.pendente)}">ⓘ</span>`:''}</b><strong>${escapar(x.quantidade)}</strong></div><div class="meta"><span>CUSTO UN: R$ ${escapar(x.custo)}</span><span>${x.controlaEstoque==='NÃO'?'':'VALOR TOTAL: '+escapar(x.valor)}</span></div></div>`).join('')||'<div class="vazio">Nenhum insumo com histórico de movimentação.</div>'}</div><p class="sub">Os saldos podem ser exibidos em KG/L para facilitar a leitura; o custo unitário continua calculado em G, ML ou UN e apresentado com seis casas decimais.</p>`;
+  el('filtroSaldos').addEventListener('input',ev=>{const anterior=el('tabelaSaldos').scrollTop;S.pesquisa=ev.target.value;const foco=ev.target.selectionStart;exibirSaldos();el('filtroSaldos').focus();el('filtroSaldos').setSelectionRange(foco,foco);el('tabelaSaldos').scrollTop=anterior;});
+}
+function blocoInv(titulo,descricao,acao,botao,sufixo=''){return `<div class="caixa"><div class="linha"><h3>${titulo}</h3>${sufixo}</div><p class="sub">${descricao}</p>${acao?botoes({action:acao,label:botao,cls:'leve'}):''}</div>`;}
+function exibirInventarios(){const s=S.situacao,ab=s.aberto;
+  const abrir=ab?blocoInv('INVENTÁRIO EM ANDAMENTO','Retome a contagem e confira as diferenças antes da finalização.','continuar','CONTINUAR CONTAGEM',`<span class="etiqueta">${escapar(ab.id)}</span>`):blocoInv('INVENTÁRIO PERIÓDICO','Conte os insumos que já possuem movimentações e registre as diferenças encontradas.','iniciar-regular','INICIAR INVENTÁRIO');
+  el('conteudo').innerHTML=`<div class="titulo"><h2>CONTROLE DE INVENTÁRIOS</h2></div>${abrir}${blocoInv('HISTÓRICO DE INVENTÁRIOS','Consulte inventários encerrados, inclusive cancelamentos justificados, e baixe relatórios em PDF.','historico','VER HISTÓRICO')}`;
+}
+function botoesMov(){return `<div class="flex" style="margin-bottom:10px">${S.situacao&&S.situacao.entradasManuais?botoes({action:"entrada-manual",label:"NOVA ENTRADA",cls:"leve"}):""}${S.situacao?botoes({action:"saida-manual",label:"NOVA SAÍDA",cls:"leve"}):""}</div>`;}
+function exibirMovimentos(){el('conteudo').innerHTML='<div class="titulo"><h2>HISTÓRICO DE MOVIMENTAÇÕES</h2><span class="sub">Mais recentes primeiro</span></div><div class="rolagem"><p class="vazio">Carregando movimentações...</p></div>';
+  rpc('estoqueListarMovimentacoes').then(l=>{S.movimentos=l;el('conteudo').innerHTML=`<div class="titulo"><h2>HISTÓRICO DE MOVIMENTAÇÕES</h2><span class="sub">Mais recentes primeiro</span></div>${l.some(m=>m.aviso)?'<div class="erro" role="alert">HÁ MOVIMENTAÇÕES COM VALOR MONETÁRIO INCONSISTENTE. Consulte os IDs indicados e verifique o banco original antes de qualquer correção. Nenhum dado foi modificado.</div>':''}${botoesMov()}<div class="rolagem desktop"><table><thead><tr><th>DATA</th><th>MOVIMENTAÇÃO</th><th>TIPO</th><th class="direita">VALOR TOTAL</th><th class="centro">DETALHES</th></tr></thead><tbody>${l.map(m=>`<tr><td class="num">${escapar(m.data)}</td><td>${escapar(m.movimento)}</td><td>${escapar(m.tipo)}</td><td class="direita num">${escapar(m.valor)}${m.aviso?`<div class="sub" style="color:#A02B2B">${escapar(m.aviso)}</div>`:''}</td><td class="centro"><button class="mov-lupa" data-action="detalhes" data-id="${escapar(m.id)}" aria-label="Ver detalhes">⌕</button></td></tr>`).join('')||'<tr><td colspan="5" class="vazio">Nenhuma movimentação registrada.</td></tr>'}</tbody></table></div><div class="lista-cards">${l.map(m=>`<div class="card-item"><div class="linha"><b>${escapar(m.data)} · ${escapar(m.movimento)}</b><button class="mov-lupa" data-action="detalhes" data-id="${escapar(m.id)}">⌕</button></div><div class="meta"><span>${escapar(m.tipo)}</span><strong>${escapar(m.valor)}</strong></div></div>`).join('')||'<p class="vazio">Nenhuma movimentação registrada.</p>'}</div>`;}).catch(e=>erro(e.message));
+}
+async function detalharMov(id){try{const d=await rpc('estoqueDetalhesMovimentacao',id);await modal('DETALHES DA MOVIMENTAÇÃO',`<p class="sub">${escapar(d.data)} · ${escapar(d.movimento)} · ${escapar(d.tipo)}<br>Origem: ${escapar(d.referencia)}</p><div class="rolagem" style="max-height:330px"><table><thead><tr><th>INSUMO</th><th>QUANTIDADE</th><th>IMPACTO</th></tr></thead><tbody>${d.itens.map(i=>`<tr><td>${escapar(i.nome)}${i.custoPendente!=='R$ 0,00'?`<div class="sub">Custo pendente: ${escapar(i.custoPendente)}</div>`:''}</td><td>${escapar(i.quantidade)}</td><td>${escapar(i.impacto)}</td></tr>`).join('')}</tbody></table></div><p><b>Impacto total no estoque: ${escapar(d.valor)}</b></p>`,[{id:'fechar',label:'FECHAR',primary:true}]);}catch(e){erro(e.message);}}
+async function historico(){try{const lista=await rpc('estoqueListarInventarios');const html=`<div class="rolagem" style="max-height:400px"><table><thead><tr><th>ID</th><th>TIPO</th><th>SITUAÇÃO</th><th></th></tr></thead><tbody>${lista.map(i=>`<tr><td>${escapar(i.id)}<span class="sub" style="display:block">${escapar(i.fim||i.inicio)}</span></td><td>${escapar(i.tipo)}</td><td>${escapar(i.status)}</td><td><button class="botao leve" data-action="consulta-hist" data-id="${escapar(i.id)}">CONSULTAR</button></td></tr>`).join('')}</tbody></table></div>`;el('conteudo').innerHTML=`<div class="titulo"><h2>HISTÓRICO DE INVENTÁRIOS</h2>${botoes({action:'voltar-inventarios',label:'VOLTAR',cls:'leve'})}</div>${html}`;}catch(e){erro(e.message);}}
+async function abrirInventario(tipo){try{erro('');const x=await rpc('estoqueAbrirInventario',tipo);await carregarInventario(x.id);}catch(e){erro(e.message);}}
+async function carregarInventario(id){try{erro('');S.dadosInv=await rpc('estoqueDadosInventario',id);S.inv=id;S.sub='a-contar';S.dirty={};S.camposRecentes=new Set();exibir();}catch(e){erro(e.message);}}
+function campoMarkup(i,nome,valor,classe='',tipo='text'){
+  const locked=i.gravado||S.dadosInv.status!=='ABERTO'||(nome==='contagem'&&S.dadosInv.tipo!=='INICIAL');
+  return `<input data-id="${escapar(i.id)}" data-campo="${nome}" class="campo ${classe}" type="${tipo}" inputmode="decimal" aria-label="${escapar(nome+' de '+i.nome)}" autocomplete="off" value="${escapar(valor)}" ${locked?'disabled':''}>`;
+}
+function unidadeEmbalagem(i){return {G:['G','KG'],ML:['ML','L'],CM:['CM','M'],UN:['UN'],KWH:['KWH']}[i.unidade]||[i.unidade];}
+function compMarkup(i){return `<select data-id="${escapar(i.id)}" data-campo="compensar" class="campo comp" ${i.gravado||S.dadosInv.status!=='ABERTO'?'disabled':''}><option value="SIM" ${i.compensar==='SIM'?'selected':''}>SIM</option><option value="NÃO" ${i.compensar==='NÃO'?'selected':''}>NÃO</option></select>`;}
+function btnDetalhes(i){return `<button class="botao leve mini btn-conferir" data-action="conferir-pacotes" data-id="${escapar(i.id)}">${i.detalhesCount?'CONFERIR ('+i.detalhesCount+')':'PACOTES / AVULSOS'}</button>`;}
+function camposInv(i){const initial=S.dadosInv.tipo==='INICIAL';const comp=campoMarkup(i,'contagem',i.contagem);
+  if(initial)return `<div class="campos">${comp}<span class="rotulo-un">${escapar(i.unidade)}</span></div>`;
+  return `<div class="campos">${comp}<span class="rotulo-un">${escapar(i.unidade)}</span></div>`;
+}
+function embMarkup(i){return `${campoMarkup(i,'tamanho',i.tamanho,'emb-num')}<select class="campo emb-un" data-id="${escapar(i.id)}" data-campo="unidadeEmbalagem" ${i.gravado?'disabled':''}>${unidadeEmbalagem(i).map(u=>`<option ${i.unidadeEmbalagem===u?'selected':''}>${u}</option>`).join('')}</select>`;}
+function linhaInv(i){const ini=S.dadosInv.tipo==='INICIAL',editavel=S.dadosInv.status==='ABERTO';return `<tr><td><span class="descricao" title="${escapar(i.nome)}">${escapar(i.nome)}</span></td>${!ini?`<td class="direita num">${escapar(i.estoque)}</td>`:''}<td>${camposInv(i)}</td>${ini?`<td><div class="campos">${embMarkup(i)}</div></td><td>${campoMarkup(i,'preco',i.preco,'preco')}</td>`:`<td class="direita num" data-diferenca="${escapar(i.id)}">${escapar(i.dif||'—')}</td><td>${compMarkup(i)}</td>`}<td class="centro">${!ini?btnDetalhes(i):''}${i.gravado&&editavel?`<button data-action="reabrir" data-id="${escapar(i.id)}" class="botao leve" style="padding:7px">CORRIGIR</button>`:(i.gravado?'✓':'')}</td></tr>`;}
+function cardInv(i){const ini=S.dadosInv.tipo==='INICIAL';return `<div class="card-item"><b title="${escapar(i.nome)}">${escapar(i.nome)}</b>${!ini?`<div class="meta"><span>QUANT. ESTOQUE</span><strong>${escapar(i.estoque)}</strong></div>`:''}<div class="meta"><span>CONTAGEM</span><span>${camposInv(i)}</span></div>${ini?`<div class="meta"><span>EMBALAGEM</span><span class="campos">${embMarkup(i)}</span></div><div class="meta"><span>PREÇO POR EMBALAGEM (R$)</span>${campoMarkup(i,'preco',i.preco)}</div>`:`<div class="meta"><span>DIFERENÇA</span><strong data-diferenca="${escapar(i.id)}">${escapar(i.dif||'—')}</strong></div>${`<div class="meta"><span>COMPENSAR?</span>${compMarkup(i)}</div>`}`}${!ini?`<div class="linha-final">${btnDetalhes(i)}</div>`:''}${i.gravado&&S.dadosInv.status==='ABERTO'?`<div class="linha-final"><button data-action="reabrir" data-id="${escapar(i.id)}" class="botao leve">CORRIGIR</button></div>`:''}</div>`;}
+function exibirContagem(){const d=S.dadosInv,ini=d.tipo==='INICIAL',aberto=d.status==='ABERTO';const gravados=d.itens.filter(i=>i.gravado),aContar=d.itens.filter(i=>!i.gravado),lista=S.sub==='a-contar'?aContar:gravados;
+  el('conteudo').innerHTML=`<div class="titulo"><div><h2>${ini?'INVENTÁRIO INICIAL':'INVENTÁRIO'} · ${escapar(d.id)}</h2><div class="sub">${escapar(d.inicio)} · ${escapar(d.status)}</div></div><div id="estadoSalvamento" class="status">${aberto?'Rascunho em andamento':'Consulta protegida'}</div></div><div class="subabas"><button data-sub="a-contar" class="subaba ${S.sub==='a-contar'?'ativa':''}">${aberto?'A CONTAR':'REGISTROS'} (${aContar.length})</button><button data-sub="gravados" class="subaba ${S.sub==='gravados'?'ativa':''}">JÁ CONTADOS (${gravados.length})</button></div><div class="rolagem desktop"><table><thead><tr><th>INSUMO</th>${!ini?'<th class="direita">QUANT. ESTOQUE</th>':''}<th>CONTAGEM</th>${ini?'<th>TAM. EMBALAGEM</th><th>PREÇO EMB. (R$)</th>':'<th class="direita">DIFERENÇA</th><th>COMPENSAR?</th>'}<th></th></tr></thead><tbody>${lista.map(linhaInv).join('')||`<tr><td colspan="7" class="vazio">Nenhum item nesta lista.</td></tr>`}</tbody></table></div><div class="lista-cards">${lista.map(cardInv).join('')||'<div class="vazio">Nenhum item nesta lista.</div>'}</div><p class="sub">${ini?'Contagem vazia equivale a ZERO somente na finalização. Para quantidade positiva, informe embalagem e preço de referência.':'CONTAGEM vem preenchida com o saldo de referência e é bloqueada. Para alterar, use PACOTES / AVULSOS. Se não houver diferença, GRAVAR confirma a quantidade existente.'}</p><div class="linha-final">${aberto?`${botoes({action:'cancelar-inventario',label:'CANCELAR INVENTÁRIO',cls:'perigo'})}${botoes({action:'gravar-contagens',label:'GRAVAR',cls:'leve'})}${botoes({action:'finalizar-inventario',label:'FINALIZAR INVENTÁRIO',cls:'primario'})}`:botoes({action:'sair-contagem',label:'VOLTAR',cls:'leve'})}</div>`;
+}
+function registrarAlteracao(target,finalizou=false){const id=target.dataset.id,chave=target.dataset.campo,it=S.dadosInv.itens.find(x=>x.id===id);if(!it||it.gravado)return;
+  const antes=it[chave];it[chave]=target.value;
+  if(chave==='contagem'&&antes!==target.value){it.momento=new Date().toISOString();const dv=Number(String(it.contagem).replace(',','.')),base=Number(it.estoqueMili||0)/1000;if(it.contagem!==''&&Number.isFinite(dv)){const diff=(dv-base).toLocaleString('pt-BR',{maximumFractionDigits:3});it.dif=(dv-base>0?'+':'')+diff+' '+it.unidade;}else it.dif='';document.querySelectorAll(`[data-diferenca="${CSS.escape(id)}"]`).forEach(e=>e.textContent=it.dif||'—');}
+  S.dirty[id]={id,contagem:it.contagem,tamanho:it.tamanho,unidadeEmbalagem:it.unidadeEmbalagem||unidadeEmbalagem(it)[0],preco:it.preco,compensar:it.compensar,momento:it.momento};
+  if(finalizou)S.camposRecentes.add(id+':'+chave);notificacao('Alterações ainda não salvas');clearTimeout(S.contagemTimer);S.contagemTimer=setTimeout(()=>salvarRascunho(),10000);
+  if(S.camposRecentes.size>=4)salvarRascunho();
+}
+async function salvarRascunho(){clearTimeout(S.contagemTimer);if(S.salvando){await S.salvando;if(Object.keys(S.dirty).length) return salvarRascunho();return;}
+  const lote=Object.values(S.dirty);if(!lote.length)return;
+  S.dirty={};S.camposRecentes=new Set();notificacao('Salvando...');
+  S.salvando=rpc('estoqueSalvarContagens',S.inv,lote).then(()=>{notificacao('✓ Rascunho salvo','ok');}).catch(e=>{lote.forEach(i=>{if(!S.dirty[i.id])S.dirty[i.id]=i;});notificacao('Não foi possível salvar','erro');throw e;}).finally(()=>{S.salvando=null;});
+  return S.salvando;
+}
+async function gravarContagens(){try{erro('');await salvarRascunho();const ids=S.dadosInv.itens.filter(i=>!i.gravado&&i.contagem!==''&&i.contagem!=null).map(i=>i.id);if(!ids.length){erro('Preencha ao menos uma contagem para gravar.');return;}
+  await rpc('estoqueGravarContagens',S.inv,ids);const nova=await rpc('estoqueDadosInventario',S.inv);S.dadosInv=nova;S.sub='a-contar';exibir();}catch(e){erro(e.message);}}
+async function finalizar(){try{erro('');await salvarRascunho();const prev=await rpc('estoquePreviaFinalizacao',S.inv);
+  const mensagem=`${prev.total} insumos na conferência. ${prev.mais} diferenças positivas, ${prev.menos} negativas e ${prev.sem} sem diferença.${prev.tipo==='INICIAL'?' Valor do estoque inicial: '+prev.valorInicial+'. Campos não preenchidos serão considerados zero.':''} Esta operação alterará o estoque e NÃO permitirá edição direta posteriormente.`;
+  if(!await solicitar('CONFIRMAR FINALIZAÇÃO',mensagem,'CONFIRMAR GRAVAÇÃO'))return;
+  const res=await rpc('estoqueFinalizarInventario',S.inv);S.inv=null;S.dadosInv=null;await carregar();S.aba='inventarios';exibir();await modal('INVENTÁRIO FINALIZADO',`<p>Inventário ${escapar(res.id)} finalizado. ${res.movimentos} insumos tiveram movimentação física registrada.</p>`,[{id:'ok',label:'FECHAR',primary:true}]);
+}catch(e){erro(e.message);}}
+async function cancelarInventario(){try{await salvarRascunho();const r=await modal('CANCELAR INVENTÁRIO','<p>O cancelamento encerra a contagem sem movimentar o estoque e ficará no histórico. Informe a justificativa:</p><textarea id="justificativaModal" placeholder="Motivo do cancelamento (mínimo 8 caracteres)"></textarea>',[{id:'cancelar',label:'CONFIRMAR CANCELAMENTO',primary:true},{id:'voltar',label:'VOLTAR'}]);if(r.id!=='cancelar')return;
+  if(r.text.trim().length<8){erro('Justificativa obrigatória com pelo menos 8 caracteres.');return;}
+  await rpc('estoqueCancelarInventario',S.inv,r.text.trim());S.inv=null;S.dadosInv=null;await carregar();S.aba='inventarios';exibir();
+}catch(e){erro(e.message);}}
+async function verInventario(id){try{S.inv=id;S.dadosInv=await rpc('estoqueDadosInventario',id);S.sub=S.dadosInv.status==='FINALIZADO'?'gravados':'a-contar';exibir();}catch(e){erro(e.message);}}
+async function gerarPdf(id){try{erro('');const r=await rpc('estoquePdfInventario',id);const chars=atob(r.base64),bytes=new Uint8Array(chars.length);for(let i=0;i<chars.length;i++)bytes[i]=chars.charCodeAt(i);const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));const a=document.createElement('a');a.href=url;a.download=r.nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);}catch(e){erro('Não foi possível gerar PDF: '+e.message);}}
+async function historicoDetalhe(id){try{const d=await rpc('estoqueDadosInventario',id);const r=await modal('INVENTÁRIO '+id,`<p>${escapar(d.tipo)} · ${escapar(d.status)}<br>Início: ${escapar(d.inicio)}<br>Fim: ${escapar(d.fim)}</p><p class="sub">${escapar(d.justificativa||'')}</p><p>${d.itens.length} insumos no registro.</p>`,[{id:'ver',label:'VER RESUMO',primary:true},...(d.status==='FINALIZADO'||d.status==='CANCELADO'?[{id:'pdf',label:'BAIXAR PDF'}]:[]),{id:'voltar',label:'VOLTAR'}]);if(r.id==='ver')verInventario(id);if(r.id==='pdf')gerarPdf(id);}catch(e){erro(e.message);}}
+function prepararCorpoModal(){const atual=el('modalConteudo');const novo=atual.cloneNode(false);atual.replaceWith(novo);return novo;}
+// Telas de conferência de embalagens e movimentações (V 05-10.2).
+function criarOpcoesUnidades(base,selecionada){
+  const us=unidadeEmbalagem({unidade:base});
+  return us.map(u=>`<option value="${escapar(u)}" ${u===selecionada?'selected':''}>${escapar(u==='KWH'?'kWh':u)}</option>`).join('');
+}
+async function abrirDetalhesPacotes(id){
+  try{
+    erro('');await salvarRascunho();
+    const i=S.dadosInv.itens.find(it=>it.id===id);
+    if(!i||S.dadosInv.tipo==='INICIAL')return;
+    const editavel=S.dadosInv.status==='ABERTO'&&!i.gravado;
+    let linhas=(i.detalhes||[]).map(l=>({...l}));
+    if(!linhas.length)linhas=[{quantidade:i.contagem==='0'?'0':'1',tamanho:i.contagem==='0'?'1':(i.contagem||'1'),unidade:i.unidade}];
+    const dlg=el('modal'),body=prepararCorpoModal(),momento=new Date().toISOString();
+    body.innerHTML=`<h3>CONTAGEM POR EMBALAGENS</h3><p><strong>${escapar(i.nome)}</strong><br><span class="sub">A unidade de referência é ${escapar(i.unidade)}. Adicione embalagens fechadas, parciais ou quantidades avulsas.</span></p><div class="formlinha"><label>QTD. PACOTES</label><label>TAMANHO</label><label>UNID.</label><label></label><label></label></div><div id="linhasPacotes"></div><div id="previsaoPacotes" class="contagem-total"></div>${editavel?'<button class="botao leve" type="button" id="addPacote">+ ADICIONAR EMBALAGEM / AVULSO</button>':''}<div class="linha-final">${editavel?'<button class="botao primario" id="gravarPacotes">SALVAR CONTAGEM</button>':''}<button class="botao leve" id="fecharPacotes">FECHAR</button></div>`;
+    let salvando=false;
+    function desenhar(){
+      el('linhasPacotes').innerHTML=linhas.map((l,index)=>`<div class="formlinha" data-index="${index}"><input aria-label="Quantidade de pacotes" data-valor="quantidade" inputmode="decimal" value="${escapar(l.quantidade)}" ${!editavel?'disabled':''}><input aria-label="Tamanho" data-valor="tamanho" inputmode="decimal" value="${escapar(l.tamanho)}" ${!editavel?'disabled':''}><select data-valor="unidade" ${!editavel?'disabled':''}>${criarOpcoesUnidades(i.unidade,l.unidade)}</select><span></span>${editavel?`<button type="button" class="botao leve mini" data-remover="${index}" aria-label="Remover embalagem">×</button>`:'<span></span>'}</div>`).join('');
+      atualizarPrevia();
+    }
+    function atualizarPrevia(){
+      let soma=0,validos=true;
+      for(const l of linhas){const q=Number(String(l.quantidade).replace(',','.')),t=Number(String(l.tamanho).replace(',','.'));
+        const fator=(l.unidade==='KG'||l.unidade==='L')?1000:l.unidade==='M'?100:1;
+        if(!Number.isFinite(q)||!Number.isFinite(t)||q<0||t<=0||String(l.quantidade).trim()===''){validos=false;continue;}soma+=q*t*fator;}
+      el('previsaoPacotes').textContent=validos&&linhas.length?'CONTAGEM CALCULADA: '+soma.toLocaleString('pt-BR',{maximumFractionDigits:3})+' '+i.unidade:'Confira os valores das embalagens.';
+    }
+    function sincronizar(){body.querySelectorAll('#linhasPacotes .formlinha[data-index]').forEach(row=>{const l=linhas[Number(row.dataset.index)];row.querySelectorAll('[data-valor]').forEach(inp=>l[inp.dataset.valor]=inp.value);});}
+    body.addEventListener('input',e=>{if(e.target.closest('#linhasPacotes')){sincronizar();atualizarPrevia();}});
+    // Em seletores e entradas, redesenhamos somente quando o valor foi confirmado.
+    body.addEventListener('change',e=>{if(e.target.closest('#linhasPacotes')){sincronizar();atualizarPrevia();}});
+    body.addEventListener('click',async e=>{
+      if(e.target.closest('#fecharPacotes')){if(!salvando)dlg.close();return;}
+      if(e.target.closest('#addPacote')){sincronizar();linhas.push({quantidade:'1',tamanho:'1',unidade:i.unidade});desenhar();return;}
+      const rm=e.target.closest('[data-remover]');if(rm){sincronizar();linhas.splice(Number(rm.dataset.remover),1);desenhar();return;}
+      if(e.target.closest('#gravarPacotes')&&!salvando){
+        sincronizar();salvando=true;el('gravarPacotes').disabled=true;
+        try{await rpc('estoqueSalvarDetalhesContagem',S.inv,id,linhas,i.compensar,momento);
+          dlg.close();S.dadosInv=await rpc('estoqueDadosInventario',S.inv);exibir();}
+        catch(ex){erro(ex.message);salvando=false;const b=el('gravarPacotes');if(b)b.disabled=false;}
+      }
+    });
+    desenhar();dlg.showModal();
+  }catch(ex){erro(ex.message);}
+}
+async function abrirEdicaoInsumoSemControle(id){
+  const item=(await rpc('listarInsumos')).find(x=>x.id===id);
+  if(!item)throw Error('Cadastro de insumo não localizado.');
+  const corpo=prepararCorpoModal(),dlg=el('modal');
+  const categorias=[...new Set((await rpc('listarInsumos')).map(x=>x.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  corpo.innerHTML=`<h3>EDITAR CADASTRO DE INSUMO</h3><p class="sub">INSUMO ${escapar(item.id)} · Alterações serão aplicadas pelo cadastro oficial, preservando os registros históricos.</p>
+    <label>DESCRIÇÃO</label><input id="eiDesc" class="campo-largo" value="${escapar(item.descricao)}">
+    <label>CATEGORIA</label><input id="eiCategoria" class="campo-largo" list="eiCategorias" value="${escapar(item.categoria)}"><datalist id="eiCategorias">${categorias.map(c=>`<option value="${escapar(c)}"></option>`).join('')}</datalist>
+    <div class="formgrid duas"><div><label>UNIDADE BASE</label><select id="eiUnidade" class="campo-largo">${['G','ML','UN','CM','KWH'].map(u=>`<option value="${u}" ${item.unidade===u?'selected':''}>${u==='KWH'?'kWh':u}</option>`).join('')}</select></div>
+    <div><label>FC</label><input id="eiFc" class="campo-largo" value="${escapar(item.fc||'1')}"></div></div>
+    <label>CONTROLA ESTOQUE?</label><select id="eiControla" class="campo-largo"><option ${item.controlaEstoque!=='NÃO'?'selected':''}>SIM</option><option ${item.controlaEstoque==='NÃO'?'selected':''}>NÃO</option></select>
+    <label>OBSERVAÇÃO</label><textarea id="eiObs" class="campo-largo" rows="2">${escapar(item.observacao||'')}</textarea>
+    <div class="linha-final"><button id="eiGravar" class="botao primario">GRAVAR CADASTRO</button><button id="eiVoltar" class="botao leve">VOLTAR</button></div>`;
+  dlg.showModal();
+  corpo.addEventListener('click',async ev=>{
+    if(ev.target.closest('#eiVoltar')){dlg.close();return;}
+    if(!ev.target.closest('#eiGravar'))return;
+    const botao=el('eiGravar');botao.disabled=true;
+    try{
+      const dados={id:item.id,descricao:el('eiDesc').value.toLocaleUpperCase('pt-BR'),categoria:el('eiCategoria').value.toLocaleUpperCase('pt-BR'),unidade:el('eiUnidade').value,
+        fc:el('eiFc').value,controlaEstoque:el('eiControla').value,observacao:el('eiObs').value.toLocaleUpperCase('pt-BR')};
+      const r=await rpc('salvarInsumo',dados,false);
+      if(r.status==='POSSIVEL_DUPLICIDADE')throw Error('Verifique uma possível duplicidade no cadastro INSUMOS.');
+      dlg.close();await carregar();
+    }catch(ex){erro(ex.message);botao.disabled=false;}
+  });
+}
+async function abrirEdicaoOuSaldo(id){
+  const item=(S.situacao?.saldos||[]).find(x=>x.id===id);
+  if(!item)throw Error('Insumo não localizado na posição de estoque.');
+  if(item.controlaEstoque==='NÃO'){
+    const sim=await solicitar('INSUMO NÃO CONTROLA ESTOQUE','Deseja alterar o cadastro do insumo para alterar o saldo em estoque?','SIM');
+    if(sim)await abrirEdicaoInsumoSemControle(id);
+    return;
+  }
+  await abrirCorrecaoSaldo(id);
+}
+async function abrirCorrecaoSaldo(idSelecionado){
+  
+  const lista=(S.situacao.saldos||[]).filter(i=>!idSelecionado||i.id===idSelecionado);
+  if(!lista.length){erro('Não há insumos com histórico para corrigir.');return;}
+  const dlg=el('modal'),body=prepararCorpoModal();
+  body.innerHTML=`<h3>CORRIGIR SALDO</h3><p class="sub">A diferença será lançada em MOVIMENTAÇÕES como AJUSTE DE SALDO. O registro original não será apagado.</p><label>INSUMO</label><select id="corrInsumo" class="campo-largo">${lista.map(i=>`<option value="${escapar(i.id)}">${escapar(i.nome)}</option>`).join('')}</select><p id="corrAtual"></p><label>SALDO CORRETO NA UNIDADE BASE</label><input class="campo-largo" id="corrQtd" inputmode="decimal"><div class="lado" style="margin-top:10px"><label>COMPENSAR?</label><select class="campo" id="corrComp"><option value="SIM">SIM</option><option value="NÃO">NÃO</option></select></div><p><label>JUSTIFICATIVA OBRIGATÓRIA</label><textarea id="corrJust" placeholder="Motivo da correção (mínimo 8 caracteres)"></textarea></p><div class="linha-final"><button class="botao primario" id="corrGravar">CONFIRMAR AJUSTE</button><button class="botao leve" id="corrVoltar">VOLTAR</button></div>`;
+  let salvando=false;
+  function atual(){const item=lista.find(x=>x.id===el('corrInsumo').value);if(!item)return;
+    el('corrAtual').textContent='Saldo atual: '+item.quantidadeBase+' '+item.unidade;
+    el('corrQtd').value=String(item.quantidadeBase).replace(/\./g,'').replace(',','.');}
+  el('corrInsumo').addEventListener('change',atual);atual();
+  body.addEventListener('click',async e=>{
+    if(e.target.closest('#corrVoltar')){if(!salvando)dlg.close();return;}
+    if(!e.target.closest('#corrGravar')||salvando)return;
+    const item=lista.find(x=>x.id===el('corrInsumo').value);
+    const dados={id:item.id,quantidade:el('corrQtd').value,compensar:el('corrComp').value,
+      justificativa:el('corrJust').value,saldoReferencialMili:item.qMili};
+    if(dados.justificativa.trim().length<8){erro('Informe justificativa de pelo menos 8 caracteres.');return;}
+    salvando=true;el('corrGravar').disabled=true;
+    try{if(!await solicitarCorrecaoInline(dados,item)){salvando=false;el('corrGravar').disabled=false;return;}
+      await rpc('estoqueCorrigirSaldoManual',dados);dlg.close();await carregar();}
+    catch(ex){erro(ex.message);salvando=false;const b=el('corrGravar');if(b)b.disabled=false;}
+  });dlg.showModal();
+}
+// Confirmação dentro da janela atual: não abre segundo dialog sobre o primeiro.
+function solicitarCorrecaoInline(dados,item){
+  return new Promise(resolve=>{
+    const body=el('modalConteudo');
+    const aviso=document.createElement('div');aviso.className='caixa';
+    aviso.innerHTML=`<p>Confirma corrigir <b>${escapar(item.nome)}</b> para <b>${escapar(dados.quantidade)} ${escapar(item.unidade)}</b>, compensar <b>${escapar(dados.compensar)}</b>?</p><div class="linha-final"><button class="botao primario" id="corrConfirmar">SIM, REGISTRAR</button><button class="botao leve" id="corrDesistir">REVISAR</button></div>`;
+    body.appendChild(aviso);
+    aviso.addEventListener('click',e=>{if(e.target.closest('#corrConfirmar')){aviso.remove();resolve(true);}if(e.target.closest('#corrDesistir')){aviso.remove();resolve(false);}});
+  });
+}
+async function abrirOperacaoManual(direcao){
+  if(direcao==='SAÍDA')return abrirSaidaManualNova();
+  try{
+    erro('');const dados=await rpc('estoqueDadosMovimentacaoManual',direcao);
+    if(direcao==='ENTRADA'&&!dados.entradasDisponiveis)throw Error('Operação indisponível neste momento.');
+    const ins=dados.insumos;if(!ins.length)throw Error('Não há insumos compatíveis com esta movimentação.');
+    const dlg=el('modal'),body=prepararCorpoModal();
+    let linhas=[{id:ins[0].id,quantidade:'1',tamanho:'1',unidade:ins[0].unidade,precoUnitario:''}],salvando=false;
+    const opts=()=>ins.map(i=>`<option value="${escapar(i.id)}">${escapar(i.nome)}${i.controla==='NÃO'?' (só custo)':''}</option>`).join('');
+    body.innerHTML=`<h3>${direcao==='ENTRADA'?'NOVA ENTRADA MANUAL':'NOVA SAÍDA MANUAL'}</h3><p class="sub">${direcao==='ENTRADA'?'Informe o preço realmente pago por embalagem. A quantidade e o custo médio serão atualizados.':'O custo sairá do estoque pela média ponderada existente.'}</p><div id="itensOperacao"></div><button class="botao leve" id="maisItem">+ ADICIONAR INSUMO</button>${direcao==='SAÍDA'?'<p><label>TIPO DA SAÍDA</label><select class="campo-largo" id="tipoSaida"><option>PRODUÇÃO MANUAL</option><option>PERDA</option><option>DEVOLUÇÃO</option><option>OUTROS</option></select></p>':''}<p><label>REFERÊNCIA / DOCUMENTO (OPCIONAL)</label><input class="campo-largo" id="refOperacao" placeholder="Ex.: produção do dia, compra avulsa"></p><p><label>JUSTIFICATIVA OBRIGATÓRIA</label><textarea id="motivoOperacao" placeholder="Descreva a finalidade (mínimo 8 caracteres)"></textarea></p><div class="linha-final"><button class="botao primario" id="gravarOperacao">CONFIRMAR MOVIMENTAÇÃO</button><button class="botao leve" id="voltarOperacao">VOLTAR</button></div>`;
+    function atualizaLinhas(){body.querySelectorAll('#itensOperacao [data-linha]').forEach(row=>{const l=linhas[Number(row.dataset.linha)];row.querySelectorAll('[data-valor]').forEach(x=>l[x.dataset.valor]=x.value);});}
+    function desenha(){el('itensOperacao').innerHTML=linhas.map((l,idx)=>{
+      const i=ins.find(x=>x.id===l.id)||ins[0];
+      return `<div class="caixa" data-linha="${idx}" style="margin-bottom:7px;padding:9px"><div class="lado"><select data-valor="id" class="campo-largo" style="flex:1">${opts().replace(`value="${escapar(l.id)}"`,`value="${escapar(l.id)}" selected`)}</select><button type="button" data-remover-item="${idx}" class="botao mini leve">×</button></div><div class="formlinha" style="grid-template-columns:1fr 1fr 1fr ${direcao==='ENTRADA'?'1fr':'0px'}"><label>QTD. EMB.</label><label>TAMANHO</label><label>UNIDADE</label>${direcao==='ENTRADA'?'<label>PREÇO/EMB.</label>':''}<input data-valor="quantidade" inputmode="decimal" value="${escapar(l.quantidade)}"><input data-valor="tamanho" inputmode="decimal" value="${escapar(l.tamanho)}"><select data-valor="unidade">${i.unidades.map(u=>`<option value="${escapar(u)}" ${l.unidade===u?'selected':''}>${escapar(u)}</option>`).join('')}</select>${direcao==='ENTRADA'?`<input data-valor="precoUnitario" inputmode="decimal" value="${escapar(l.precoUnitario)}" placeholder="R$">`:''}</div></div>`;
+    }).join('');}
+    body.addEventListener('change',e=>{
+      const row=e.target.closest('[data-linha]');if(!row)return;
+      atualizaLinhas();if(e.target.dataset.valor==='id'){
+        const l=linhas[Number(row.dataset.linha)],i=ins.find(x=>x.id===l.id);if(i){l.unidade=i.unidade;l.tamanho='1';}
+        desenha();}
+    });
+    body.addEventListener('click',async e=>{
+      if(e.target.closest('#voltarOperacao')){if(!salvando)dlg.close();return;}
+      if(e.target.closest('#maisItem')){atualizaLinhas();linhas.push({id:ins[0].id,quantidade:'1',tamanho:'1',unidade:ins[0].unidade,precoUnitario:''});desenha();return;}
+      const rm=e.target.closest('[data-remover-item]');if(rm){atualizaLinhas();linhas.splice(Number(rm.dataset.remover),1);desenha();return;}
+      if(e.target.closest('#gravarOperacao')&&!salvando){atualizaLinhas();
+        const payload={direcao,itens:linhas,motivo:direcao==='SAÍDA'?el('tipoSaida').value:'AQUISIÇÃO MANUAL',referencia:el('refOperacao').value,justificativa:el('motivoOperacao').value};
+        if(payload.justificativa.trim().length<8){erro('Informe justificativa de pelo menos 8 caracteres.');return;}
+        salvando=true;el('gravarOperacao').disabled=true;
+        try{
+          if(!await confirmarOperacaoInline(direcao,linhas.length)){salvando=false;el('gravarOperacao').disabled=false;return;}
+          const res=await rpc('estoqueRegistrarMovimentacaoManual',payload);dlg.close();await carregar();S.aba='movimentacoes';exibir();
+        }catch(ex){erro(ex.message);salvando=false;const b=el('gravarOperacao');if(b)b.disabled=false;}
+      }
+    });desenha();dlg.showModal();
+  }catch(ex){erro(ex.message);}
+}
+/**
+ * Saída manual compacta por INSUMO / QUANT. / UNID., com pesquisa por teclado,
+ * conferência sem baixa e rascunho persistente. Não altera entradas manuais.
+ */
+async function abrirSaidaManualNova(){
+  try{
+    erro('');
+    const dados=await rpc('estoqueDadosMovimentacaoManual','SAÍDA');
+    
+    const ins=[...dados.insumos].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+    if(!ins.length)throw Error('Nenhum insumo com controle de estoque disponível.');
+    const map=Object.fromEntries(ins.map(i=>[i.id,i]));
+    const dlg=el('modal'),body=prepararCorpoModal();
+    let linhas=[{id:'',quantidade:'',tamanho:'1',unidade:''}],rascunhoId='',salvando=false,sujo=false,verificacao=0,conferencia=null,editandoBusca=null;
+    const rasc={motivo:'PRODUÇÃO MANUAL',referencia:'',justificativa:''};
+    const inputNovo=()=>({id:'',quantidade:'',tamanho:'1',unidade:''});
+    const unidades=i=>i?.unidades||[];
+    body.innerHTML=`<h3>NOVA SAÍDA MANUAL</h3>
+      <p class="sub">PESQUISE O INSUMO E INFORME QUANTIDADE E UNIDADE. O SISTEMA CONVERTE PARA A UNIDADE BASE E CONFERE O SALDO. NÃO HÁ BAIXA AO GRAVAR RASCUNHO.</p>
+      <div class="linha" style="gap:6px;margin:9px 0"><span id="saidaEstado" class="status crescer">NOVA SAÍDA</span><button type="button" class="botao mini leve" id="saidaRascunhos">RASCUNHOS</button></div>
+      <div id="saidaEdicao"><div class="saida-cab"><span>INSUMO</span><span>QUANT.</span><span>UNID.</span><span></span></div><div id="saidaItens"></div>
+      <button type="button" class="botao leve mini" id="saidaMaisItem">+ ADICIONAR INSUMO</button>
+      <div id="saidaConferencia" class="saida-conferencia" aria-live="polite">INFORME OS INSUMOS PARA CONFERIR AS NECESSIDADES.</div>
+      <p><label>TIPO DA SAÍDA</label><select id="saidaTipo" class="campo-largo"><option>PRODUÇÃO MANUAL</option><option>PERDA</option><option>DEVOLUÇÃO</option><option>OUTROS</option></select></p>
+      <p><label>REFERÊNCIA / DOCUMENTO (OPCIONAL)</label><input id="saidaReferencia" class="campo-largo" placeholder="EX.: PRODUÇÃO DO DIA"></p>
+      <p><label>JUSTIFICATIVA OBRIGATÓRIA PARA CONFIRMAR</label><textarea id="saidaJustificativa" placeholder="DESCREVA A FINALIDADE (MÍNIMO 8 CARACTERES)"></textarea></p>
+      <div id="saidaAviso" class="sub" role="status"></div>
+      <div class="linha-final"><button type="button" class="botao leve" id="saidaGravar">GRAVAR</button><button type="button" class="botao primario" id="saidaConfirmar">CONFIRMAR</button><button type="button" class="botao leve" id="saidaVoltar">VOLTAR</button></div></div>
+      <div id="saidaListaRascunhos" hidden></div>`;
+    const aviso=t=>{const a=body.querySelector('#saidaAviso');if(a)a.textContent=t;};
+    function coletar(){
+      body.querySelectorAll('#saidaItens [data-linha]').forEach(row=>{
+        const l=linhas[Number(row.dataset.linha)];if(!l)return;
+        l.quantidade=row.querySelector('[data-saida="quantidade"]')?.value||'';
+        l.unidade=row.querySelector('[data-saida="unidade"]')?.value||l.unidade;
+      });
+      rasc.motivo=body.querySelector('#saidaTipo')?.value||rasc.motivo;
+      rasc.referencia=body.querySelector('#saidaReferencia')?.value||'';
+      rasc.justificativa=body.querySelector('#saidaJustificativa')?.value||'';
+    }
+    const payload=()=>({direcao:'SAÍDA',itens:linhas.map(l=>({id:l.id,quantidade:l.quantidade,tamanho:'1',unidade:l.unidade})),motivo:rasc.motivo,referencia:rasc.referencia,justificativa:rasc.justificativa});
+    function fecharListaSugestoes(){body.querySelectorAll('.saida-sugestoes').forEach(e=>e.remove());editandoBusca=null;}
+    function escolher(row,item){
+      const l=linhas[Number(row.dataset.linha)];l.id=item.id;l.unidade=item.unidade;
+      row.querySelector('[data-saida="insumo"]').value=item.nome;
+      row.querySelector('[data-saida="unidade"]').innerHTML=unidades(item).map(u=>`<option ${u===l.unidade?'selected':''} value="${escapar(u)}">${escapar(u)}</option>`).join('');
+      fecharListaSugestoes();sujo=true;aviso('');row.querySelector('[data-saida="quantidade"]')?.focus();agendarConferencia();
+    }
+    function buscar(input){
+      fecharListaSugestoes();const row=input.closest('[data-linha]');if(!row)return;
+      const termo=input.value.trim().toLocaleUpperCase('pt-BR');
+      const res=ins.filter(i=>i.nome.toLocaleUpperCase('pt-BR').includes(termo)).slice(0,70);
+      if(!res.length)return;
+      const lista=document.createElement('div');lista.className='saida-sugestoes';lista.setAttribute('role','listbox');
+      res.forEach((i,k)=>{const op=document.createElement('button');op.type='button';op.textContent=i.nome;op.dataset.opid=i.id;op.className='';op.addEventListener('mousedown',e=>e.preventDefault());op.addEventListener('click',()=>escolher(row,i));lista.appendChild(op);});
+      input.parentElement.appendChild(lista);editandoBusca={input,row,res,lista,ativo:-1};
+    }
+    function desenhar(){
+      fecharListaSugestoes();
+      body.querySelector('#saidaItens').innerHTML=linhas.map((l,k)=>{
+        const i=map[l.id];
+        const us=i?unidades(i):['G','KG','ML','L','UN','CM','M','KWH'];
+        const uni=us.includes(l.unidade)?l.unidade:(i?.unidade||'');
+        if(i&&uni!==l.unidade)l.unidade=uni;
+        return `<div class="saida-linha" data-linha="${k}">
+          <div class="saida-busca"><input class="campo-largo" autocomplete="off" data-saida="insumo" aria-label="Insumo ${k+1}" placeholder="PESQUISAR INSUMO" value="${escapar(i?.nome||'')}"></div>
+          <input data-saida="quantidade" aria-label="Quantidade ${k+1}" inputmode="decimal" value="${escapar(l.quantidade)}" placeholder="0">
+          <select data-saida="unidade" aria-label="Unidade ${k+1}"><option value="" ${!uni?'selected':''}>—</option>${us.map(u=>`<option value="${escapar(u)}" ${u===uni?'selected':''}>${escapar(u)}</option>`).join('')}</select>
+          <button type="button" class="botao mini leve" data-saida-remover="${k}" title="Remover linha" aria-label="Remover linha">×</button></div>`;
+      }).join('');
+    }
+    let tConferencia;
+    function agendarConferencia(){
+      clearTimeout(tConferencia);const versao=++verificacao;
+      const caixa=body.querySelector('#saidaConferencia');
+      if(!linhas.length||linhas.some(l=>!map[l.id]||!/^[0-9]+(?:[.,][0-9]{1,3})?$/.test(String(l.quantidade))||!l.unidade)){
+        conferencia=null;caixa.textContent='PREENCHA INSUMO, QUANTIDADE E UNIDADE PARA CONFERIR O SALDO.';return;
+      }
+      caixa.textContent='CONFERINDO SALDOS...';
+      tConferencia=setTimeout(async()=>{
+        try{const res=await rpc('estoqueConferirSaidaManual',linhas);if(verificacao!==versao)return;
+          conferencia=res;
+          caixa.innerHTML=`<b>${res.suficiente?'✓ SALDOS SUFICIENTES':'⚠ HÁ INSUMOS A COMPRAR'}</b>`+res.linhas.map(x=>`<div class="saida-saldo ${x.ok?'':'falta'}"><span>${escapar(x.nome)}</span><span>NECESSÁRIO ${escapar(x.necessario)} · DISPONÍVEL ${escapar(x.disponivel)}${x.ok?'':' · FALTA '+escapar(x.falta)}</span></div>`).join('');
+        }catch(e){if(verificacao===versao){conferencia=null;caixa.textContent=e.message;}}
+      },550);
+    }
+    async function gravar(){
+      coletar();if(salvando)return false;salvando=true;const bt=body.querySelector('#saidaGravar');if(bt)bt.disabled=true;
+      try{const res=await rpc('estoqueRascunhoSaidaSalvar',rascunhoId,payload());rascunhoId=res.id;sujo=false;
+        body.querySelector('#saidaEstado').textContent='✓ RASCUNHO SALVO · '+res.id;aviso('RAScunho salvo sem movimentar o estoque.'.toLocaleUpperCase('pt-BR'));return true;
+      }catch(ex){aviso('NÃO FOI POSSÍVEL GRAVAR: '+ex.message);return false;}
+      finally{salvando=false;if(bt)bt.disabled=false;}
+    }
+    function preencherFormulario(d){
+      const src=d.dados||d;linhas=Array.isArray(src.itens)&&src.itens.length?src.itens.map(l=>({id:String(l.id||''),quantidade:String(l.quantidade||''),unidade:String(l.unidade||''),tamanho:'1'})):[inputNovo()];
+      rasc.motivo=src.motivo||'PRODUÇÃO MANUAL';rasc.referencia=src.referencia||'';rasc.justificativa=src.justificativa||'';
+      body.querySelector('#saidaTipo').value=rasc.motivo;body.querySelector('#saidaReferencia').value=rasc.referencia;body.querySelector('#saidaJustificativa').value=rasc.justificativa;
+      desenhar();sujo=false;conferencia=null;agendarConferencia();
+    }
+    async function verRascunhos(){
+      if(sujo&&(linhas.some(l=>l.id||l.quantidade)||rasc.referencia||rasc.justificativa)){
+        if(!await gravar())return;
+      }
+      const lista=await rpc('estoqueRascunhosSaidaListar');const box=body.querySelector('#saidaListaRascunhos');
+      box.innerHTML=`<h3>RASCUNHOS DE SAÍDA</h3><p class="sub">${lista.length} rascunho(s) armazenado(s)</p>${lista.map(x=>`<div class="caixa linha" style="align-items:center"><div><b>${escapar(x.referencia)}</b><div class="sub">${escapar(x.id)} · ${escapar(x.data)} · ${x.itens} ITEM(NS)</div></div><div class="flex"><button class="botao mini leve" data-saida-abrir="${escapar(x.id)}">ABRIR</button><button class="botao mini perigo" data-saida-excluir="${escapar(x.id)}">EXCLUIR</button></div></div>`).join('')||'<p>NENHUM RASCUNHO.</p>'}<div class="linha-final"><button class="botao leve" id="saidaNovo">NOVA SAÍDA</button><button class="botao leve" id="saidaFecharLista">VOLTAR</button></div>`;
+      body.querySelector('#saidaEdicao').hidden=true;box.hidden=false;
+    }
+    body.addEventListener('input',e=>{
+      const t=e.target;if(t.matches('[data-saida="insumo"]')){const row=t.closest('[data-linha]');const l=linhas[Number(row.dataset.linha)];l.id='';sujo=true;buscar(t);agendarConferencia();return;}
+      if(t.matches('[data-saida="quantidade"]')){const l=linhas[Number(t.closest('[data-linha]').dataset.linha)];l.quantidade=t.value;sujo=true;agendarConferencia();return;}
+      if(['saidaReferencia','saidaJustificativa'].includes(t.id)){sujo=true;}
+    });
+    body.addEventListener('keydown',e=>{
+      const t=e.target,row=t.closest('[data-linha]');if(!row)return;
+      if(t.matches('[data-saida="insumo"]')){
+        if((e.key==='ArrowDown'||e.key==='ArrowUp')&&editandoBusca?.input!==t)buscar(t);
+        if((e.key==='ArrowDown'||e.key==='ArrowUp')&&editandoBusca?.input===t){e.preventDefault();const s=editandoBusca;s.ativo=(s.ativo+(e.key==='ArrowDown'?1:-1)+s.res.length)%s.res.length;s.lista.querySelectorAll('button').forEach((b,k)=>b.classList.toggle('ativo',k===s.ativo));s.lista.querySelectorAll('button')[s.ativo]?.scrollIntoView({block:'nearest'});return;}
+        if(e.key==='Escape'){fecharListaSugestoes();return;}
+        if(e.key==='Enter'||e.key==='Tab'){
+          const escolhido=editandoBusca?.input===t?editandoBusca.res[editandoBusca.ativo>=0?editandoBusca.ativo:0]:ins.find(i=>i.nome.toLocaleUpperCase('pt-BR')===t.value.trim().toLocaleUpperCase('pt-BR'));
+          if(escolhido){e.preventDefault();escolher(row,escolhido);return;}
+          if(e.key==='Enter'){e.preventDefault();aviso('SELECIONE UM INSUMO VÁLIDO.');}
+        }
+      }else if(e.key==='Enter'&&t.matches('[data-saida="quantidade"]')){e.preventDefault();row.querySelector('[data-saida="unidade"]')?.focus();}
+      else if(e.key==='Enter'&&t.matches('[data-saida="unidade"]')){e.preventDefault();const proxima=row.nextElementSibling?.querySelector('[data-saida="insumo"]');(proxima||body.querySelector('#saidaMaisItem'))?.focus();}
+    });
+    body.addEventListener('change',e=>{
+      const t=e.target,row=t.closest('[data-linha]');if(t.id==='saidaTipo')sujo=true;
+      if(row&&t.matches('[data-saida="unidade"]')){const l=linhas[Number(row.dataset.linha)];l.unidade=t.value;sujo=true;agendarConferencia();}
+    });
+    body.addEventListener('click',async e=>{
+      const b=e.target.closest('button');if(!b||salvando)return;
+      try{
+        if(b.id==='saidaVoltar'){if(sujo&&(linhas.some(l=>l.id||l.quantidade)||rasc.referencia||rasc.justificativa)&&!await solicitar('ALTERAÇÕES NÃO SALVAS','Existem alterações não salvas. Deseja sair sem gravar?','DESCARTAR E SAIR'))return;dlg.close();return;}
+        if(b.id==='saidaMaisItem'){coletar();linhas.push(inputNovo());desenhar();sujo=true;conferencia=null;agendarConferencia();const k=linhas.length-1;body.querySelector(`[data-linha="${k}"] [data-saida="insumo"]`)?.focus();return;}
+        if(b.dataset.saidaRemover!==undefined){coletar();linhas.splice(Number(b.dataset.saidaRemover),1);if(!linhas.length)linhas=[inputNovo()];desenhar();sujo=true;agendarConferencia();return;}
+        if(b.id==='saidaGravar'){await gravar();return;}
+        if(b.id==='saidaRascunhos'){await verRascunhos();return;}
+        if(b.id==='saidaFecharLista'){body.querySelector('#saidaEdicao').hidden=false;body.querySelector('#saidaListaRascunhos').hidden=true;return;}
+        if(b.id==='saidaNovo'){rascunhoId='';preencherFormulario({itens:[inputNovo()],motivo:'PRODUÇÃO MANUAL',referencia:'',justificativa:''});body.querySelector('#saidaEstado').textContent='NOVA SAÍDA';body.querySelector('#saidaEdicao').hidden=false;body.querySelector('#saidaListaRascunhos').hidden=true;return;}
+        if(b.dataset.saidaAbrir){const aberto=await rpc('estoqueRascunhoSaidaAbrir',b.dataset.saidaAbrir);rascunhoId=aberto.id;preencherFormulario(aberto);body.querySelector('#saidaEstado').textContent='RASCUNHO '+aberto.id;body.querySelector('#saidaEdicao').hidden=false;body.querySelector('#saidaListaRascunhos').hidden=true;return;}
+        if(b.dataset.saidaExcluir){if(!await solicitar('DESCARTAR RASCUNHO','Descartar o rascunho '+b.dataset.saidaExcluir+'? O registro será marcado como descartado.','DESCARTAR'))return;await rpc('estoqueRascunhoSaidaDescartar',b.dataset.saidaExcluir);if(rascunhoId===b.dataset.saidaExcluir)rascunhoId='';await verRascunhos();return;}
+        if(b.id==='saidaConfirmar'){
+          coletar();if(rasc.justificativa.trim().length<8)throw Error('JUSTIFICATIVA OBRIGATÓRIA COM PELO MENOS 8 CARACTERES.');
+          if(!linhas.length||linhas.some(l=>!l.id||!l.quantidade||!l.unidade))throw Error('COMPLETE INSUMO, QUANTIDADE E UNIDADE EM TODAS AS LINHAS.');
+          const visto=await rpc('estoqueConferirSaidaManual',linhas);conferencia=visto;
+          if(!visto.suficiente){agendarConferencia();throw Error('ESTOQUE INSUFICIENTE. GRAVE O RASCUNHO E CONFIRA OS ITENS A COMPRAR ANTES DE CONFIRMAR.');}
+          if(!await gravar())return;
+          if(!await confirmarOperacaoInline('SAÍDA',linhas.length))return;
+          salvando=true;body.querySelector('#saidaConfirmar').disabled=true;
+          const res=await rpc('estoqueRegistrarMovimentacaoManual',{...payload(),rascunhoId});
+          dlg.close();await carregar();S.aba='movimentacoes';exibir();return;
+        }
+      }catch(ex){aviso(ex.message);erro(ex.message);}
+      finally{salvando=false;const bt=body.querySelector('#saidaConfirmar');if(bt)bt.disabled=false;}
+    });
+    desenhar();dlg.showModal();body.querySelector('[data-saida="insumo"]')?.focus();
+  }catch(ex){erro(ex.message);}
+}
+
+function confirmarOperacaoInline(direcao,num){
+  return new Promise(resolve=>{const corpo=el('modalConteudo'),div=document.createElement('div');
+    div.className='caixa';div.innerHTML=`<p>Confirma ${escapar(direcao.toLowerCase())} manual de ${num} ${num===1?'insumo':'insumos'}? A operação alterará os registros imediatamente e não poderá ser apagada.</p><div class="linha-final"><button id="operConfirmar" class="botao primario">CONFIRMAR GRAVAÇÃO</button><button id="operRevisar" class="botao leve">REVISAR</button></div>`;
+    corpo.appendChild(div);div.addEventListener('click',e=>{if(e.target.closest('#operConfirmar')){div.remove();resolve(true);}if(e.target.closest('#operRevisar')){div.remove();resolve(false);}});
+  });
+}
+
+document.addEventListener('click',async e=>{
+  const aba=e.target.closest('[data-aba]');if(aba){try{if(S.inv&&(Object.keys(S.dirty).length||S.salvando))await salvarRascunho();S.inv=null;S.dadosInv=null;S.aba=aba.dataset.aba;erro('');exibir();}catch(ex){erro(ex.message);}return;}
+  const sub=e.target.closest('[data-sub]');if(sub){try{await salvarRascunho();S.sub=sub.dataset.sub;exibir();}catch(ex){erro(ex.message);}return;}
+  const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action;try{
+    if(a==='iniciar-regular')await abrirInventario('INVENTARIO');
+    if(a==='continuar')await carregarInventario(S.situacao.aberto.id);
+    if(a==='gravar-contagens')await gravarContagens();
+    if(a==='finalizar-inventario')await finalizar();
+    if(a==='cancelar-inventario')await cancelarInventario();
+    if(a==='historico')await historico();
+    if(a==='voltar-inventarios'){await carregar();S.aba='inventarios';exibir();}
+    if(a==='consulta-hist')await historicoDetalhe(b.dataset.id);
+    if(a==='detalhes')await detalharMov(b.dataset.id);
+    if(a==='conferir-pacotes')await abrirDetalhesPacotes(b.dataset.id);
+    if(a==='editar-saldo')await abrirEdicaoOuSaldo(b.dataset.id);
+    if(a==='entrada-manual')await abrirOperacaoManual('ENTRADA');
+    if(a==='saida-manual')await abrirOperacaoManual('SAÍDA');
+    if(a==='reabrir'){await salvarRascunho();await rpc('estoqueReabrirContagem',S.inv,b.dataset.id);S.dadosInv=await rpc('estoqueDadosInventario',S.inv);S.sub='a-contar';exibir();}
+    if(a==='sair-contagem'){S.inv=null;S.dadosInv=null;await carregar();S.aba='inventarios';exibir();}
+  }catch(ex){erro(ex.message);}
+});
+document.addEventListener('input',e=>{if(e.target.matches('[data-campo]')&&e.target.tagName==='INPUT')registrarAlteracao(e.target,false);});
+document.addEventListener('change',e=>{if(e.target.matches('[data-campo]'))registrarAlteracao(e.target,true);});
+el('btnMenu').addEventListener('click',async()=>{try{await salvarRascunho();window.top.location.href=APP_URL;}catch(e){erro('Não foi possível concluir o salvamento do rascunho: '+e.message);}});
+carregar();
+</script>
+<script>
+/* Normalização visual e efetiva de texto livre. Campos estruturados (datas, valores, e-mails, XML) preservam seu formato. */
+document.addEventListener('input',function(ev){
+ const e=ev.target;if(!e || !e.matches || !e.matches('textarea,input[type=text],input:not([type]) ,input[type=search]'))return;
+ if(e.readOnly||e.disabled||e.dataset.csmCase==='original'||e.inputMode==='decimal'||e.inputMode==='numeric'||e.type==='email')return;
+ const t=e.value,novo=t.toLocaleUpperCase('pt-BR');if(t===novo)return;
+ const a=e.selectionStart,b=e.selectionEnd;e.value=novo;
+ try{if(a!==null&&b!==null)e.setSelectionRange(a,b)}catch(_){}
+},true);
+/* Um módulo incluído na área à direita notifica altura, sem comandar a navegação do menu. */
+
+(function(){
+ let ultima=0;
+ const raiz=()=>document.querySelector('main')||document.querySelector('.app')||document.body;
+ function altura(){const area=raiz(),r=area.getBoundingClientRect(),n=Math.ceil(Math.max(100,r.bottom));if(n!==ultima){ultima=n;window.parent.postMessage({tipo:'CSM_ALTURA_MODULO',altura:n},'*')}}
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(altura).observe(raiz());
+ window.addEventListener('load',altura);new MutationObserver(altura).observe(document.body,{childList:true,subtree:true,attributes:false});altura();})();
+
+</script>
+</body>
+</html>

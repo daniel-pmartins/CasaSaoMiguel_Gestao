@@ -1,0 +1,809 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --marrom: #071D2C;
+      --creme: #FDF7EC;
+      --texto: #071D2C;
+      --borda: #D6BE9B;
+      --branco: #fff;
+      --cinza: #284150;
+      --erro: #a12424;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--creme);
+      color: var(--texto);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    header {
+      position: relative;
+      width: min(100% - 28px, 900px);
+      margin: 22px auto 0;
+      background: var(--marrom);
+      color: var(--creme);
+      padding: 15px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60px;
+      border-radius: 12px;
+    }
+    .voltar {
+      position: absolute;
+      left: 18px;
+      border: 1px solid #FDF7EC8c;
+      background: transparent;
+      color: var(--creme);
+      border-radius: 8px;
+      padding: 9px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    header h1 { margin: 0; text-align: center; font-size: clamp(20px, 4vw, 27px); }
+    main { width: min(100% - 28px, 900px); margin: 12px auto 36px; }
+    .painel {
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 14px;
+      padding: clamp(16px, 3vw, 26px);
+      box-shadow: 0 4px 14px #071D2C0f;
+    }
+    .linha-datas {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    /* Larguras ajustadas ao conteúdo: categoria recebe mais espaço. */
+    .linha-categoria-unidade {
+      display: grid;
+      grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr) minmax(0, 0.85fr);
+      gap: 12px;
+    }
+    .linha-categoria-unidade .campo { min-width: 0; }
+    #fc { text-align: center; font-variant-numeric: tabular-nums; }
+    .campo { min-width: 0; margin-bottom: 17px; }
+    .linha-datas .campo { margin-bottom: 0; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      color: var(--marrom);
+    }
+    input, select, textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      padding: 12px;
+      background: #FFFDF8;
+      color: var(--texto);
+      font: inherit;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--marrom);
+      box-shadow: 0 0 0 2px #071D2C1a;
+    }
+    input[readonly] { background: #F4EEE4; color: #685b54; }
+    .texto-maiusculo { text-transform: uppercase; }
+    .descricao-conteudo { position: relative; }
+    .descricao-linha { display: flex; gap: 8px; }
+    .descricao-linha input { flex: 1; }
+    .lupa {
+      flex: 0 0 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      background: #FFFDF8;
+      color: var(--marrom);
+      cursor: pointer;
+      box-shadow: 0 1px 3px #071D2C0b;
+    }
+    .lupa:hover, .lupa:focus-visible { background: var(--creme); border-color: var(--marrom); }
+    .lupa svg { width: 21px; height: 21px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    /* Sugestões aparecem diretamente abaixo do campo, sem janela modal. */
+    .sugestoes {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 54px;
+      z-index: 5;
+      max-height: 240px;
+      overflow-y: auto;
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px #071D2C25;
+    }
+    .sugestoes.aberta { display: block; }
+    .sugestao-item {
+      display: block;
+      width: 100%;
+      padding: 11px 12px;
+      border: 0;
+      border-bottom: 1px solid #F3E7D2;
+      background: var(--branco);
+      color: var(--texto);
+      text-align: left;
+      line-height: 1.4;
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+    }
+    .sugestao-item:last-child { border-bottom: 0; }
+    .sugestao-item:hover, .sugestao-item.ativa {
+      background: var(--creme);
+    }
+    .sugestao-item strong { color: var(--marrom); }
+    .sugestoes-aviso { padding: 12px; color: var(--cinza); font-size: 13px; }
+    textarea { min-height: 88px; resize: vertical; }
+    .acoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+    button.acao {
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 22px;
+      font-weight: 700;
+      cursor: pointer;
+      min-width: 112px;
+    }
+    .salvar { background: var(--marrom); color: var(--creme); }
+    .salvar:disabled { background: #a89b95; cursor: not-allowed; }
+    .cancelar {
+      background: #F3E7D2;
+      color: var(--marrom);
+      border: 1px solid var(--borda) !important;
+    }
+    .status { min-height: 20px; margin: 12px 0 0; font-size: 13px; color: var(--cinza); }
+    .status.erro { color: var(--erro); }
+    .status.sucesso { color: #23633a; }
+    .modal-fundo {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      padding: 18px;
+      background: #180c088c;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-fundo.aberto { display: flex; }
+    @media (min-width: 651px) { .modal-fundo { align-items: center; padding: 16px; } }
+    .modal {
+      width: min(100%, 520px);
+      max-height: 85vh;
+      overflow: auto;
+      background: var(--branco);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 12px 36px #0003;
+    }
+    .modal h2 { margin: 0 0 10px; color: var(--marrom); font-size: 20px; }
+    .modal p { line-height: 1.45; }
+    .modal-acoes { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+    .lista-insumos { display: grid; gap: 8px; margin-top: 14px; height: 310px; max-height: 310px; overflow-y: auto; padding-right: 4px; }
+    .item-insumo {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      background: #FFFDF8;
+      color: var(--texto);
+      text-align: left;
+      cursor: pointer;
+      line-height: 1.4;
+    }
+    .item-insumo:hover { border-color: var(--marrom); background: var(--creme); }
+    .item-insumo strong { color: var(--marrom); }
+    .lista-vazia { color: var(--cinza); padding: 12px 0; }
+  
+/* CABEÇALHO ÚNICO DESKTOP — mesmo padrão de título da FICHA TÉCNICA */
+@media(min-width:850px){
+ header,.barra,.head{min-height:80px!important;background:#071D2C!important;color:#FDF7EC!important;
+  border-radius:12px!important;border-bottom:3px solid #E9A348!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;position:relative!important}
+ header h1,.barra h1,.head h1{color:#FFCC66!important;font-size:22px!important;text-align:center!important;margin:0!important}
+ header .voltar,.barra .voltar,.barra #voltarMenu,.head a.desktopOnly{position:absolute!important;left:16px!important;top:50%!important;transform:translateY(-50%)!important;
+   color:#FDF7EC!important;background:transparent!important;text-decoration:none!important}
+}
+/* CASA SÃO MIGUEL | V13-11.8 TESTE | foco e maiúsculas em todos os módulos */
+input:not([type=number]):not([type=date]):not([type=email]):not([type=url]):not([type=tel]):not([type=file]):not([type=password]), textarea {text-transform:uppercase}
+input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline:2px solid #E9A348 !important; outline-offset:2px !important;
+  border-color:#B87829 !important; box-shadow:0 0 0 3px rgba(233,163,72,.22) !important;
+}
+
+</style>
+
+<style>@media(min-width:850px){html,body{overflow-y:hidden!important} .app{margin-top:22px!important}}</style>
+<style>@media (min-width:651px){.voltar,#btnMenu,#voltarMenu,.head>a.desktopOnly{display:none!important} header,.barra,.head{margin-top:0!important}}</style>
+<style>@media(min-width:850px){body.native-embedded-page .app{margin-top:0!important;margin-bottom:0!important}body.native-embedded-page main{margin-bottom:8px!important}body.native-embedded-page .painel{padding:12px 18px!important}body.native-embedded-page .campo{margin-bottom:9px!important}body.native-embedded-page label{margin-bottom:4px!important}body.native-embedded-page input,body.native-embedded-page select,body.native-embedded-page textarea{padding:9px 10px!important}body.native-embedded-page textarea{min-height:70px!important}body.native-embedded-page .secao{margin-bottom:8px!important;padding-top:8px!important}body.native-embedded-page .acoes{margin-top:0!important}}</style>
+
+</head>
+<body>
+  <header>
+    <button class="voltar" type="button" onclick="voltarMenu()">← Menu</button>
+    <h1>INSUMOS</h1>
+  </header>
+
+  <main>
+    <section class="painel" aria-label="Cadastro de insumos">
+      <form id="formInsumos" autocomplete="off" onsubmit="return false;">
+        <div class="linha-datas">
+          <div class="campo">
+            <label for="id">ID</label>
+            <input id="id" type="text" readonly>
+          </div>
+          <div class="campo">
+            <label for="dataCadastro">DATA DO CADASTRO</label>
+            <input id="dataCadastro" type="text" readonly>
+          </div>
+          <div class="campo">
+            <label for="dataAlteracao">DATA DA ÚLTIMA ALTERAÇÃO</label>
+            <input id="dataAlteracao" type="text" readonly>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="descricao">DESCRIÇÃO *</label>
+          <div class="descricao-conteudo" id="descricaoConteudo">
+            <div class="descricao-linha">
+              <input id="descricao" class="texto-maiusculo" type="text" required
+                     maxlength="150" aria-autocomplete="list" aria-controls="sugestoes"
+                     aria-expanded="false" autocomplete="off">
+              <button class="lupa" type="button" aria-label="Consultar insumos cadastrados"
+                      title="Consultar insumos" onclick="abrirLista()"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></button>
+            </div>
+            <div id="sugestoes" class="sugestoes" role="listbox"
+                 aria-label="Insumos correspondentes à descrição"></div>
+          </div>
+        </div>
+
+        <div class="linha-categoria-unidade">
+          <div class="campo">
+            <label for="categoria">CATEGORIA *</label>
+            <select id="categoria" required>
+              <option value="" selected></option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="unidade">UNIDADE *</label>
+            <select id="unidade" required>
+              <option value="" selected></option>
+              <option value="G">G</option>
+              <option value="ML">ML</option>
+              <option value="UN">UN</option>
+              <option value="CM">CM</option>
+              <option value="KWH">kWh</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="fc">FC *</label>
+            <input id="fc" type="text" inputmode="decimal" autocomplete="off"
+                   maxlength="12" value="1,00" required aria-label="Fator de correção">
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="controlaEstoque">CONTROLA ESTOQUE?</label>
+          <select id="controlaEstoque"><option value="SIM" selected>SIM</option><option value="NÃO">NÃO</option></select>
+        </div>
+
+        <div class="campo">
+          <label>CUSTO DE REFERÊNCIA (FICHA TÉCNICA)</label>
+          <button type="button" class="acao cancelar" onclick="consultarCustoFT()">CONSULTAR / ATUALIZAR CUSTO MANUAL</button>
+          <p style="color:#284150;font-size:12px">Disponível para insumo já salvo. Custos efetivos de compras/estoque têm prioridade e não serão sobrescritos.</p>
+        </div>
+        <div class="campo">
+          <label for="observacao">OBSERVAÇÃO</label>
+          <textarea id="observacao" class="texto-maiusculo" maxlength="1000"></textarea>
+        </div>
+        <div class="acoes">
+          <button id="btnSalvar" class="acao salvar" type="button" disabled
+                  onclick="salvar(false)">SALVAR</button>
+          <button class="acao cancelar" type="button" onclick="cancelar()">CANCELAR</button>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <div id="modalFundo" class="modal-fundo" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <div class="modal">
+      <h2 id="modalTitulo">Atenção</h2>
+      <div id="modalConteudo"></div>
+      <div id="modalAcoes" class="modal-acoes"></div>
+    </div>
+  </div>
+
+<script>
+  const APP_URL = '/';
+  const el = id => document.getElementById(id);
+  let salvando = false;
+  let insumosCache = [];
+  let cacheCarregado = false;
+  let podeExibirSugestoes = false;
+  let sugestoesFiltradas = [];
+  let sugestaoAtiva = -1;
+  let categoriaPendente = '';
+  let custoManualPendente = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    ['descricao', 'observacao'].forEach(id => {
+      el(id).addEventListener('input', () => {
+        const campo = el(id);
+        const inicio = campo.selectionStart;
+        const fim = campo.selectionEnd;
+        campo.value = campo.value.toLocaleUpperCase('pt-BR');
+        try { campo.setSelectionRange(inicio, fim); } catch (e) {}
+        if (id === 'descricao') {
+          podeExibirSugestoes = true;
+          atualizarSugestoes();
+        }
+        atualizarBotaoSalvar();
+      });
+    });
+    el('categoria').addEventListener('change', atualizarBotaoSalvar);
+    el('unidade').addEventListener('change', atualizarBotaoSalvar);
+    el('fc').addEventListener('input', atualizarBotaoSalvar);
+    el('fc').addEventListener('blur', formatarFc); 
+    el('descricao').addEventListener('keydown', teclaDescricao);
+    el('descricao').addEventListener('blur', () => {
+      // Fecha sugestões ao avançar por Tab, sem atrapalhar o clique em um item.
+      setTimeout(fecharSugestoes, 150);
+    });
+    document.addEventListener('click', evento => {
+      if (!el('descricaoConteudo').contains(evento.target)) fecharSugestoes();
+    });
+    limparFormulario();
+    carregarCategorias();
+    atualizarCacheInsumos();
+  });
+
+  function voltarMenu() { window.top.location.href = APP_URL; }
+
+  function atualizarBotaoSalvar() {
+    el('btnSalvar').disabled = !(
+      el('descricao').value.trim() && el('categoria').value && el('unidade').value &&
+      fcValido(el('fc').value)
+    ) || salvando;
+  }
+
+  function limparFormulario() {
+    el('formInsumos').reset();
+    ['id', 'dataCadastro', 'dataAlteracao', 'descricao', 'categoria', 'unidade', 'observacao']
+      .forEach(id => { el(id).value = ''; });
+    el('fc').value = '1,00';
+    el('controlaEstoque').value = 'SIM';
+    categoriaPendente = '';
+    custoManualPendente = null;
+    podeExibirSugestoes = false;
+    fecharSugestoes();
+    mostrarStatus('');
+    atualizarBotaoSalvar();
+    el('descricao').focus();
+  }
+
+  function fcValido(texto) {
+    const valor = String(texto || '').trim();
+    if (!/^\d+(?:[,.]\d{1,2})?$/.test(valor)) return false;
+    const numero = Number(valor.replace(',', '.'));
+    return Number.isFinite(numero) && numero >= 1 &&
+      Number.isSafeInteger(Math.round(numero * 100));
+  }
+
+  function formatarFc() {
+    const campo = el('fc');
+    if (fcValido(campo.value)) {
+      campo.value = Number(campo.value.trim().replace(',', '.')).toFixed(2).replace('.', ',');
+    }
+    atualizarBotaoSalvar();
+  }
+
+  function mostrarFc(valor) {
+    const numero = Number(String(valor == null || valor === '' ? 1 : valor).replace(',', '.'));
+    return Number.isFinite(numero) && numero >= 1
+      ? numero.toFixed(2).replace('.', ',') : '';
+  }
+
+  function dataVisivel(valor) {
+    const texto = String(valor || '');
+    const match = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : texto;
+  }
+
+  function cancelar() {
+    if (salvando) return;
+    fecharModal();
+    limparFormulario();
+  }
+
+  function mostrarStatus(mensagem, tipo) {
+    const status = el('status');
+    status.textContent = mensagem || '';
+    status.className = 'status' + (tipo ? ' ' + tipo : '');
+  }
+
+  function carregarCategorias() {
+    localApi
+      .withSuccessHandler(categorias => {
+        const seletor = el('categoria');
+        const selecionada = categoriaPendente || seletor.value;
+        seletor.innerHTML = '';
+        seletor.add(new Option('', ''));
+        categorias.forEach(categoria => seletor.add(new Option(categoria, categoria)));
+        seletor.value = selecionada;
+        categoriaPendente = '';
+        atualizarBotaoSalvar();
+      })
+      .withFailureHandler(erro => {
+        mostrarStatus(erro.message || 'Não foi possível carregar as categorias.', 'erro');
+      })
+      .listarCategoriasInsumos();
+  }
+
+  function atualizarCacheInsumos() {
+    localApi
+      .withSuccessHandler(registros => {
+        insumosCache = registros;
+        cacheCarregado = true;
+        if (podeExibirSugestoes) atualizarSugestoes();
+      })
+      .withFailureHandler(() => {
+        cacheCarregado = false;
+        fecharSugestoes();
+      })
+      .listarInsumos();
+  }
+
+  function fecharSugestoes() {
+    el('sugestoes').classList.remove('aberta');
+    el('sugestoes').innerHTML = '';
+    el('descricao').setAttribute('aria-expanded', 'false');
+    sugestoesFiltradas = [];
+    sugestaoAtiva = -1;
+  }
+
+  // A lista é filtrada no próprio formulário; a lupa continua disponível.
+  function atualizarSugestoes() {
+    const termo = el('descricao').value.toLocaleUpperCase('pt-BR').trim();
+    if (!podeExibirSugestoes || !termo) {
+      fecharSugestoes();
+      return;
+    }
+
+    const caixa = el('sugestoes');
+    caixa.innerHTML = '';
+    sugestaoAtiva = -1;
+    sugestoesFiltradas = cacheCarregado
+      ? insumosCache.filter(item => item.descricao.toLocaleUpperCase('pt-BR').includes(termo))
+      : [];
+
+    if (!cacheCarregado) {
+      const aviso = document.createElement('div');
+      aviso.className = 'sugestoes-aviso';
+      aviso.textContent = 'CARREGANDO INSUMOS...';
+      caixa.appendChild(aviso);
+    } else if (!sugestoesFiltradas.length) {
+      const aviso = document.createElement('div');
+      aviso.className = 'sugestoes-aviso';
+      aviso.textContent = 'NENHUM INSUMO ENCONTRADO. CONTINUE PARA CADASTRAR.';
+      caixa.appendChild(aviso);
+    } else {
+      sugestoesFiltradas.forEach((item, indice) => {
+        const botao = document.createElement('button');
+        botao.type = 'button';
+        botao.className = 'sugestao-item';
+        botao.setAttribute('role', 'option');
+        botao.id = 'sugestao-' + indice;
+        const id = document.createElement('strong');
+        id.textContent = '(' + item.id + ') ';
+        botao.appendChild(id);
+        botao.appendChild(document.createTextNode(item.descricao));
+        // Mantém o foco no campo até a seleção ser processada.
+        botao.addEventListener('mousedown', evento => evento.preventDefault());
+        botao.addEventListener('click', () => carregarRegistro(item));
+        caixa.appendChild(botao);
+      });
+    }
+    caixa.classList.add('aberta');
+    el('descricao').setAttribute('aria-expanded', 'true');
+  }
+
+  function teclaDescricao(evento) {
+    if (!el('sugestoes').classList.contains('aberta')) return;
+    if (evento.key === 'Escape') {
+      fecharSugestoes();
+      return;
+    }
+    if (!sugestoesFiltradas.length) return;
+    if (evento.key === 'ArrowDown') {
+      evento.preventDefault();
+      sugestaoAtiva = (sugestaoAtiva + 1) % sugestoesFiltradas.length;
+    } else if (evento.key === 'ArrowUp') {
+      evento.preventDefault();
+      sugestaoAtiva = sugestaoAtiva <= 0
+        ? sugestoesFiltradas.length - 1
+        : sugestaoAtiva - 1;
+    } else if (evento.key === 'Enter' && sugestaoAtiva >= 0) {
+      evento.preventDefault();
+      carregarRegistro(sugestoesFiltradas[sugestaoAtiva]);
+      return;
+    } else {
+      return;
+    }
+    const botoes = el('sugestoes').querySelectorAll('.sugestao-item');
+    botoes.forEach((botao, indice) => {
+      botao.classList.toggle('ativa', indice === sugestaoAtiva);
+      botao.setAttribute('aria-selected', indice === sugestaoAtiva ? 'true' : 'false');
+    });
+    if (botoes[sugestaoAtiva]) botoes[sugestaoAtiva].scrollIntoView({ block: 'nearest' });
+  }
+
+  function abrirModal(titulo, botoes) {
+    el('modalTitulo').textContent = titulo;
+    el('modalConteudo').innerHTML = '';
+    el('modalAcoes').innerHTML = '';
+    botoes.forEach(cfg => {
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.className = 'acao ' + (cfg.classe || 'cancelar');
+      botao.textContent = cfg.texto;
+      botao.onclick = cfg.acao;
+      el('modalAcoes').appendChild(botao);
+    });
+    el('modalFundo').classList.add('aberto');
+  }
+
+  function fecharModal() {
+    el('modalFundo').classList.remove('aberto');
+    el('modalConteudo').innerHTML = '';
+    el('modalAcoes').innerHTML = '';
+  }
+
+  function abrirLista() {
+    fecharSugestoes();
+    mostrarStatus('Carregando insumos...');
+    localApi
+      .withSuccessHandler(registros => {
+        insumosCache = registros;
+        cacheCarregado = true;
+        mostrarStatus('');
+        abrirModal('INSUMOS CADASTRADOS', [
+          { texto: 'FECHAR', classe: 'cancelar', acao: fecharModal }
+        ]);
+        const conteudo = el('modalConteudo');
+        const intro = document.createElement('p');
+        intro.textContent = 'Selecione um insumo para consultar ou editar.';
+        conteudo.appendChild(intro);
+
+        const busca = document.createElement('input');
+        busca.type = 'text';
+        busca.placeholder = 'FILTRAR POR DESCRIÇÃO OU ID';
+        busca.className = 'texto-maiusculo';
+        conteudo.appendChild(busca);
+
+        const lista = document.createElement('div');
+        lista.className = 'lista-insumos';
+        conteudo.appendChild(lista);
+
+        function desenhar(filtro) {
+          lista.innerHTML = '';
+          const termo = (filtro || '').toLocaleUpperCase('pt-BR').trim();
+          const filtrados = registros.filter(item =>
+            item.descricao.toLocaleUpperCase('pt-BR').includes(termo) ||
+            item.id.toLocaleUpperCase('pt-BR').includes(termo)
+          );
+          if (!filtrados.length) {
+            const vazio = document.createElement('div');
+            vazio.className = 'lista-vazia';
+            vazio.textContent = 'Nenhum insumo encontrado.';
+            lista.appendChild(vazio);
+            return;
+          }
+          filtrados.forEach(item => {
+            const botao = document.createElement('button');
+            botao.type = 'button';
+            botao.className = 'item-insumo';
+            const id = document.createElement('strong');
+            id.textContent = '(' + item.id + ') ';
+            botao.appendChild(id);
+            botao.appendChild(document.createTextNode(item.descricao));
+            botao.onclick = () => carregarRegistro(item);
+            lista.appendChild(botao);
+          });
+        }
+        busca.addEventListener('input', () => {
+          busca.value = busca.value.toLocaleUpperCase('pt-BR');
+          desenhar(busca.value);
+        });
+        desenhar('');
+        setTimeout(() => busca.focus(), 30);
+      })
+      .withFailureHandler(erro => {
+        mostrarStatus(erro.message || 'Não foi possível carregar os insumos.', 'erro');
+      })
+      .listarInsumos();
+  }
+
+  function carregarRegistro(item) {
+    fecharModal();
+    podeExibirSugestoes = false;
+    fecharSugestoes();
+    el('id').value = item.id || '';
+    el('dataCadastro').value = dataVisivel(item.dataCadastro);
+    el('dataAlteracao').value = dataVisivel(item.dataAlteracao);
+    el('descricao').value = (item.descricao || '').toLocaleUpperCase('pt-BR');
+    categoriaPendente = (item.categoria || '').toLocaleUpperCase('pt-BR');
+    custoManualPendente = null;
+    el('categoria').value = categoriaPendente;
+    el('unidade').value = item.unidade || '';
+    el('fc').value = mostrarFc(item.fc);
+    el('controlaEstoque').value = item.controlaEstoque || 'SIM';
+    el('observacao').value = (item.observacao || '').toLocaleUpperCase('pt-BR');
+    mostrarStatus('Editando o insumo ' + item.id + '.');
+    atualizarBotaoSalvar();
+    el('descricao').focus();
+  }
+
+  function salvar(forcarNovo) {
+    if (salvando) return;
+    fecharSugestoes();
+    podeExibirSugestoes = false;
+    const dados = {
+      id: el('id').value,
+      descricao: el('descricao').value.toLocaleUpperCase('pt-BR').trim().replace(/\s+/g, ' '),
+      categoria: el('categoria').value,
+      unidade: el('unidade').value,
+      fc: el('fc').value,
+      controlaEstoque: el('controlaEstoque').value,
+      observacao: el('observacao').value.toLocaleUpperCase('pt-BR').trim()
+    };
+    if (!dados.descricao || !dados.categoria || !dados.unidade || !fcValido(dados.fc)) {
+      atualizarBotaoSalvar();
+      return;
+    }
+
+    salvando = true;
+    atualizarBotaoSalvar();
+    mostrarStatus('Salvando...');
+    localApi
+      .withSuccessHandler(res => {
+        salvando = false;
+        atualizarBotaoSalvar();
+        if (res.status === 'POSSIVEL_DUPLICIDADE') {
+          perguntarDuplicidade(res);
+          return;
+        }
+        const mensagem = res.mensagem || 'Operação concluída.';
+        const custoPendente = !dados.id ? custoManualPendente : null;
+        const concluir = (texto, tipo) => { custoManualPendente = ''; limparFormulario(); mostrarStatus(texto, tipo); atualizarCacheInsumos(); };
+        if (custoPendente) {
+          localApi.withSuccessHandler(() => concluir(mensagem + ' Custo de referência salvo.', 'sucesso'))
+            .withFailureHandler(erro => concluir(mensagem + ' O insumo foi salvo, mas o custo não pôde ser gravado: ' + (erro.message || erro), 'erro'))
+            .ftSalvarCustoManual(res.insumo.id, '', 'Custo informado durante o cadastro do insumo', custoPendente.embalagem, custoPendente.valorPago);
+          return;
+        }
+        concluir(mensagem, 'sucesso');
+      })
+      .withFailureHandler(erro => {
+        salvando = false;
+        atualizarBotaoSalvar();
+        mostrarStatus(erro.message || 'Ocorreu um erro ao salvar.', 'erro');
+      })
+      .salvarInsumo(dados, Boolean(forcarNovo));
+  }
+
+  function perguntarDuplicidade(res) {
+    const item = res.insumo;
+    abrirModal('POSSÍVEL DUPLICIDADE', [
+      {
+        texto: 'SIM', classe: 'salvar',
+        acao: () => { fecharModal(); carregarRegistro(item); }
+      },
+      {
+        texto: 'NÃO', classe: 'cancelar',
+        acao: () => { fecharModal(); salvar(true); }
+      }
+    ]);
+    const p = document.createElement('p');
+    p.textContent = res.correspondenciaExata
+      ? 'Já existe um insumo com esta descrição, considerando maiúsculas e espaços. Deseja abrir o cadastro existente para editar?'
+      : 'Encontramos um insumo com nome parecido. Ele pode ser o mesmo ingrediente. Deseja abrir o cadastro existente para editar?';
+    const d = document.createElement('p');
+    d.textContent = '(' + item.id + ') ' + item.descricao + ' — UNIDADE: ' + item.unidade;
+    el('modalConteudo').appendChild(p);
+    el('modalConteudo').appendChild(d);
+  }
+
+  function consultarCustoFT() {
+    const id = el('id').value.trim();
+    if (!id) {
+      abrirModal('CUSTO DE REFERÊNCIA — NOVO INSUMO', [
+        { texto: 'VOLTAR', classe: 'cancelar', acao: fecharModal },
+        { texto: 'APLICAR CUSTO', classe: 'salvar', acao: () => {
+          const preco = el('ftCustoInput').value.trim().replace(',', '.');
+          if (!/^\d+(?:\.\d{1,18})?$/.test(preco) || Number(preco) <= 0) { mostrarStatus('Informe um custo numérico válido.', 'erro'); return; }
+          custoManualPendente = preco;
+          fecharModal();
+          mostrarStatus('Custo de referência reservado para este novo insumo.', 'sucesso');
+        }}
+      ]);
+      const corpoNovo = el('modalConteudo');
+      const infoNovo = document.createElement('p');
+      infoNovo.textContent = 'Informe o custo por unidade. Ele será gravado junto com o insumo ao clicar em SALVAR.';
+      corpoNovo.appendChild(infoNovo);
+      const inputNovo = document.createElement('input');
+      inputNovo.id = 'ftCustoInput'; inputNovo.type = 'text'; inputNovo.inputMode = 'decimal'; inputNovo.placeholder = 'VALOR POR UNIDADE (R$)'; inputNovo.value = custoManualPendente;
+      corpoNovo.appendChild(inputNovo); setTimeout(() => inputNovo.focus(), 30);
+      return;
+    }
+    localApi.withSuccessHandler(reg => {
+      abrirModal('CUSTO DE REFERÊNCIA — ' + reg.insumo, [
+        { texto: 'FECHAR', classe: 'cancelar', acao: fecharModal },
+        ...(reg.podeEditar ? [{ texto: 'ATUALIZAR CUSTO', classe: 'salvar', acao: () => {
+          const preco = el('ftCustoInput').value.trim();
+          if (!preco) { mostrarStatus('Informe um custo numérico válido.', 'erro'); return; }
+          localApi.withSuccessHandler(() => { fecharModal(); mostrarStatus('Custo manual salvo para futuras FTs.', 'sucesso'); })
+            .withFailureHandler(e => mostrarStatus(e.message, 'erro'))
+            .ftSalvarCustoManual(id,preco,'Atualização pelo módulo INSUMOS');
+        }}] : [])
+      ]);
+      const corpo=el('modalConteudo');
+      const info=document.createElement('p');
+      info.textContent='Origem operacional: '+reg.metodo+' | Custo operacional: '+reg.operacional+' / '+reg.unidade;
+      corpo.appendChild(info);
+      const atual=document.createElement('p');
+      atual.textContent='Custo manual existente: '+(reg.manual||'NÃO INFORMADO')+' | Atualizado: '+(reg.atualizado||'—');
+      corpo.appendChild(atual);
+      if(reg.podeEditar){
+        const inp=document.createElement('input');inp.id='ftCustoInput';inp.type='text';inp.inputMode='decimal';
+        inp.placeholder='Valor por '+reg.unidade+' (R$)';inp.value=reg.manual||'';
+        corpo.appendChild(inp);
+      } else {
+        const nota=document.createElement('p');
+        nota.textContent='Já existe preço operacional registrado em ESTOQUE/COMPRAS. Ajustes desses valores devem ser feitos no módulo de origem.';
+        corpo.appendChild(nota);
+      }
+    }).withFailureHandler(e => mostrarStatus(e.message,'erro')).ftConsultaReferenciaManual(id);
+  }
+
+</script>
+<script>
+/* Normalização visual e efetiva de texto livre. Campos estruturados (datas, valores, e-mails, XML) preservam seu formato. */
+window.consultarCustoFT=function(){
+ const id=el('id').value.trim();
+ const lerCampos=()=>{const embalagem=String(el('ftEmbalagemInput')?.value||'').trim().replace(',','.');const valorPago=String(el('ftValorPagoInput')?.value||'').trim().replace(',','.');if(!/^\d+(?:\.\d{1,18})?$/.test(embalagem)||Number(embalagem)<=0){mostrarStatus('Informe um tamanho de embalagem válido.','erro');return null;}if(!/^\d+(?:\.\d{1,2})?$/.test(valorPago)||Number(valorPago)<=0){mostrarStatus('Informe um valor pago válido.','erro');return null;}return {embalagem,valorPago};};
+ const montarCampos=(unidade,pendente)=>{const corpo=el('modalConteudo');const info=document.createElement('p');info.textContent='Informe o tamanho da embalagem na unidade '+unidade+' e o valor total pago. O sistema calculará o custo por '+unidade+'.';corpo.appendChild(info);const grade=document.createElement('div');grade.className='formgrid duas';grade.innerHTML='<div><label>TAMANHO DA EMBALAGEM ('+unidade+')</label><input id="ftEmbalagemInput" class="campo" inputmode="decimal" placeholder="Ex.: 500" value="'+(pendente?.embalagem||'')+'"></div><div><label>VALOR PAGO (R$)</label><input id="ftValorPagoInput" class="campo" inputmode="decimal" placeholder="Ex.: 10,00" value="'+(pendente?.valorPago||'')+'"></div>';corpo.appendChild(grade);setTimeout(()=>el('ftEmbalagemInput')?.focus(),30);};
+ if(!id){abrirModal('CUSTO DE REFERÊNCIA — NOVO INSUMO',[{texto:'VOLTAR',classe:'cancelar',acao:fecharModal},{texto:'APLICAR CUSTO',classe:'salvar',acao:()=>{const valores=lerCampos();if(!valores)return;custoManualPendente=valores;fecharModal();mostrarStatus('Embalagem e valor reservados para o novo insumo.','sucesso');}}]);montarCampos(el('unidade').value||'unidade',custoManualPendente);return;}
+ localApi.withSuccessHandler(reg=>{abrirModal('CUSTO DE REFERÊNCIA — '+reg.insumo,[{texto:'FECHAR',classe:'cancelar',acao:fecharModal},...(reg.podeEditar?[{texto:'ATUALIZAR CUSTO',classe:'salvar',acao:()=>{const valores=lerCampos();if(!valores)return;localApi.withSuccessHandler(res=>{fecharModal();mostrarStatus('Custo por '+reg.unidade+' atualizado: R$ '+res.valor,'sucesso');}).withFailureHandler(e=>mostrarStatus(e.message,'erro')).ftSalvarCustoManual(id,'','Atualização pelo módulo INSUMOS',valores.embalagem,valores.valorPago);}}]:[])]);const corpo=el('modalConteudo');const info=document.createElement('p');info.textContent='Origem operacional: '+reg.metodo+' | Custo operacional: '+reg.operacional+' / '+reg.unidade;corpo.appendChild(info);const atual=document.createElement('p');atual.textContent='Custo manual existente: '+(reg.manual||'NÃO INFORMADO')+' | Atualizado: '+(reg.atualizado||'—');corpo.appendChild(atual);if(reg.podeEditar)montarCampos(reg.unidade,null);else{const nota=document.createElement('p');nota.textContent='Já existe preço operacional registrado em ESTOQUE/COMPRAS. Ajustes devem ser feitos no módulo de origem.';corpo.appendChild(nota);}}).withFailureHandler(e=>mostrarStatus(e.message,'erro')).ftConsultaReferenciaManual(id);
+};
+document.addEventListener('input',function(ev){
+ const e=ev.target;if(!e || !e.matches || !e.matches('textarea,input[type=text],input:not([type]) ,input[type=search]'))return;
+ if(e.readOnly||e.disabled||e.dataset.csmCase==='original'||e.inputMode==='decimal'||e.inputMode==='numeric'||e.type==='email')return;
+ const t=e.value,novo=t.toLocaleUpperCase('pt-BR');if(t===novo)return;
+ const a=e.selectionStart,b=e.selectionEnd;e.value=novo;
+ try{if(a!==null&&b!==null)e.setSelectionRange(a,b)}catch(_){}
+},true);
+/* Um módulo incluído na área à direita notifica altura, sem comandar a navegação do menu. */
+
+(function(){
+ let ultima=0;
+ const raiz=()=>document.querySelector('main')||document.querySelector('.app')||document.body;
+ function altura(){const area=raiz(),r=area.getBoundingClientRect(),n=Math.ceil(Math.max(100,r.bottom));if(n!==ultima){ultima=n;window.parent.postMessage({tipo:'CSM_ALTURA_MODULO',altura:n},'*')}}
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(altura).observe(raiz());
+ window.addEventListener('load',altura);new MutationObserver(altura).observe(document.body,{childList:true,subtree:true,attributes:false});altura();})();
+
+</script>
+</body>
+</html>

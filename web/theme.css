@@ -1,0 +1,519 @@
+﻿/* Casa São Miguel — opção 1: Clássico Institucional */
+:root {
+  --csm-navy: #071D2C;
+  --csm-gold: #E9A348;
+  --csm-gold-light: #FFCC66;
+  --csm-champagne: #F3CD99;
+  --csm-cream: #FDF7EC;
+  --csm-ink-soft: #405564;
+  --csm-danger: #982D25;
+
+  /* Mantém os nomes usados pelos arquivos do sistema alinhados à paleta oficial. */
+  --marrom: var(--csm-navy);
+  --navy: var(--csm-navy);
+  --texto: var(--csm-navy);
+  --creme: var(--csm-cream);
+  --cream: var(--csm-cream);
+  --borda: var(--csm-champagne);
+  --line: var(--csm-champagne);
+  --gold: var(--csm-gold);
+  --goldlight: var(--csm-gold-light);
+  --champagne: var(--csm-champagne);
+  --muted: var(--csm-ink-soft);
+  --cinza: var(--csm-ink-soft);
+}
+
+html {
+  background: var(--csm-cream) !important;
+}
+
+body {
+  background: var(--csm-cream) !important;
+  color: var(--csm-navy) !important;
+}
+
+header,
+.barra,
+.head {
+  background: linear-gradient(135deg, var(--csm-navy) 0%, #0C3045 100%) !important;
+  color: var(--csm-cream) !important;
+  border-bottom-color: var(--csm-gold) !important;
+  box-shadow: 0 8px 24px rgba(7, 29, 44, .13);
+}
+
+header h1,
+.barra h1,
+.head h1 {
+  color: var(--csm-gold-light) !important;
+}
+
+header p,
+.head small,
+.head a,
+.barra a,
+.voltar {
+  color: var(--csm-cream) !important;
+}
+
+header .voltar,
+.barra .voltar,
+.barra #voltarMenu,
+.head a.desktopOnly {
+  border-color: rgba(253, 247, 236, .58) !important;
+}
+
+header .voltar:hover,
+.barra .voltar:hover,
+.barra #voltarMenu:hover,
+.head a.desktopOnly:hover {
+  background: rgba(233, 163, 72, .18) !important;
+}
+
+/* Embedded module chrome belongs to the parent menu at every viewport width. */
+body.native-embedded-page > header,
+body.native-embedded-page > .app > .barra,
+body.native-embedded-page > .app > .head {
+  display: none !important;
+}
+
+.painel,
+.panel,
+.caixa,
+.modal,
+dialog {
+  background: linear-gradient(180deg, #FFFDF9 0%, #FFFFFF 100%) !important;
+  border-color: var(--csm-champagne) !important;
+  box-shadow: 0 8px 24px rgba(7, 29, 44, .09) !important;
+}
+
+.caixa,
+.hint,
+.simBox,
+.csmResults > div {
+  background: rgba(243, 205, 153, .18) !important;
+}
+
+input,
+select,
+textarea,
+.campo {
+  background: #FFFEFB !important;
+  color: var(--csm-navy) !important;
+  border-color: var(--csm-champagne) !important;
+}
+
+input[readonly],
+.campo:disabled,
+.somente {
+  background: #F6EADB !important;
+  color: var(--csm-ink-soft) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  border-color: var(--csm-gold) !important;
+  box-shadow: 0 0 0 3px rgba(233, 163, 72, .25) !important;
+}
+
+label,
+.resumo-rotulo,
+.mHead {
+  color: var(--csm-navy) !important;
+}
+
+.btn,
+.botao,
+.acao,
+.aba {
+  background: linear-gradient(180deg, #FFFDF9 0%, #F8EBD9 100%) !important;
+  color: var(--csm-navy) !important;
+  border-color: var(--csm-gold) !important;
+}
+
+.btn:hover,
+.botao:hover,
+.acao:hover,
+.aba:hover {
+  border-color: var(--csm-gold-light) !important;
+  box-shadow: 0 4px 12px rgba(233, 163, 72, .22);
+}
+
+.btn.primario,
+.btn.primary,
+.btn.gold,
+.botao.primario,
+.acao.salvar,
+.salvar,
+.aba.ativo,
+.tabs .chosen {
+  background: linear-gradient(135deg, var(--csm-gold) 0%, var(--csm-gold-light) 100%) !important;
+  color: var(--csm-navy) !important;
+  border-color: var(--csm-gold) !important;
+}
+
+.btn.soft,
+.btn:not(.primario):not(.primary):not(.gold):not(.perigo):not(.danger),
+.botao.leve,
+.acao.cancelar {
+  background: rgba(243, 205, 153, .28) !important;
+}
+
+.btn.perigo,
+.btn.danger,
+.botao.perigo,
+.acao.excluir {
+  background: #FFF1F0 !important;
+  color: var(--csm-danger) !important;
+  border-color: #D79A90 !important;
+}
+
+.btn:disabled,
+.botao:disabled,
+.acao:disabled,
+.aba:disabled {
+  background: #D8CBBB !important;
+  color: #6D6258 !important;
+  border-color: #C4B5A3 !important;
+  box-shadow: none !important;
+}
+
+th,
+.item-grid.cab,
+.simTable th {
+  background: rgba(243, 205, 153, .48) !important;
+  color: var(--csm-navy) !important;
+}
+
+th,
+td,
+.linha-item,
+.cardline {
+  border-color: rgba(233, 163, 72, .28) !important;
+}
+
+.lupa {
+  background: rgba(243, 205, 153, .22) !important;
+  color: var(--csm-navy) !important;
+  border-color: var(--csm-gold) !important;
+}
+
+.lupa:hover,
+.lupa:focus-visible,
+.sugestao-item:hover,
+.sugestao-item.ativa,
+.sugestao:hover,
+.sugestao.ativa,
+.item-insumo:hover,
+.item-registro:hover,
+.list button:hover,
+.fornecedor-opcoes button:hover,
+.fornecedor-opcoes button.ativo,
+.sugestoes-vinculo button:hover,
+.sugestoes-vinculo button.ativo {
+  background: rgba(243, 205, 153, .38) !important;
+}
+
+.sugestoes,
+.sugestao,
+.sugestoes-vinculo,
+.fornecedor-opcoes,
+.suggestions,
+.lista-insumos,
+.lista-registros {
+  border-color: var(--csm-champagne) !important;
+  background: #FFFEFB !important;
+}
+
+.sugestao-item,
+.item-insumo,
+.item-registro,
+.list button,
+.fornecedor-opcoes button,
+.sugestoes-vinculo button,
+.suggestions button {
+  color: var(--csm-navy) !important;
+  background: #FFFEFB !important;
+  border-color: rgba(233, 163, 72, .25) !important;
+}
+
+.sub,
+.muted,
+.status,
+.sugestoes-aviso,
+.vazio {
+  color: var(--csm-ink-soft) !important;
+}
+
+.erro,
+.error {
+  background: #FFF1F0 !important;
+  border-color: #D79A90 !important;
+  color: var(--csm-danger) !important;
+}
+
+dialog::backdrop,
+.modal-fundo {
+  background: rgba(7, 29, 44, .62) !important;
+}
+
+/* Menu lateral do sistema */
+.csm-menu-sidebar {
+  background: linear-gradient(180deg, var(--csm-cream) 0%, #F5E7D3 100%) !important;
+  border-right-color: var(--csm-champagne) !important;
+}
+
+.csm-menu-sidebar .modulo {
+  background: rgba(255, 255, 255, .88) !important;
+  color: var(--csm-navy) !important;
+  border-color: var(--csm-champagne) !important;
+}
+
+.csm-menu-sidebar .modulo:hover {
+  background: rgba(243, 205, 153, .38) !important;
+  border-color: var(--csm-gold) !important;
+}
+
+.csm-menu-sidebar .modulo.ativo {
+  background: var(--csm-navy) !important;
+  color: var(--csm-gold-light) !important;
+  border-color: var(--csm-gold) !important;
+  box-shadow: 0 4px 12px rgba(7, 29, 44, .18) !important;
+}
+
+.csm-menu-group {
+  display: block;
+}
+
+.csm-submenu {
+  display: none;
+}
+
+.csm-menu-sidebar .modulo[data-has-submenu="true"] {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.csm-submenu-chevron {
+  display: inline-block;
+  color: currentColor;
+  font-size: 16px;
+  line-height: 1;
+  transition: transform .15s ease;
+}
+
+.csm-menu-group.aberto > .modulo .csm-submenu-chevron {
+  transform: rotate(180deg);
+}
+
+.csm-submodulo {
+  display: flex;
+  align-items: center;
+  min-height: 35px;
+  padding: 8px 12px 8px 25px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--csm-navy);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1px;
+}
+
+.csm-submodulo:hover {
+  background: rgba(243, 205, 153, .38);
+  border-color: var(--csm-champagne);
+}
+
+.csm-submodulo.ativo {
+  background: var(--csm-navy);
+  color: var(--csm-gold-light);
+  border-color: var(--csm-gold);
+}
+
+.csm-sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0 0 15px;
+  margin: 0 0 15px;
+  border-bottom: 1px solid rgba(233, 163, 72, .62);
+}
+
+.csm-sidebar-brand img {
+  display: block;
+  width: 126px;
+  height: 126px;
+  object-fit: contain;
+  border-radius: 50%;
+  box-shadow: 0 7px 18px rgba(7, 29, 44, .18);
+}
+
+#csmDesktopArea {
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+#csmWelcome {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+#csmModuleScroll {
+  background: transparent !important;
+}
+
+html:has(body.native-embedded-page) {
+  overflow-y: auto !important;
+}
+
+body.native-embedded-page {
+  overflow-y: auto !important;
+}
+
+body.native-embedded-page dialog[open] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: calc(100vh - 32px) !important;
+}
+
+/* No desktop, o menu ocupa toda a coluna esquerda e a faixa começa depois dela. */
+@media (min-width: 850px) {
+  .csm-menu-page > header {
+    position: absolute !important;
+    top: 0 !important;
+    left: 224px !important;
+    right: 0 !important;
+    width: auto !important;
+    height: 86px !important;
+    min-height: 86px !important;
+    padding: 14px 18px !important;
+    border-radius: 0 !important;
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    z-index: 3;
+  }
+
+  .csm-menu-page > header h1 {
+    width: 100%;
+    color: var(--csm-gold-light) !important;
+    font-size: 22px !important;
+    line-height: 1.15;
+    text-align: left !important;
+  }
+
+  .csm-menu-page > header p {
+    display: none !important;
+  }
+
+  .csm-menu-page > .csm-menu-sidebar {
+    top: 0 !important;
+    bottom: 0 !important;
+  }
+
+  .csm-menu-group.aberto > .csm-submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 5px 0 3px;
+    padding-left: 8px;
+    border-left: 1px solid rgba(233, 163, 72, .55);
+  }
+
+  .csm-menu-page > #csmDesktopArea {
+    top: 86px !important;
+    left: 224px !important;
+    overflow: hidden !important;
+  }
+
+  .csm-menu-page > #csmDesktopArea > #csmModuleScroll {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    overflow: hidden !important;
+    background: transparent !important;
+  }
+
+  .csm-menu-page > #csmDesktopArea > #csmModuleScroll > #csmFrame {
+    width: min(calc(100% - 24px), 928px) !important;
+    height: calc(100% - 30px) !important;
+    margin: 12px 12px 18px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Dentro do iframe, o título já é representado pelo botão selecionado. */
+  body.native-embedded-page {
+    background: transparent !important;
+  }
+
+  body.native-embedded-page > main,
+  body.native-embedded-page > .app {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    background: transparent !important;
+  }
+
+  body.native-embedded-page > main > .painel,
+  body.native-embedded-page > main.painel,
+  body.native-embedded-page > .app > main.painel,
+  body.native-embedded-page > .app > .painel,
+  body.native-embedded-page > .app > .desktopOnly > .panel {
+    margin-top: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.native-embedded-page.native-module-estoque > .app > .abas,
+  body.native-embedded-page.native-module-compras > .app > .abas {
+    display: none !important;
+  }
+}
+
+/* Divisórias do formulário de Ficha Técnica no modo desktop embutido. */
+@media (min-width: 850px) {
+  body.native-embedded-page > .app > .desktopOnly > #resultsPanel.ft-results-panel {
+    border-top: 1px solid var(--csm-champagne) !important;
+    border-radius: 0 !important;
+    margin-top: 18px !important;
+    padding-top: 18px !important;
+  }
+
+  /* Todas as janelas sobrepostas acompanham a área visível do computador. */
+  body.native-embedded-page dialog[open] {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  body.native-embedded-page .modal-fundo.aberto {
+    position: fixed !important;
+    align-items: center !important;
+    padding: 16px !important;
+    overflow-y: auto !important;
+  }
+
+}
+

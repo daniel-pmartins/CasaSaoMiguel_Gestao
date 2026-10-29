@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Casa São Miguel | Sistema de Gestão</title>
+
+  <style>
+    :root {
+      --marrom: #071D2C;
+      --creme: #FDF7EC;
+      --texto: #071D2C;
+      --borda: #D6BE9B;
+      --branco: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--creme);
+      color: var(--texto);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    header {
+      background: var(--marrom);
+      color: var(--creme);
+      padding: 22px 18px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(23px, 4vw, 32px);
+    }
+
+    header p {
+      margin: 7px 0 0;
+      font-size: 14px;
+    }
+
+    main {
+      width: min(100% - 32px, 900px);
+      margin: 32px auto;
+      text-align: center;
+    }
+
+    h2 {
+      margin: 0 0 22px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .modulos {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 190px));
+      justify-content: center;
+      gap: 16px;
+      margin: 0 auto;
+    }
+
+    .modulo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 68px;
+      padding: 16px;
+      border: 1px solid var(--borda);
+      border-radius: 12px;
+      background: var(--branco);
+      color: var(--marrom);
+      text-decoration: none;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 0 3px 10px #071D2C14;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .modulo:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px #071D2C24;
+    }
+
+    .modulo:focus-visible {
+      outline: 3px solid var(--marrom);
+      outline-offset: 3px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 18px;
+      color: #284150;
+      font-size: 12px;
+    }
+
+    /* NOVO LAYOUT DESKTOP. No celular, conserva-se o menu tradicional anterior. */
+    @media(min-width:850px){
+      html,body{height:100%;overflow:hidden}
+      /* Cabeçalho alinha à esquerda com o conteúdo da janela do módulo. */
+      header{height:86px;padding:14px 18px 14px 238px;border-bottom:3px solid #E9A348;
+        text-align:left}
+      header h1,header p{text-align:left}
+      header h1{color:#FFCC66;font-size:27px}header p{color:#FDF7EC;font-size:12px}
+      main{position:absolute;top:86px;bottom:0;left:0;margin:0;width:224px;max-width:none;
+        padding:18px 13px;background:#FDF7EC;border-right:1px solid #D6BE9B;overflow-y:auto;text-align:left}
+      main h2{display:none!important}
+      .modulos{display:flex;flex-direction:column;gap:9px}
+      /* Menu fixo: rótulos à esquerda, mantendo a ordem atual. */
+      .modulo{min-height:43px;font-size:13px;padding:10px 12px;border-radius:8px;box-shadow:none;
+        justify-content:flex-start;text-align:left}
+      .modulo.ativo{background:#071D2C;color:#FDF7EC;border-color:#071D2C}
+      .modulo:hover{transform:none;box-shadow:0 2px 6px #071d2c18}
+       #csmDesktopArea{display:block!important;position:absolute;top:86px;bottom:0;left:224px;right:0;overflow:hidden;background:#FDF7EC}
+      /* Iframe dimensionado ao padrão original de 900px: sem grande vão entre as colunas. */
+      #csmWelcome{position:absolute;inset:0;display:flex!important;align-items:center;justify-content:center;max-width:none;margin:0;padding:0;border:0;border-radius:0;background:transparent;pointer-events:none;z-index:0}
+      #csmWelcome .csm-watermark{display:block;width:min(78vh,70vw);height:min(78vh,70vw);max-width:680px;max-height:680px;object-fit:contain;opacity:.2}
+       #csmModuleScroll{position:absolute;inset:0;z-index:1;overflow:hidden;background:transparent}
+       #csmFrame{position:relative;z-index:1;width:min(100%,928px);height:calc(100% - 30px);border:0;display:none;min-height:0;background:#FDF7EC;overflow:hidden}
+      footer{display:none}
+    }
+    #csmDesktopArea{display:none}
+</style>
+</head>
+
+<body class="csm-menu-page">
+  <header>
+    <h1>CASA SÃO MIGUEL - SISTEMA DE GESTÃO</h1>
+  </header>
+
+  <main>
+    <h2 class="desktopOnlyMenuTitle">Menu inicial</h2>
+
+    <nav class="modulos" aria-label="Módulos do sistema">
+      <a class="modulo" data-page="insumos" href="/modules/insumos.html">INSUMOS</a>
+      <a class="modulo" data-page="fornecedores" href="/modules/fornecedores.html">FORNECEDORES</a>
+      <div class="csm-menu-group">
+        <a class="modulo" data-page="estoque" data-has-submenu="true" aria-expanded="false" href="/modules/estoque.html">ESTOQUE <span class="csm-submenu-chevron" aria-hidden="true">⌄</span></a>
+        <div class="csm-submenu" aria-label="Opções de estoque">
+          <a class="csm-submodulo" data-parent="estoque" data-aba="saldos" href="/modules/estoque.html?aba=saldos">SALDOS</a>
+          <a class="csm-submodulo" data-parent="estoque" data-aba="inventarios" href="/modules/estoque.html?aba=inventarios">INVENTÁRIOS</a>
+          <a class="csm-submodulo" data-parent="estoque" data-aba="movimentacoes" href="/modules/estoque.html?aba=movimentacoes">MOVIMENTAÇÕES</a>
+        </div>
+      </div>
+      <div class="csm-menu-group">
+        <a class="modulo" data-page="compras" data-has-submenu="true" aria-expanded="false" href="/modules/compras.html">COMPRAS <span class="csm-submenu-chevron" aria-hidden="true">⌄</span></a>
+        <div class="csm-submenu" aria-label="Opções de compras">
+          <a class="csm-submodulo" data-parent="compras" data-aba="NOVA" href="/modules/compras.html?aba=NOVA">NOVA COMPRA</a>
+          <a class="csm-submodulo" data-parent="compras" data-aba="PENDENTES" href="/modules/compras.html?aba=PENDENTES">PENDENTES</a>
+          <a class="csm-submodulo" data-parent="compras" data-aba="RECEBIDAS" href="/modules/compras.html?aba=RECEBIDAS">RECEBIDAS</a>
+        </div>
+      </div>
+      <a class="modulo" data-page="ficha_tecnica" href="/modules/ficha-tecnica.html">FICHA TÉCNICA</a>
+    </nav>
+  </main>
+  <div id="csmDesktopArea" aria-label="Módulo selecionado">
+    <div id="csmWelcome" aria-label="Logotipo Casa São Miguel" style="border:0;background:transparent;text-align:center;box-shadow:none"><img class="csm-watermark" src="/assets/casa-sao-miguel-logo-completo.png?v=1" alt="Casa São Miguel"></div>
+    <div id="csmModuleScroll" aria-label="Rolagem do módulo">
+      <iframe id="csmFrame" title="Conteúdo do módulo" referrerpolicy="same-origin" scrolling="auto" loading="eager"></iframe>
+    </div>
+  </div>
+
+  <footer>CASA SÃO MIGUEL</footer>
+  <script>
+    (function(){
+       const menu=[...document.querySelectorAll('a.modulo')],submenus=[...document.querySelectorAll('a.csm-submodulo')],grupos=[...document.querySelectorAll('.csm-menu-group')],tela=document.getElementById('csmFrame'),bem=document.getElementById('csmWelcome');
+       const ordemMenu=['ficha_tecnica','compras','estoque','fornecedores','insumos'],nav=document.querySelector('.modulos');
+       const paginaDoItem=item=>item.dataset.page||item.querySelector('[data-page]')?.dataset.page||'';
+       [...nav.children].sort((a,b)=>ordemMenu.indexOf(paginaDoItem(a))-ordemMenu.indexOf(paginaDoItem(b))).forEach(item=>nav.appendChild(item));
+       let modulo='',aba='',alturaConteudo=100;
+       document.querySelector('.csm-sidebar-brand')?.addEventListener('click',function(e){
+         if(!telaDesktop())return;
+         e.preventDefault();window.location.assign('/');
+       });
+      function telaDesktop(){return true}
+      function aplicarAlturaModulo(){tela.style.height='calc(100% - 30px)';}
+      function grupoDe(a){return a.closest('.csm-menu-group')}
+      function abrirGrupo(grupo,aberto){
+        if(!grupo)return;
+        grupos.forEach(x=>{const abertoEste=x===grupo&&aberto;x.classList.toggle('aberto',abertoEste);x.querySelector(':scope > .modulo')?.setAttribute('aria-expanded',abertoEste?'true':'false');});
+      }
+      function abrirModulo(a,abaSolicitada='',parametros={}){
+        const nome=a.dataset.parent||a.dataset.page||(new URL(a.href,location.href)).searchParams.get('page');if(!nome)return;
+        if(modulo===nome&&aba===abaSolicitada)return;
+        modulo=nome;aba=abaSolicitada;
+        const principal=a.classList.contains('modulo')?a:menu.find(x=>x.dataset.page===nome);
+        menu.forEach(x=>x.classList.toggle('ativo',x===principal));
+        submenus.forEach(x=>x.classList.toggle('ativo',x.dataset.parent===nome&&x.dataset.aba===abaSolicitada));
+         bem.style.display='flex';tela.style.display='block';alturaConteudo=100;aplicarAlturaModulo();
+         const u=new URL(a.href);u.searchParams.set('embedded','1');Object.entries(parametros).forEach(([chave,valor])=>{if(valor!==undefined&&valor!==null&&valor!=='')u.searchParams.set(chave,String(valor));});tela.src=u.toString();
+      }
+      menu.forEach(a=>a.addEventListener('click',function(e){if(!telaDesktop())return;e.preventDefault();const grupo=grupoDe(a);if(grupo)abrirGrupo(grupo,!grupo.classList.contains('aberto')||modulo!==a.dataset.page);const primeira=grupo?.querySelector('.csm-submodulo')?.dataset.aba||'';abrirModulo(a,primeira);}));
+      submenus.forEach(a=>a.addEventListener('click',function(e){if(!telaDesktop())return;e.preventDefault();abrirGrupo(grupoDe(a),true);abrirModulo(a,a.dataset.aba);}));
+      window.addEventListener('message',function(ev){
+        if(!tela.contentWindow||ev.source!==tela.contentWindow)return;
+         const d=ev.data;if(!d)return;
+         if(d.tipo==='CSM_SOLICITAR_FORNECEDOR'){
+           const fornecedor=menu.find(x=>x.dataset.page==='fornecedores');if(!fornecedor)return;
+           abrirModulo(fornecedor,'',{retorno:'compras',rascunho:d.rascunhoId||'',cnpj:d.cnpj||''});return;
+         }
+         if(d.tipo==='CSM_FORNECEDOR_SALVO'||d.tipo==='CSM_FORNECEDOR_CANCELADO'){
+           const compras=menu.find(x=>x.dataset.page==='compras');if(!compras)return;
+           abrirGrupo(grupoDe(compras),true);abrirModulo(compras,'NOVA',{rascunho:d.rascunhoId||'',fornecedorId:d.fornecedorId||'',cnpj:d.cnpj||''});return;
+         }
+         if(d.tipo!=='CSM_ALTURA_MODULO')return;
+         const n=Number(d.altura);if(Number.isFinite(n)&&n>=100&&n<30000){alturaConteudo=n+18;aplicarAlturaModulo();}
+       });
+       window.addEventListener('resize',()=>{if(modulo)aplicarAlturaModulo();});
+      // O sistema administrativo é destinado exclusivamente ao computador.
+    })();
+  </script>
+</body>
+</html>

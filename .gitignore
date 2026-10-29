@@ -1,0 +1,16 @@
+# Dependências e artefatos locais
+node_modules/
+node_modules/
+database/data/
+.env
+*.log
+
+# Configurações e segredos locais
+.env
+.env.*
+!.env.example
+
+# Saídas comuns de desenvolvimento
+coverage/
+dist/
+logs/

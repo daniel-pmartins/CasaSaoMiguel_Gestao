@@ -1,0 +1,660 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{--marrom:#071D2C;--creme:#FDF7EC;--texto:#071D2C;--borda:#D6BE9B;--cinza:#284150;--erro:#a12424}
+    *{box-sizing:border-box}body{margin:0;background:var(--creme);font-family:Arial,Helvetica,sans-serif;color:var(--texto)}
+    header{width:min(100% - 28px,900px);margin:22px auto 0;position:relative;min-height:62px;padding:15px 18px;border-radius:12px;background:var(--marrom);color:var(--creme);display:flex;justify-content:center;align-items:center}
+    header h1{margin:0;font-size:clamp(20px,4vw,27px);text-align:center}.voltar{position:absolute;left:18px;border:1px solid #ffffff77;border-radius:8px;background:transparent;color:var(--creme);padding:9px 12px;font-weight:bold;cursor:pointer}
+    main{width:min(100% - 28px,900px);margin:12px auto 36px}.painel{background:#fff;border:1px solid var(--borda);border-radius:14px;box-shadow:0 4px 14px #071D2C0e;padding:clamp(15px,3vw,26px)}
+    form{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 12px;grid-template-areas:
+      "id id cnpj cnpj cnpj cnpj cnpj cnpj abertura abertura abertura abertura"
+      "situacao situacao situacao situacao situacao situacao dataSituacao dataSituacao dataSituacao dataSituacao dataSituacao dataSituacao"
+      "situacaoCompras situacaoCompras situacaoCompras situacaoCompras situacaoCompras situacaoCompras situacaoCompras situacaoCompras situacaoCompras situacaoCompras situacaoCompras situacaoCompras"
+      "razao razao razao razao razao razao razao razao razao razao razao razao"
+      "fantasia fantasia fantasia fantasia fantasia fantasia fantasia fantasia fantasia fantasia fantasia fantasia"
+      "enderecoCab enderecoCab enderecoCab enderecoCab enderecoCab enderecoCab enderecoCab enderecoCab enderecoCab enderecoCab enderecoCab enderecoCab"
+      "cep cep cep logradouro logradouro logradouro logradouro logradouro logradouro logradouro logradouro logradouro"
+      "numero numero complemento complemento complemento complemento complemento bairro bairro bairro bairro bairro"
+      "cidade cidade cidade cidade cidade cidade cidade cidade cidade uf uf uf"
+      "contatoCab contatoCab contatoCab contatoCab contatoCab contatoCab contatoCab contatoCab contatoCab contatoCab contatoCab contatoCab"
+      "nomeContato nomeContato nomeContato nomeContato telefone telefone telefone email email email email email"
+      "acoes acoes acoes acoes acoes acoes acoes acoes acoes acoes acoes acoes"
+      "status status status status status status status status status status status status"}
+    .campo{min-width:0;margin-bottom:16px}.campo label{display:block;color:var(--marrom);font-size:12px;font-weight:bold;margin:0 0 7px}
+    input,select{width:100%;min-width:0;border:1px solid var(--borda);border-radius:8px;background:#FFFDF8;padding:12px;font:inherit;color:var(--texto);outline:none;height:45px}
+    input:focus,select:focus{border-color:var(--marrom);box-shadow:0 0 0 2px #071D2C1b}input[readonly]{background:#F4EEE4;color:#405564}
+    .maiusculo{text-transform:uppercase}.campo-com-lupa{position:relative;display:flex;align-items:stretch;gap:8px}.campo-com-lupa input{flex:1;min-width:0}
+    .lupa{flex:0 0 46px;display:flex;align-items:center;justify-content:center;height:45px;border:1px solid var(--borda);border-radius:8px;background:#FFFDF8;color:var(--marrom);cursor:pointer;box-shadow:0 1px 3px #071D2C0b}
+    .lupa:hover,.lupa:focus-visible{border-color:var(--marrom);background:var(--creme)}.lupa svg{height:21px;width:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .secao{margin:0 0 14px;border-top:1px solid #F3E7D2;padding-top:14px;color:var(--marrom);font-size:14px;font-weight:bold}
+    .cabecalho-cadastral{display:none}.acoes{grid-area:acoes;display:flex;justify-content:flex-end;gap:10px;margin-top:4px}
+    .acao{border:1px solid var(--borda);border-radius:8px;padding:12px 20px;font-weight:bold;cursor:pointer;min-width:124px}
+    .salvar{background:var(--marrom);color:var(--creme);border-color:var(--marrom)}.salvar:disabled{background:#a69a93;border-color:#a69a93;cursor:not-allowed}.cancelar{background:#F3E7D2;color:var(--marrom)}.excluir{color:#a32924;border-color:#bb736d;background:#fff7f6}.excluir[hidden]{display:none}
+    .status{grid-area:status;min-height:18px;font-size:13px;color:var(--cinza);margin:12px 0 0}.status.erro{color:var(--erro)}.status.sucesso{color:#24643b}
+    .sugestoes{display:none;position:absolute;left:0;right:54px;top:calc(100% + 4px);max-height:230px;overflow:auto;background:#fff;border:1px solid var(--borda);border-radius:8px;box-shadow:0 7px 20px #071D2C29;z-index:4}
+    .sugestoes.aberta{display:block}.sugestao{width:100%;border:none;background:#fff;padding:10px 12px;text-align:left;cursor:pointer;color:var(--texto);font:inherit;border-bottom:1px solid #efe7db}.sugestao:hover,.sugestao.ativa{background:var(--creme)}.sugestao strong{color:var(--marrom)}.vazio{padding:12px;font-size:13px;color:var(--cinza)}
+    .modal-fundo{display:none;position:fixed;inset:0;z-index:10;align-items:center;justify-content:center;background:#180c088c;padding:16px}.modal-fundo.aberto{display:flex}.modal{width:min(100%,540px);max-height:85vh;overflow:auto;background:#fff;border-radius:14px;padding:22px;box-shadow:0 12px 30px #0004}.modal h2{color:var(--marrom);margin:0 0 12px;font-size:19px}.modal p{line-height:1.45;font-size:14px}.modal-acoes{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px;margin-top:14px}.lista-registros{display:grid;gap:8px;margin-top:12px}.item-registro{width:100%;border:1px solid var(--borda);border-radius:8px;text-align:left;padding:12px;background:#FFFDF8;color:var(--texto);cursor:pointer;font:inherit;line-height:1.4}.item-registro:hover{background:var(--creme);border-color:var(--marrom)}.filtro-modal{margin:6px 0 4px}
+    .lista-registros{height:310px;max-height:310px;overflow-y:auto;padding-right:4px}
+    @media(min-width:651px){.modal-fundo{align-items:center;padding:16px}}
+    #id{grid-area:id}#campoCnpj{grid-area:cnpj}#campoAbertura{grid-area:abertura}#campoSituacao{grid-area:situacao}#campoDataSituacao{grid-area:dataSituacao}
+    #campoSituacaoCompras{grid-area:situacaoCompras}#campoRazao{grid-area:razao}#campoFantasia{grid-area:fantasia}#enderecoCab{grid-area:enderecoCab}#campoCep{grid-area:cep}#campoLogradouro{grid-area:logradouro}
+    #campoNumero{grid-area:numero}#campoComplemento{grid-area:complemento}#campoBairro{grid-area:bairro}#campoCidade{grid-area:cidade}#campoUf{grid-area:uf}
+    #contatoCab{grid-area:contatoCab}#campoNomeContato{grid-area:nomeContato}#campoTelefone{grid-area:telefone}#campoEmail{grid-area:email}
+  
+/* CABEÇALHO ÚNICO DESKTOP — mesmo padrão de título da FICHA TÉCNICA */
+@media(min-width:850px){
+ header,.barra,.head{min-height:80px!important;background:#071D2C!important;color:#FDF7EC!important;
+  border-radius:12px!important;border-bottom:3px solid #E9A348!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;position:relative!important}
+ header h1,.barra h1,.head h1{color:#FFCC66!important;font-size:22px!important;text-align:center!important;margin:0!important}
+ header .voltar,.barra .voltar,.barra #voltarMenu,.head a.desktopOnly{position:absolute!important;left:16px!important;top:50%!important;transform:translateY(-50%)!important;
+   color:#FDF7EC!important;background:transparent!important;text-decoration:none!important}
+}
+/* CASA SÃO MIGUEL | V13-11.8 TESTE | foco e maiúsculas em todos os módulos */
+input:not([type=number]):not([type=date]):not([type=email]):not([type=url]):not([type=tel]):not([type=file]):not([type=password]), textarea {text-transform:uppercase}
+input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline:2px solid #E9A348 !important; outline-offset:2px !important;
+  border-color:#B87829 !important; box-shadow:0 0 0 3px rgba(233,163,72,.22) !important;
+}
+
+</style>
+
+<style>@media(min-width:850px){html,body{overflow-y:hidden!important} .app{margin-top:22px!important}}</style>
+<style>@media (min-width:651px){.voltar,#btnMenu,#voltarMenu,.head>a.desktopOnly{display:none!important} header,.barra,.head{margin-top:0!important}}</style>
+
+</head>
+<body>
+  <header><button type="button" class="voltar" onclick="voltarMenu()">← Menu</button><h1>FORNECEDORES</h1></header>
+  <main><section class="painel"><form id="formFornecedor" autocomplete="off" onsubmit="return false;">
+    <div id="id" class="campo"><label for="idValor">ID</label><input id="idValor" type="text" readonly></div>
+    <div id="campoCnpj" class="campo"><label for="cnpj">CNPJ *</label><div class="campo-com-lupa">
+      <input id="cnpj" type="text" maxlength="18" autocomplete="off" placeholder="00.000.000/0000-00" aria-label="CNPJ numérico ou alfanumérico">
+      <button type="button" class="lupa" aria-label="Pesquisar fornecedores por CNPJ" title="Pesquisar CNPJ" onclick="abrirLista('cnpj')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></button>
+    </div></div>
+    <div id="campoAbertura" class="campo"><label for="abertura">DATA DE ABERTURA</label><input id="abertura" type="text" readonly></div>
+    <div id="campoSituacao" class="campo"><label for="situacao">SITUAÇÃO CADASTRAL</label>
+      <input id="situacaoApi" type="text" readonly>
+      <select id="situacao" style="display:none"><option value="ATIVA">ATIVA</option><option value="INATIVA">INATIVA</option></select>
+    </div>
+    <div id="campoDataSituacao" class="campo"><label for="dataSituacao">DATA DA SITUAÇÃO CADASTRAL</label><input id="dataSituacao" type="text" readonly></div>
+    <div id="campoSituacaoCompras" class="campo"><label for="situacaoCompras">SITUAÇÃO PARA COMPRAS</label><select id="situacaoCompras"><option value="ATIVO">ATIVO</option><option value="INATIVO">INATIVO</option></select></div>
+    <div id="campoRazao" class="campo"><label for="razaoSocial">NOME / RAZÃO SOCIAL *</label><div class="campo-com-lupa">
+      <input id="razaoSocial" class="maiusculo" type="text" maxlength="200" autocomplete="off" aria-autocomplete="list" aria-controls="sugestoesFornecedor" aria-expanded="false">
+      <button type="button" class="lupa" aria-label="Pesquisar por razão social" title="Pesquisar razão social" onclick="abrirLista('razao')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></button>
+      <div class="sugestoes" id="sugestoesFornecedor" role="listbox" aria-label="Sugestões de fornecedores"></div>
+    </div></div>
+    <div id="campoFantasia" class="campo"><label for="nomeFantasia">NOME FANTASIA</label><div class="campo-com-lupa">
+      <input id="nomeFantasia" class="maiusculo" type="text" maxlength="200" autocomplete="off" aria-autocomplete="list" aria-controls="sugestoesFantasia" aria-expanded="false">
+      <button type="button" class="lupa" aria-label="Pesquisar por nome fantasia" title="Pesquisar nome fantasia" onclick="abrirLista('fantasia')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></button>
+      <div class="sugestoes" id="sugestoesFantasia" role="listbox" aria-label="Sugestões de nomes fantasia"></div>
+    </div></div>
+    <div id="enderecoCab" class="secao">ENDEREÇO</div>
+    <div id="campoCep" class="campo"><label for="cep">CEP</label><input id="cep" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000"></div>
+    <div id="campoLogradouro" class="campo"><label for="logradouro">ENDEREÇO / LOGRADOURO</label><input id="logradouro" class="maiusculo" type="text" maxlength="200"></div>
+    <div id="campoNumero" class="campo"><label for="numero">NÚMERO</label><input id="numero" type="text" class="maiusculo" maxlength="30"></div>
+    <div id="campoComplemento" class="campo"><label for="complemento">COMPLEMENTO</label><input id="complemento" type="text" class="maiusculo" maxlength="120"></div>
+    <div id="campoBairro" class="campo"><label for="bairro">BAIRRO</label><input id="bairro" type="text" class="maiusculo" maxlength="120"></div>
+    <div id="campoCidade" class="campo"><label for="cidade">CIDADE</label><input id="cidade" type="text" class="maiusculo" maxlength="120"></div>
+    <div id="campoUf" class="campo"><label for="uf">ESTADO (UF)</label><input id="uf" type="text" class="maiusculo" maxlength="2"></div>
+    <div id="contatoCab" class="secao">CONTATO DO FORNECEDOR</div>
+    <div id="campoNomeContato" class="campo"><label for="nomeContato">NOME DO CONTATO</label><input id="nomeContato" class="maiusculo" type="text" maxlength="150"></div>
+    <div id="campoTelefone" class="campo"><label for="telefone">TELEFONE</label><input id="telefone" type="tel" maxlength="40"></div>
+    <div id="campoEmail" class="campo"><label for="email">E-MAIL</label><input id="email" type="email" maxlength="200"></div>
+    <div class="secao cabecalho-cadastral">DADOS CADASTRAIS</div>
+    <div class="acoes"><button id="btnExcluir" type="button" class="acao excluir" onclick="excluirFornecedorAtual()" hidden>EXCLUIR CADASTRO</button><button id="btnSalvar" type="button" class="acao salvar" disabled onclick="salvar(false)">SALVAR</button>
+      <button type="button" class="acao cancelar" onclick="cancelar()">CANCELAR</button></div>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </form></section></main>
+  <div id="modalFundo" class="modal-fundo" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <div class="modal"><h2 id="modalTitulo"></h2><div id="modalConteudo"></div><div class="modal-acoes" id="modalAcoes"></div></div>
+  </div>
+  <script>
+    const APP_URL = '/';
+    const parametrosRetorno = new URLSearchParams(window.location.search);
+    const retornoCompra = parametrosRetorno.get('retorno') === 'compras' ? {
+      rascunhoId: parametrosRetorno.get('rascunho') || '',
+      cnpj: parametrosRetorno.get('cnpj') || ''
+    } : null;
+    const el = id => document.getElementById(id);
+    const ZERO = '00000000000000';
+    const camposEditaveis = ['nomeFantasia','logradouro','numero','complemento','bairro','cep','cidade','uf','nomeContato','telefone','email'];
+    let verificando = false, verificandoCep = false, salvando = false, validadoCnpj = '';
+    let ultimaConsultaCep = 0;
+    let cache = [], cachePronto = false, ultimaConsulta = 0;
+    let dataSituacaoOriginal = '', estadoOriginal = '', campoSugestao = '', sugestoesAtuais = [], indiceSugestao = -1;
+
+    function normalizarCnpj(valor) {
+      const s = String(valor || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      return s.slice(0,12) + s.slice(12).replace(/\D/g, '').slice(0,2);
+    }
+    function formatarCnpj(valor) {
+      const s = normalizarCnpj(valor);
+      return s.slice(0,2) + (s.length>2?'.'+s.slice(2,5):'') +
+        (s.length>5?'.'+s.slice(5,8):'') + (s.length>8?'/'+s.slice(8,12):'') +
+        (s.length>12?'-'+s.slice(12,14):'');
+    }
+    function dvCnpj(s,pesos) {
+      const resto=pesos.reduce((t,p,i)=>t+(s.charCodeAt(i)-48)*p,0)%11;
+      return resto<2?0:11-resto;
+    }
+    function cnpjValido(s) {
+      if(s===ZERO)return true;
+      if(!/^[0-9A-Z]{12}[0-9]{2}$/.test(s)||/^(\d)\1{13}$/.test(s))return false;
+      const dv1=dvCnpj(s.slice(0,12),[5,4,3,2,9,8,7,6,5,4,3,2]);
+      const dv2=dvCnpj(s.slice(0,12)+dv1,[6,5,4,3,2,9,8,7,6,5,4,3,2]);
+      return s.slice(12)===String(dv1)+dv2;
+    }
+    function dataHoje(){return new Date().toLocaleDateString('pt-BR');}
+    function dataVisivel(valor){
+      const m=String(valor||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return m?m[3]+'/'+m[2]+'/'+m[1]:(valor||'');
+    }
+    function mascaraCep(valor){
+      const s=String(valor||'').replace(/\D/g,'').slice(0,8);
+      return s.slice(0,5)+(s.length>5?'-'+s.slice(5):'');
+    }
+    function mascaraTelefone(valor){
+      const n=String(valor||'').replace(/\D/g,'').slice(0,11);
+      if(n.length<3)return n;
+      return '('+n.slice(0,2)+') '+(n.length>10?n.slice(2,7):n.slice(2,6))+
+        (n.length>6?'-'+(n.length>10?n.slice(7):n.slice(6)):'');
+    }
+    function upper(id){
+      const c=el(id),a=c.selectionStart,b=c.selectionEnd;
+      c.value=c.value.toLocaleUpperCase('pt-BR');
+      try{c.setSelectionRange(a,b);}catch(e){}
+    }
+    function status(texto,tipo){
+      el('status').textContent=texto||'';
+      el('status').className='status'+(tipo?' '+tipo:'');
+    }
+    function voltarMenu(){window.top.location.href=APP_URL;}
+    function retornarParaCompra(fornecedor){
+      if(!retornoCompra)return false;
+      const f=fornecedor||{};
+      const dados={tipo:f.id?'CSM_FORNECEDOR_SALVO':'CSM_FORNECEDOR_CANCELADO',rascunhoId:retornoCompra.rascunhoId,fornecedorId:f.id||'',cnpj:normalizarCnpj(f.cnpj||retornoCompra.cnpj)};
+      if(window.parent&&window.parent!==window){window.parent.postMessage(dados,window.location.origin);return true;}
+      const destino=new URL(APP_URL,window.location.href);destino.searchParams.set('page','compras');destino.searchParams.set('aba','NOVA');if(dados.rascunhoId)destino.searchParams.set('rascunho',dados.rascunhoId);if(dados.fornecedorId)destino.searchParams.set('fornecedorId',dados.fornecedorId);if(dados.cnpj)destino.searchParams.set('cnpj',dados.cnpj);window.location.href=destino.toString();return true;
+    }
+    function prepararRetornoCompra(){
+      if(!retornoCompra||!retornoCompra.cnpj)return;
+      el('cnpj').value=formatarCnpj(retornoCompra.cnpj);aoDigitarCnpj();
+    }
+
+    function capturarEstado(){
+      const dados={id:el('idValor').value,cnpj:normalizarCnpj(el('cnpj').value),
+        situacaoCompras:el('situacaoCompras').value,
+        razaoSocial:el('razaoSocial').value.trim(),
+        situacao:el('situacao').style.display==='none'?'':el('situacao').value};
+      camposEditaveis.forEach(id=>dados[id]=id==='cep'
+        ? el(id).value.replace(/\D/g,'') : el(id).value.trim());
+      return JSON.stringify(dados);
+    }
+    function registrarEstado(){estadoOriginal=capturarEstado();}
+    function houveAlteracao(){return capturarEstado()!==estadoOriginal;}
+    function haPendenciasNaTroca(){
+      // A partir da V06, um rascunho apenas com razão social já pode ser salvo.
+      // Portanto, também precisa de confirmação antes de abrir outro cadastro.
+      return houveAlteracao();
+    }
+    function atualizarBotao(){
+      const c=normalizarCnpj(el('cnpj').value);
+      const temNome=!!el('razaoSocial').value.trim();
+      const validoSemDocumentoNovo= !el('idValor').value && c==='' && temNome;
+      const validoComDocumento= c.length===14 && cnpjValido(c) && validadoCnpj===c &&
+        temNome && (!el('idValor').value || houveAlteracao());
+      el('btnSalvar').disabled=verificando||verificandoCep||salvando||
+        !(validoSemDocumentoNovo||validoComDocumento);
+    }
+    function mostrarModo(modo){
+      // No formulário vazio, ambos os campos de identificação são pesquisáveis.
+      el('razaoSocial').readOnly=modo==='api';
+      el('situacaoApi').style.display=modo==='sem'?'none':'block';
+      el('situacao').style.display=modo==='sem'?'block':'none';
+      if(modo==='sem'&&!el('idValor').value)el('situacao').value='ATIVA';
+    }
+    function limparFormulario(){
+      el('formFornecedor').reset();
+      ['idValor','cnpj','abertura','dataSituacao','situacaoApi','razaoSocial',...camposEditaveis]
+        .forEach(id=>el(id).value='');
+      el('situacao').value='ATIVA';
+      el('situacaoCompras').value='ATIVO';el('btnExcluir').hidden=true;
+      el('cnpj').readOnly=false;
+      dataSituacaoOriginal='';validadoCnpj='';verificando=false;verificandoCep=false;salvando=false;ultimaConsulta++;ultimaConsultaCep++;
+      mostrarModo('rascunho');fecharSugestoes();status('');registrarEstado();
+      atualizarBotao();el('cnpj').focus();
+    }
+    function cancelar(){if(salvando)return;fecharModal();if(retornarParaCompra())return;limparFormulario();}
+    function preencherCampos(dados,editando){
+      ultimaConsultaCep++;verificandoCep=false;
+      if(editando){
+        el('idValor').value=dados.id||'';
+        el('cnpj').value=formatarCnpj(dados.cnpj||'');
+        el('cnpj').readOnly=true;
+      }
+      // Cadastro consultado: a API tem prioridade se trouxe um valor.
+      // Resposta vazia não apaga dados já digitados antes de informar o CNPJ.
+      ['abertura','dataSituacao','razaoSocial',...camposEditaveis].forEach(id=>{
+        const chave=id==='abertura'?'dataAbertura':id;
+        const retornado=dados[chave];
+        if(editando || id==='abertura' || id==='dataSituacao' || id==='razaoSocial' ||
+           (retornado!==null && retornado!==undefined && String(retornado).trim()!=='')) {
+          el(id).value=retornado == null ? '' : retornado;
+        }
+      });
+      el('cep').value=mascaraCep(el('cep').value);
+      el('telefone').value=mascaraTelefone(el('telefone').value);
+      el('abertura').value=dataVisivel(el('abertura').value);
+      el('dataSituacao').value=dataVisivel(el('dataSituacao').value);
+      const sem=normalizarCnpj(el('cnpj').value)===ZERO;
+      mostrarModo(sem?'sem':'api');
+      el('situacaoCompras').value=dados.situacaoCompras==='INATIVO'?'INATIVO':'ATIVO';
+      el('btnExcluir').hidden=!(editando&&sem&&!dados.excluidoLogico);
+      if(sem){
+        el('situacao').value=(dados.situacao==='INATIVO'?'INATIVA':
+          dados.situacao==='ATIVO'?'ATIVA':dados.situacao)||'ATIVA';
+      }else el('situacaoApi').value=dados.situacao||'';
+      validadoCnpj=normalizarCnpj(el('cnpj').value);
+      dataSituacaoOriginal=el('dataSituacao').value;
+      registrarEstado();atualizarBotao();
+    }
+    function aoDigitarCnpj(){
+      el('cnpj').value=formatarCnpj(el('cnpj').value);
+      const c=normalizarCnpj(el('cnpj').value);
+      const anterior=validadoCnpj;
+      if(c===anterior)return;
+      ultimaConsulta++;verificando=false;validadoCnpj='';
+      if(anterior){
+        // Ao trocar de CNPJ, limpar somente os dados oficiais.
+        // Endereço, contato e fantasia digitados permanecem até a nova consulta.
+        el('abertura').value='';el('dataSituacao').value='';el('situacaoApi').value='';
+      }
+      mostrarModo(c===ZERO?'sem':'rascunho');
+      if(c.length===14){
+        if(!cnpjValido(c))status('CNPJ inválido. Confira os dígitos verificadores.','erro');
+        else if(c===ZERO){
+          validadoCnpj=ZERO;el('abertura').value=dataHoje();el('dataSituacao').value=dataHoje();
+          el('situacao').value='ATIVA';
+          status('Fornecedor sem CNPJ. Preencha o nome / razão social.');
+          el('razaoSocial').focus();
+        }else consultarCnpj(c);
+      }else status('');
+      atualizarBotao();
+    }
+    function consultarCepDigitado(){
+      const cep=el('cep').value.replace(/\D/g,'');
+      // Cancela visualmente respostas de CEPs anteriores, mesmo se a requisição
+      // o fluxo anterior ainda estiver em andamento.
+      const token=++ultimaConsultaCep;
+      verificandoCep=false;
+      if(cep.length!==8){atualizarBotao();return;}
+      verificandoCep=true;atualizarBotao();status('Consultando CEP na BrasilAPI...');
+      localApi.withSuccessHandler(dados=>{
+        if(token!==ultimaConsultaCep || el('cep').value.replace(/\D/g,'')!==cep)return;
+        verificandoCep=false;
+        ['logradouro','bairro','cidade','uf'].forEach(id=>{
+          // Campo preenchido no retorno substitui o que havia na tela;
+          // campo vazio do serviço não apaga o conteúdo informado pelo usuário.
+          if(dados && String(dados[id]||'').trim())el(id).value=dados[id];
+        });
+        status('CEP consultado. Confira o endereço e faça os ajustes desejados.','sucesso');
+        atualizarBotao();
+        el('logradouro').focus();
+      }).withFailureHandler(erro=>{
+        if(token!==ultimaConsultaCep || el('cep').value.replace(/\D/g,'')!==cep)return;
+        verificandoCep=false;
+        status((erro && erro.message) || 'Falha ao consultar o CEP. Você pode preencher o endereço manualmente.','erro');
+        atualizarBotao();
+      }).consultarCepFornecedor(cep);
+    }
+
+    function consultarCnpj(c){
+      verificando=true;atualizarBotao();status('Consultando dados cadastrais do CNPJ...');
+      const token=++ultimaConsulta;
+      localApi.withSuccessHandler(res=>{
+        if(token!==ultimaConsulta)return;
+        verificando=false;
+        if(res.status==='EXISTENTE'){
+          // Se o usuário apenas informou um CNPJ já cadastrado no formulário
+          // em branco, abrir o registro diretamente, sem perguntar se deseja editar.
+          // Quando houver outros dados preenchidos, manter a proteção contra
+          // perda de alterações não salvas antes de trocar de fornecedor.
+          if(apenasCnpjConsultado()) abrirRegistroDireto(res.fornecedor);
+          else tentarAbrirRegistro(res.fornecedor);
+          atualizarBotao();return;
+        }
+        if(res.status==='CONSULTADO'){
+          preencherCampos(res.fornecedor,false);
+          status('CNPJ confirmado. Complete os dados, se necessário.','sucesso');
+          el('nomeFantasia').focus();
+        }
+        atualizarBotao();
+      }).withFailureHandler(e=>{
+        if(token!==ultimaConsulta)return;
+        verificando=false;validadoCnpj='';
+        status(e.message||'Não foi possível consultar o CNPJ.','erro');atualizarBotao();
+      }).consultarCnpjFornecedor(c);
+    }
+    function apenasCnpjConsultado(){
+      return !el('idValor').value &&
+        !el('razaoSocial').value.trim() &&
+        camposEditaveis.every(id=>!el(id).value.trim());
+    }
+    function abrirRegistroDireto(item){
+      ultimaConsulta++;verificando=false;
+      fecharModal();fecharSugestoes();
+      preencherCampos(item,true);
+      status('Consultando / editando fornecedor '+item.id+'.');
+      (normalizarCnpj(item.cnpj)===ZERO?el('razaoSocial'):el('nomeFantasia')).focus();
+    }
+    // V08: o texto digitado num formulário vazio pode servir só à pesquisa,
+    // tanto nas sugestões automáticas quanto na lista aberta pela lupa.
+    // Selecionar uma sugestão nesse contexto não representa abandonar um cadastro.
+    // Se houver qualquer outro dado preenchido (ou fornecedor aberto para edição),
+    // a proteção contra perda de alterações continua obrigatória.
+    function somentePesquisaInicial(campoPesquisa){
+      if(campoPesquisa!=='razaoSocial' && campoPesquisa!=='nomeFantasia')return false;
+      if(el('idValor').value || normalizarCnpj(el('cnpj').value) || validadoCnpj)return false;
+      if(el('abertura').value || el('dataSituacao').value)return false;
+      if(campoPesquisa!=='razaoSocial' && el('razaoSocial').value.trim())return false;
+      if(camposEditaveis.some(id=>id!==campoPesquisa && el(id).value.trim()))return false;
+      return true;
+    }
+    function tentarAbrirRegistro(item,campoPesquisa){
+      const pesquisaSemRascunho=somentePesquisaInicial(campoPesquisa);
+      fecharSugestoes();
+      if(pesquisaSemRascunho || !haPendenciasNaTroca()){
+        abrirRegistroDireto(item);return;
+      }
+      const podeSalvarAgora=!el('btnSalvar').disabled;
+      const botoes=[];
+      if(podeSalvarAgora)botoes.push({texto:'SALVAR',classe:'salvar',acao:()=>{
+        fecharModal();salvar(false,()=>abrirRegistroDireto(item));
+      }});
+      botoes.push(
+        {texto:'NÃO SALVAR',classe:'cancelar',acao:()=>abrirRegistroDireto(item)},
+        {texto:'CANCELAR',classe:'cancelar',acao:fecharModal}
+      );
+      abrirModal('ALTERAÇÕES NÃO SALVAS',botoes);
+      textoModal(podeSalvarAgora
+        ? 'Existem alterações não salvas neste cadastro. Deseja salvar antes de abrir outro fornecedor?'
+        : 'Existem alterações não salvas, mas o cadastro ainda não atende às condições para salvar. Deseja descartá-las para abrir outro fornecedor?');
+    }
+    function atualizarCache(){
+      localApi.withSuccessHandler(lista=>{cache=lista||[];cachePronto=true;})
+        .withFailureHandler(()=>{cachePronto=false;}).pesquisarFornecedores('razao');
+    }
+    function caixaSugestoes(campo){return el(campo==='razaoSocial'?'sugestoesFornecedor':'sugestoesFantasia');}
+    function fecharSugestoes(){
+      ['razaoSocial','nomeFantasia'].forEach(campo=>{
+        const caixa=caixaSugestoes(campo);
+        caixa.innerHTML='';caixa.classList.remove('aberta');
+        el(campo).setAttribute('aria-expanded','false');
+      });
+      campoSugestao='';sugestoesAtuais=[];indiceSugestao=-1;
+    }
+    function mostrarSugestoes(campo){
+      fecharSugestoes();
+      if(el(campo).readOnly)return;
+      const termo=el(campo).value.toLocaleUpperCase('pt-BR').trim();
+      if(!termo)return;
+      const caixa=caixaSugestoes(campo);campoSugestao=campo;
+      if(!cachePronto){
+        const aviso=document.createElement('div');aviso.className='vazio';
+        aviso.textContent='CARREGANDO FORNECEDORES...';caixa.appendChild(aviso);
+      }else{
+        sugestoesAtuais=cache.filter(f=>String(campo==='razaoSocial'?f.razaoSocial:f.nomeFantasia||'')
+          .toLocaleUpperCase('pt-BR').includes(termo));
+        sugestoesAtuais.sort((a,b)=>String(campo==='razaoSocial'?a.razaoSocial:a.nomeFantasia||'')
+          .localeCompare(String(campo==='razaoSocial'?b.razaoSocial:b.nomeFantasia||''),'pt-BR'));
+        if(!sugestoesAtuais.length){
+          const aviso=document.createElement('div');aviso.className='vazio';
+          aviso.textContent='NENHUM FORNECEDOR ENCONTRADO. CONTINUE PARA CADASTRAR.';
+          caixa.appendChild(aviso);
+        }
+        sugestoesAtuais.forEach(f=>{
+          const b=document.createElement('button');b.type='button';b.className='sugestao';
+          b.setAttribute('role','option');
+          const forte=document.createElement('strong');forte.textContent='('+f.id+') ';
+          b.appendChild(forte);
+          b.appendChild(document.createTextNode(campo==='razaoSocial'?f.razaoSocial:f.nomeFantasia));
+          b.onmousedown=ev=>ev.preventDefault();b.onclick=()=>tentarAbrirRegistro(f,campo);
+          caixa.appendChild(b);
+        });
+      }
+      caixa.classList.add('aberta');el(campo).setAttribute('aria-expanded','true');
+    }
+    function teclaSugestao(ev,campo){
+      const caixa=caixaSugestoes(campo);
+      if(campoSugestao!==campo||!caixa.classList.contains('aberta'))return;
+      if(ev.key==='Escape'){fecharSugestoes();return;}
+      if(!sugestoesAtuais.length)return;
+      if(ev.key==='ArrowDown'){
+        ev.preventDefault();indiceSugestao=(indiceSugestao+1)%sugestoesAtuais.length;
+      }else if(ev.key==='ArrowUp'){
+        ev.preventDefault();indiceSugestao=(indiceSugestao+sugestoesAtuais.length-1)%sugestoesAtuais.length;
+      }else if(ev.key==='Enter'&&indiceSugestao>=0){
+        ev.preventDefault();tentarAbrirRegistro(sugestoesAtuais[indiceSugestao],campo);return;
+      }else return;
+      caixa.querySelectorAll('.sugestao').forEach((b,i)=>b.classList.toggle('ativa',i===indiceSugestao));
+    }
+    function abrirModal(titulo,botoes){
+      el('modalTitulo').textContent=titulo;el('modalConteudo').innerHTML='';el('modalAcoes').innerHTML='';
+      botoes.forEach(cfg=>{
+        const b=document.createElement('button');b.type='button';
+        b.className='acao '+(cfg.classe||'cancelar');b.textContent=cfg.texto;
+        b.onclick=cfg.acao;el('modalAcoes').appendChild(b);
+      });
+      el('modalFundo').classList.add('aberto');
+    }
+    function textoModal(texto){const p=document.createElement('p');p.textContent=texto;el('modalConteudo').appendChild(p);}
+    function fecharModal(){
+      el('modalFundo').classList.remove('aberto');el('modalConteudo').innerHTML='';
+      el('modalAcoes').innerHTML='';
+    }
+    function abrirLista(campo){
+      fecharSugestoes();status('Carregando fornecedores...');
+      localApi.withSuccessHandler(lista=>{
+        status('');cache=lista||[];cachePronto=true;
+        const titulo={cnpj:'CNPJ',razao:'RAZÃO SOCIAL',fantasia:'NOME FANTASIA'}[campo];
+        abrirModal('PESQUISAR POR '+titulo,[{texto:'FECHAR',classe:'cancelar',acao:fecharModal}]);
+        textoModal('Selecione um fornecedor cadastrado para consultar ou editar.');
+        const filtro=document.createElement('input');filtro.type='text';
+        filtro.className='filtro-modal maiusculo';filtro.placeholder='FILTRAR POR '+titulo;
+        el('modalConteudo').appendChild(filtro);
+        const listaUi=document.createElement('div');listaUi.className='lista-registros';
+        el('modalConteudo').appendChild(listaUi);
+        function desenhar(termo){
+          listaUi.innerHTML='';
+          const t=termo.toLocaleUpperCase('pt-BR').trim();
+          const procura=campo==='cnpj'?normalizarCnpj(t):t;
+          const filtrados=lista.filter(f=>{
+            const texto=campo==='cnpj'?f.cnpj:
+              campo==='fantasia'?(f.nomeFantasia||f.razaoSocial):f.razaoSocial;
+            return texto.toLocaleUpperCase('pt-BR').includes(procura)||
+              (campo==='cnpj'&&f.cnpj===ZERO&&f.razaoSocial.toLocaleUpperCase('pt-BR').includes(t))||
+              (campo!=='cnpj'&&f.id.includes(t));
+          });
+          if(!filtrados.length){
+            const vazio=document.createElement('div');vazio.className='vazio';
+            vazio.textContent='Nenhum fornecedor encontrado.';listaUi.appendChild(vazio);return;
+          }
+          filtrados.forEach(f=>{
+            const b=document.createElement('button');b.className='item-registro';b.type='button';
+            b.textContent=campo==='cnpj'
+              ?formatarCnpj(f.cnpj)+' — '+f.razaoSocial
+              :campo==='fantasia'?(f.nomeFantasia||'SEM NOME FANTASIA')+' — '+f.razaoSocial
+                :'('+f.id+') '+f.razaoSocial;
+            // Identifica a origem também na pesquisa por lupa. Na V07 ela não era
+            // informada e o texto usado apenas para buscar gerava falso alerta.
+            const origem = campo==='razao' ? 'razaoSocial' :
+              campo==='fantasia' ? 'nomeFantasia' : 'cnpj';
+            b.onclick=()=>tentarAbrirRegistro(f,origem);listaUi.appendChild(b);
+          });
+        }
+        filtro.addEventListener('input',()=>{upperInput(filtro);desenhar(filtro.value);});
+        desenhar('');setTimeout(()=>filtro.focus(),30);
+      }).withFailureHandler(e=>status(e.message||'Não foi possível carregar os fornecedores.','erro'))
+        .pesquisarFornecedores(campo);
+    }
+    function upperInput(input){
+      const a=input.selectionStart,b=input.selectionEnd;input.value=input.value.toLocaleUpperCase('pt-BR');
+      try{input.setSelectionRange(a,b);}catch(e){}
+    }
+    function excluirFornecedorAtual(){
+      const id=el('idValor').value;
+      if(!id||normalizarCnpj(el('cnpj').value)!==ZERO)return;
+      abrirModal('EXCLUIR CADASTRO SEM CNPJ',[
+        {texto:'SIM, RETIRAR CADASTRO',classe:'excluir',acao:()=>{
+          fecharModal();salvando=true;atualizarBotao();status('Registrando exclusão lógica...');
+          localApi.withSuccessHandler(res=>{
+            salvando=false;limparFormulario();atualizarCache();status(res.mensagem,'sucesso');
+          }).withFailureHandler(err=>{
+            salvando=false;atualizarBotao();status(err.message||'Não foi possível excluir o cadastro.','erro');
+          }).excluirFornecedorSemCnpj(id);
+        }},
+        {texto:'CANCELAR',classe:'cancelar',acao:fecharModal}
+      ]);
+      textoModal('Deseja retirar o fornecedor '+id+' das listas de cadastros? O cadastro não será apagado da planilha, o ID não será reutilizado e compras anteriores continuarão vinculadas a ele.');
+      if(houveAlteracao())textoModal('Atenção: alterações não salvas neste formulário não serão gravadas.');
+    }
+
+    function confirmarCadastroSemCnpj(aposSalvar){
+      abrirModal('FORNECEDOR SEM CNPJ',[
+        {texto:'SIM',classe:'salvar',acao:()=>{
+          fecharModal();
+          el('cnpj').value=formatarCnpj(ZERO);
+          validadoCnpj=ZERO;
+          mostrarModo('sem');
+          el('situacao').value='ATIVA';
+          el('abertura').value=dataHoje();
+          el('dataSituacao').value=dataHoje();
+          atualizarBotao();
+          salvar(false,aposSalvar);
+        }},
+        {texto:'NÃO',classe:'cancelar',acao:()=>{
+          fecharModal();el('cnpj').focus();
+        }}
+      ]);
+      textoModal('Deseja gravar este fornecedor sem CNPJ?');
+    }
+
+    function salvar(forcarDuplicidade,aposSalvar){
+      if(salvando||verificando)return;
+      const c=normalizarCnpj(el('cnpj').value);
+      // O novo fornecedor pode ser informado por nome, com CNPJ inicialmente vazio.
+      // A geração dos 14 zeros só é feita após confirmação expressa do usuário.
+      if(c==='' && !el('idValor').value){
+        if(!el('razaoSocial').value.trim()){
+          status('Informe o NOME / RAZÃO SOCIAL antes de salvar.','erro');return;
+        }
+        confirmarCadastroSemCnpj(aposSalvar);return;
+      }
+      if(c!==validadoCnpj||!cnpjValido(c)){
+        status('Consulte e valide o CNPJ antes de salvar.','erro');return;
+      }
+      if(!el('razaoSocial').value.trim()){
+        status('Informe o NOME / RAZÃO SOCIAL antes de salvar.','erro');return;
+      }
+      fecharSugestoes();
+      const dados={id:el('idValor').value,cnpj:c,
+        razaoSocial:el('razaoSocial').value,situacao:el('situacao').value,
+        situacaoCompras:el('situacaoCompras').value};
+      camposEditaveis.forEach(id=>dados[id]=el(id).value);
+      salvando=true;atualizarBotao();status('Salvando fornecedor...');
+      localApi.withSuccessHandler(res=>{
+        salvando=false;
+        if(res.status==='POSSIVEL_DUPLICIDADE'){
+          avisoDuplicidade(res,aposSalvar);atualizarBotao();return;
+        }
+        const mensagem=res.mensagem||'Operação concluída.';
+        if(typeof aposSalvar==='function'){
+          atualizarCache();aposSalvar();return;
+        }
+        if(retornarParaCompra(res.fornecedor||dados))return;
+        limparFormulario();status(mensagem+' ID: '+res.id+'.','sucesso');atualizarCache();
+      }).withFailureHandler(e=>{
+        salvando=false;atualizarBotao();
+        status(e.message||'Erro ao salvar o fornecedor.','erro');
+      }).salvarFornecedor(dados,Boolean(forcarDuplicidade));
+    }
+    function avisoDuplicidade(res,aposSalvar){
+      const f=res.fornecedor;
+      abrirModal('POSSÍVEL DUPLICIDADE',[
+        {texto:'SIM',classe:'salvar',acao:()=>abrirRegistroDireto(f)},
+        {texto:'NÃO',classe:'cancelar',acao:()=>{
+          fecharModal();salvar(true,aposSalvar);
+        }}
+      ]);
+      textoModal((res.correspondenciaExata?'Já existe um fornecedor com este nome. '
+        :'Encontramos um nome semelhante. ')+'Deseja abrir o cadastro existente?');
+      textoModal('('+f.id+') '+f.razaoSocial);
+    }
+    document.addEventListener('DOMContentLoaded',()=>{
+      limparFormulario();atualizarCache();
+      el('cnpj').addEventListener('input',aoDigitarCnpj);
+      ['razaoSocial','nomeFantasia'].forEach(campo=>{
+        el(campo).addEventListener('input',()=>{
+          upper(campo);mostrarSugestoes(campo);atualizarBotao();
+        });
+        el(campo).addEventListener('keydown',ev=>teclaSugestao(ev,campo));
+        el(campo).addEventListener('blur',()=>setTimeout(()=>{
+          if(campoSugestao===campo)fecharSugestoes();
+        },160));
+      });
+      document.addEventListener('click',e=>{
+        if(!el('campoRazao').contains(e.target)&&!el('campoFantasia').contains(e.target))
+          fecharSugestoes();
+      });
+      el('situacaoCompras').addEventListener('change',atualizarBotao);
+      el('situacao').addEventListener('change',()=>{
+        const atual=el('situacao').value;
+        const original=el('idValor').value
+          ?JSON.parse(estadoOriginal).situacao:'ATIVA';
+        if(!el('idValor').value||atual!==original)el('dataSituacao').value=dataHoje();
+        // Se voltou à situação original, mostrar a data armazenada, sem alterá-la.
+        if(el('idValor').value&&atual===original&&dataSituacaoOriginal)
+          el('dataSituacao').value=dataSituacaoOriginal;
+        atualizarBotao();
+      });
+      ['logradouro','numero','complemento','bairro','cidade','uf','nomeContato'].forEach(id=>
+        el(id).addEventListener('input',()=>upper(id)));
+      el('cep').addEventListener('input',()=>{
+        el('cep').value=mascaraCep(el('cep').value);
+        consultarCepDigitado();
+      });
+      el('telefone').addEventListener('blur',()=>{
+        const n=el('telefone').value.replace(/\D/g,'');
+        if(n.length===10||n.length===11)el('telefone').value=mascaraTelefone(n);
+        atualizarBotao();
+      });
+      el('formFornecedor').addEventListener('input',atualizarBotao);
+      el('formFornecedor').addEventListener('change',atualizarBotao);
+      prepararRetornoCompra();
+    });
+  </script>
+<script>
+/* Normalização visual e efetiva de texto livre. Campos estruturados (datas, valores, e-mails, XML) preservam seu formato. */
+document.addEventListener('input',function(ev){
+ const e=ev.target;if(!e || !e.matches || !e.matches('textarea,input[type=text],input:not([type]) ,input[type=search]'))return;
+ if(e.readOnly||e.disabled||e.dataset.csmCase==='original'||e.inputMode==='decimal'||e.inputMode==='numeric'||e.type==='email')return;
+ const t=e.value,novo=t.toLocaleUpperCase('pt-BR');if(t===novo)return;
+ const a=e.selectionStart,b=e.selectionEnd;e.value=novo;
+ try{if(a!==null&&b!==null)e.setSelectionRange(a,b)}catch(_){}
+},true);
+/* Um módulo incluído na área à direita notifica altura, sem comandar a navegação do menu. */
+
+(function(){
+ let ultima=0;
+ const raiz=()=>document.querySelector('main')||document.querySelector('.app')||document.body;
+ function altura(){const area=raiz(),r=area.getBoundingClientRect(),n=Math.ceil(Math.max(100,r.bottom));if(n!==ultima){ultima=n;window.parent.postMessage({tipo:'CSM_ALTURA_MODULO',altura:n},'*')}}
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(altura).observe(raiz());
+ window.addEventListener('load',altura);new MutationObserver(altura).observe(document.body,{childList:true,subtree:true,attributes:false});altura();})();
+
+</script>
+</body>
+</html>

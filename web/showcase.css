@@ -1,0 +1,41 @@
+/* Casa São Miguel | Simulação do Sistema | somente leitura */
+.csm-showcase .csm-demo-banner {
+  position: sticky;
+  top: 0;
+  z-index: 10000;
+  margin: 0;
+  padding: 7px 12px;
+  border-bottom: 1px solid #AC772D;
+  background: linear-gradient(135deg, #E9A348 0%, #FFCC66 100%);
+  color: #071D2C;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .35px;
+  text-align: center;
+}
+
+.csm-showcase .csm-demo-disabled,
+.csm-showcase button:disabled,
+.csm-showcase input:disabled,
+.csm-showcase select:disabled,
+.csm-showcase textarea:disabled,
+.csm-showcase input[readonly] {
+  cursor: not-allowed !important;
+  opacity: .58 !important;
+}
+
+.csm-showcase .component-drag-handle {
+  cursor: not-allowed !important;
+  opacity: .48 !important;
+}
+
+.csm-showcase .csm-demo-note {
+  margin: 8px auto;
+  padding: 8px 12px;
+  border: 1px solid #D6BE9B;
+  border-radius: 8px;
+  background: #FFF8EA;
+  color: #284150;
+  font-size: 11px;
+  text-align: center;
+}

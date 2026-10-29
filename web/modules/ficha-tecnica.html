@@ -1,0 +1,357 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR"><head><base target="_top"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ficha Técnica | CASA SÃO MIGUEL</title>
+<style>
+:root{--navy:#071D2C;--gold:#E9A348;--goldlight:#FFCC66;--champagne:#F3CD99;--cream:#FDF7EC;--muted:#284150;--line:#D6BE9B;--bad:#A02B2B;--ok:#126342}
+*{box-sizing:border-box}body{margin:0;font:14px/1.48 Arial,Helvetica,sans-serif;background:var(--cream);color:var(--navy)}button,input,select,textarea{font:inherit;color:var(--navy)}button{cursor:pointer}button:disabled{opacity:.5;cursor:default}input,select,textarea{border:1px solid #B8A78A;border-radius:8px;background:#fff;min-height:38px;padding:9px;width:100%}input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}label{display:block;font-size:11px;font-weight:800;letter-spacing:.35px;margin-bottom:5px;color:var(--navy)}.app{max-width:900px;width:calc(100% - 28px);margin:18px auto 40px}.head{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--navy);color:var(--cream);padding:15px 18px;border-bottom:3px solid var(--gold);border-radius:12px}.head h1{margin:0;color:var(--goldlight);font-size:22px;text-align:center}.head small{color:var(--cream)}.head a{color:var(--cream);text-decoration:none;font-weight:bold}.head .gap{width:110px}.panel{background:#fff;border:1px solid var(--line);border-radius:13px;margin-top:14px;padding:18px;box-shadow:0 5px 16px #071d2c0a}.toolbar,.flex{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.toolbar{justify-content:space-between}.btn{background:#fff;border:1px solid var(--navy);border-radius:8px;padding:10px 13px;font-weight:700;width:auto;min-height:39px}.btn.primary{background:var(--navy);color:var(--cream);border-color:var(--navy)}.btn.gold{background:var(--gold);color:var(--navy);border-color:#AC772D}.btn.soft{border-color:var(--line);background:var(--cream)}.btn.danger{border-color:#B77171;color:#8A2222}.sub{font-size:12px;color:var(--muted)}.hint{background:#FFF2DA;border:1px solid var(--champagne);border-radius:8px;padding:10px;margin:8px 0}.error{background:#FFF0EF;border:1px solid #D79A9A;color:#8A1A1A;padding:10px;border-radius:8px;white-space:pre-wrap}.success{color:var(--ok)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.three{grid-template-columns:repeat(3,minmax(0,1fr))}.entry{margin:0 0 12px}.tabs{display:flex;overflow-x:auto;gap:8px;margin:12px 0;scrollbar-width:thin}.tabs .btn{white-space:nowrap;flex:none}.tabs .chosen{background:var(--gold);color:var(--navy)}.list{display:grid;gap:6px}.list button{text-align:left;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 12px}.list button:hover{background:#FFF1D9}.status{font-size:12px;color:var(--muted);min-height:18px}h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:12px 0}.components{overflow-x:auto}.components table{border-collapse:collapse;min-width:700px;width:100%;font-size:12px}th,td{border-bottom:1px solid #EADFCF;padding:8px;text-align:left;vertical-align:middle}th{background:#FFF3DD}td input,td select{min-width:70px;padding:7px;min-height:34px}td .mini{width:auto;font-size:11px;padding:7px}.chip{font-size:11px;background:var(--cream);padding:4px 7px;border-radius:6px;border:1px solid var(--line)}.right{text-align:right}.money{font-size:22px;font-weight:800}.cardline{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #EFE5D7}.summary{display:grid;gap:10px}#variations{max-width:100%;overflow-x:auto;padding-bottom:2px}.sm-fields{display:grid;min-width:570px;grid-template-columns:minmax(120px,1fr) 92px 72px 116px 104px 34px;gap:7px;align-items:end}.sm-fields>div{min-width:0}.variation-remove{display:flex;align-items:flex-end;justify-content:flex-end;height:100%}.variation-remove-button{display:grid;place-items:center;width:34px;min-width:34px;height:38px;min-height:38px;padding:0!important;font-size:17px;line-height:1}.variation-confirm-actions{margin-top:14px}.fold{display:none}.fold.open{display:block}.alert{color:var(--bad);font-size:12px}.flexend{justify-content:flex-end}.hide{display:none!important} .printOnly{display:none}dialog{border:0;border-radius:12px;padding:20px;box-shadow:0 12px 60px #0004;width:min(550px,calc(100vw - 24px));max-height:90vh;overflow:auto}dialog::backdrop{background:#071d2c9c}dialog h2{margin:0 0 10px} .mobileOnly{display:none}
+@media print{body{background:#fff}.app{display:none!important}.printOnly{display:block!important;padding:12mm;color:#071D2C;font-size:12px}.printOnly h2{margin-top:20px;break-after:avoid}.printOnly .cardline{break-inside:avoid}}
+
+/* Ordenação visual da composição: o arraste acontece exclusivamente pelo botão de três pontos. */
+.component-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;white-space:nowrap}
+.component-drag-handle{display:grid;place-items:center;width:30px;min-width:30px;height:34px;min-height:34px;padding:0!important;border:1px solid var(--line);border-radius:8px;background:var(--cream);color:var(--navy);font-size:20px;line-height:1;letter-spacing:1px;cursor:grab;touch-action:none}
+.component-drag-handle:hover,.component-drag-handle:focus-visible{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.component-drag-handle:active{cursor:grabbing}
+#compTable tbody tr.component-dragging{opacity:.45}
+#compTable tbody tr.component-drop-before>td{box-shadow:inset 0 3px 0 var(--gold)}
+#compTable tbody tr.component-drop-after>td{box-shadow:inset 0 -3px 0 var(--gold)}
+
+/* CABEÇALHO ÚNICO DESKTOP — mesmo padrão de título da FICHA TÉCNICA */
+@media(min-width:850px){
+ header,.barra,.head{min-height:80px!important;background:#071D2C!important;color:#FDF7EC!important;
+  border-radius:12px!important;border-bottom:3px solid #E9A348!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;position:relative!important}
+ header h1,.barra h1,.head h1{color:#FFCC66!important;font-size:22px!important;text-align:center!important;margin:0!important}
+ header .voltar,.barra .voltar,.barra #voltarMenu,.head a.desktopOnly{position:absolute!important;left:16px!important;top:50%!important;transform:translateY(-50%)!important;
+   color:#FDF7EC!important;background:transparent!important;text-decoration:none!important}
+}
+/* CASA SÃO MIGUEL | V13-11.8 TESTE | foco e maiúsculas em todos os módulos */
+input:not([type=number]):not([type=date]):not([type=email]):not([type=url]):not([type=tel]):not([type=file]):not([type=password]), textarea {text-transform:uppercase}
+input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline:2px solid #E9A348 !important; outline-offset:2px !important;
+  border-color:#B87829 !important; box-shadow:0 0 0 3px rgba(233,163,72,.22) !important;
+}
+
+
+/* 005-010 ajustes do cadastro: alternância de painéis e sugestões nativas */
+.entry{position:relative}.suggestions{position:absolute;top:calc(100% + 3px);left:0;right:0;max-height:158px;overflow:auto;border:1px solid #D6BE9B;background:white;border-radius:8px;box-shadow:0 7px 15px #071d2c17;z-index:4;margin-top:0}.list{height:220px;min-height:44px;max-height:220px;overflow-y:auto;align-content:start}.list>p{margin:0;padding:10px 0}
+.suggestions button{display:block;width:100%;background:white;border:0;text-align:left;padding:10px;color:#071D2C;cursor:pointer}
+.suggestions button:hover,.suggestions button:focus{background:#FFF2D8}
+.simGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin:12px 0}
+.simBox{padding:12px;border:1px solid #D6BE9B;border-radius:9px;background:#FDF7EC}
+.simBox input{margin-top:5px}.simError{margin:9px 0;color:#A02B2B;font-weight:700}.simTable{width:100%;border-collapse:collapse}
+.simTable th{text-align:left;background:#FFF3DD}.simTable .qty{text-align:right;white-space:nowrap;font-weight:700}
+/* Alterações 015–022: painel horizontal único, sem rolagem vertical aninhada */
+.csmResults{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.csmResults>div{min-width:0;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--cream)}
+.csmResults .money{font-size:clamp(12px,1.45vw,19px);overflow-wrap:anywhere}
+.csmResults .sub{font-size:10px;font-weight:700}
+.csmResults .amountAndRate{display:flex;gap:5px;align-items:baseline;flex-wrap:wrap}
+.ft-cost-missing{border:1px solid var(--line);border-radius:8px;padding:10px;margin:8px 0;background:var(--cream)}.ft-cost-missing h3{margin:0 0 8px;font-size:13px}
+#costTabs .btn{background:var(--cream);border-color:var(--line);color:var(--navy)}
+#costTabs .btn.chosen:not(.primario):not(.primary):not(.gold):not(.perigo):not(.danger){background:linear-gradient(135deg,var(--gold) 0%,var(--goldlight) 100%)!important;border-color:var(--gold)!important;color:var(--navy)!important;box-shadow:0 3px 8px rgba(7,29,44,.16);font-weight:800}
+#costTabs .btn:not(.chosen):hover,#costTabs .btn:not(.chosen):focus-visible{background:#FFF2D8;border-color:var(--champagne)}
+@media(min-width:651px){.ft-section-break{border-top:1px solid var(--line);padding-top:14px;margin-top:18px}.ft-results-panel{border-top:1px solid var(--line)!important;border-radius:0!important;padding-top:18px!important;margin-top:18px!important}.component-actions,.ft-editor-actions,.ft-results-actions{justify-content:flex-end!important}.ft-editor-actions{border-top:1px solid var(--line);padding-top:14px;margin-top:18px}.ft-results-actions{border-top:1px solid var(--line);padding-top:14px;margin-top:18px}}
+dialog[open]{position:fixed;top:50%;left:50%;right:auto;bottom:auto;margin:0;transform:translate(-50%,-50%);max-height:calc(100vh - 32px);overflow:auto;z-index:1000}
+@media(min-width:850px){.app{margin-top:22px!important}}
+
+.ft-category-heading{margin-top:18px;font-size:11px;font-weight:800;letter-spacing:.35px;color:var(--navy)}
+.ft-category-menu{display:grid;gap:8px;height:auto;min-height:44px;max-height:none;overflow:visible;align-content:start}
+.ft-category-group{position:relative}
+.ft-category-button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:43px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--cream);color:var(--navy);text-align:left;font-weight:700}
+.ft-category-button:hover,.ft-category-button:focus-visible,.ft-category-group.open>.ft-category-button,.ft-category-group:focus-within>.ft-category-button{background:var(--navy);color:var(--goldlight);border-color:var(--gold)}
+.ft-category-chevron{font-size:16px;line-height:1;transition:transform .15s ease}
+.ft-category-group.open>.ft-category-button .ft-category-chevron,.ft-category-group:hover>.ft-category-button .ft-category-chevron,.ft-category-group:focus-within>.ft-category-button .ft-category-chevron{transform:rotate(180deg)}
+.ft-category-list{display:none;gap:4px;margin:4px 0 0 8px;padding-left:8px;border-left:1px solid rgba(233,163,72,.55)}
+.ft-category-group.has-children:hover>.ft-category-list,.ft-category-group.has-children:focus-within>.ft-category-list,.ft-category-group.open>.ft-category-list{display:grid}
+.ft-category-item{display:flex;flex-direction:column;align-items:flex-start;width:100%;min-height:35px;padding:8px 12px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--navy);text-align:left}
+.ft-category-item:hover,.ft-category-item:focus-visible{background:#FFF2D8;border-color:var(--champagne)}
+.ft-category-item strong{font-size:12px}.ft-category-item .sub{font-size:11px}
+.ft-category-empty{margin:0;padding:10px 0}
+</style>
+<style>@media (min-width:651px){.voltar,#btnMenu,#voltarMenu,.head>a.desktopOnly{display:none!important} header,.barra,.head{margin-top:0!important}html,body{overflow-y:hidden!important}}</style>
+
+</head><body>
+<div class="app">
+<header class="head"><a class="desktopOnly" href="/">← MENU</a><div><h1>FICHA TÉCNICA</h1></div><div class="desktopOnly gap"></div></header>
+<div class="desktopOnly">
+  <section class="panel noPrint" id="ftToolbar"><div class="toolbar"><h2>FICHAS TÉCNICAS</h2><div class="flex"><button class="btn gold" onclick="newFT()">+ NOVA FT</button><button class="btn soft" onclick="refreshConsultation()">ATUALIZAR LISTA</button></div></div></section>
+  <div id="ftGlobalNotice" class="sub" role="status" aria-live="polite" style="margin-top:7px"></div>
+  <section class="panel noPrint" id="listPanel">
+    <div class="grid"><div><label>PESQUISAR POR NOME OU CÓDIGO</label><input id="search" placeholder="Pesquisar ficha..." oninput="renderList()"></div><div><label>FILTRO DE SITUAÇÃO</label><select id="filter" onchange="renderList()"><option value="">TODAS</option><option>ATIVA</option><option>RASCUNHO</option><option>INATIVA</option></select></div></div><div class="grid two" style="margin-top:10px"><div class="ft-category-filter-internal" hidden><label>CATEGORIA</label><select id="filterCat" onchange="renderList()"><option value="">TODAS</option></select></div><div><label>COMPONENTE UTILIZADO</label><select id="filterComp" onchange="renderList()"><option value="">TODOS</option></select></div><div><label>ORDENAÇÃO</label><select id="sortList" onchange="renderList()"><option value="NOME">NOME</option><option value="DATA">DATA DA ALTERAÇÃO</option></select></div></div><div class="ft-category-heading">CATEGORIAS DE FICHAS TÉCNICAS</div><div class="ft-category-menu" id="list" style="margin-top:12px"></div></section>
+  <section class="panel hide" id="editor"><div class="toolbar"><h2 id="formTitle">CADASTRAR FICHA TÉCNICA</h2><div class="flex"><span class="chip" id="statusTag">NOVA</span><span class="chip" id="codeTag">SEM CÓDIGO</span></div></div>
+    <div class="grid"><div class="entry"><label>NOME DA FICHA TÉCNICA *</label><input id="ftName" placeholder="EX.: MASSA BASE DE TORTA" autocomplete="off" oninput="markDirty();suggestNames()"><div id="nameSuggestions" class="suggestions hide" aria-live="polite"></div></div><div class="entry"><label>CATEGORIA (OPCIONAL)</label><div class="flex" style="flex-wrap:nowrap"><input style="min-width:0;flex:1;width:100%" id="ftCat" list="categories" autocomplete="off" placeholder="PESQUISAR CATEGORIA" onfocus="suggestCategories()" oninput="markDirty();suggestCategories()"><datalist id="categories"></datalist><button class="btn soft" onclick="createCategory()" title="Cadastrar categoria">+</button><button class="btn soft" onclick="renameCategory()" title="Renomear categoria">✎</button></div></div></div>
+    <div class="grid three"><div class="entry"><label>RENDIMENTO PRINCIPAL — QUANTIDADE *</label><input id="baseQty" placeholder="Ex.: 1100" inputmode="decimal" oninput="markDirty()"></div><div class="entry"><label>UNIDADE DE RENDIMENTO *</label><select id="baseUnit" onchange="markDirty()"><option value="G">G</option><option value="KG">KG</option><option value="ML">ML</option><option value="L">L</option><option value="UN">UN</option></select></div><div class="entry"><label>R$ PDV (ADM)</label><input id="basePDV" inputmode="decimal" placeholder="OPCIONAL" onblur="formatPDV(this)" oninput="markDirty()"></div></div>
+    <div class="toolbar"><h3>RENDIMENTOS ADICIONAIS (OPCIONAIS)</h3><button class="btn soft" onclick="addVariation()">+ ADICIONAR</button></div><div id="variations"></div>
+    <div class="toolbar ft-section-break"><h3>COMPOSIÇÃO DA RECEITA</h3><div class="flex"><button class="btn soft" onclick="addComponent('FT')">+ OUTRA FT</button><button class="btn soft" onclick="copyVariation()">COPIAR VARIAÇÃO</button></div></div>
+    <p class="sub">Quantidades líquidas para a receita completa. Células vazias não entram no custo. Para rendimento alternativo com mesma composição, escolha DIVIDIR RECEITA; para ingredientes próprios do tamanho, COMPOSIÇÃO PRÓPRIA.</p>
+    <div class="components"><table id="compTable"></table></div>
+    <div class="flex component-actions"><button id="addInsumoButton" class="btn soft" onclick="addComponent('INSUMO',true)">+ INSUMO</button><button class="btn soft" onclick="openQuickInsumo()">+ CADASTRAR INSUMO</button></div>
+    <div class="toolbar ft-section-break" style="margin-top:18px"><h3>INFORMAÇÕES COMPLEMENTARES</h3><div class="flex"><button class="btn soft" onclick="fold('prep')">▤ MODO DE PREPARO</button><button class="btn soft" onclick="fold('obs')">▤ OBSERVAÇÕES</button></div></div>
+    <div class="fold" id="prep"><label>MODO DE PREPARO</label><textarea id="ftPrep" rows="6" oninput="markDirty()"></textarea></div><div class="fold" id="obs"><label>OBSERVAÇÕES</label><textarea id="ftObs" rows="4" oninput="markDirty()"></textarea></div>
+    <div class="status" id="message"></div>
+  </section>
+  <section class="panel hide ft-results-panel" id="resultsPanel"><h2 id="resultsTitle">CONSULTA DE CUSTOS ESTIMADOS</h2><div id="simulateArea" class="hide"></div><div id="costArea"><div class="tabs" id="costTabs"></div><div id="costBody"><p class="sub">Selecione ou salve uma FT para consultar custos.</p></div></div><div class="flex flexend ft-editor-actions noPrint" id="ftEditorActions"><button class="btn soft" onclick="duplicateFT()">DUPLICAR FT</button><button class="btn soft" onclick="saveFT(false)">SALVAR</button><button class="btn primary" onclick="saveFT(true)">SALVAR E ATIVAR</button><button class="btn soft" onclick="simulateFT()">SIMULAR</button><button class="btn soft" onclick="printFT()">IMPRIMIR</button></div><div class="flex flexend ft-results-actions noPrint" id="costActions"><button class="btn soft" onclick="showHistory()">HISTÓRICO / VERSÕES</button><button class="btn soft" onclick="changeStatus()">ATIVAR / INATIVAR</button><button class="btn danger" onclick="deleteDraft()">EXCLUIR RASCUNHO</button></div></section>
+</div>
+</div>
+<section id="printSheet" class="printOnly"></section>
+<dialog id="modal"><h2 id="modalTitle">INFORMAÇÃO</h2><div id="modalBody"></div><div class="flex flexend" style="margin-top:16px"><button class="btn soft" onclick="closeCSMModal()">FECHAR</button></div></dialog>
+<script>
+// O cliente conversa com a API local; validações e gravações ficam no servidor.
+const $=id=>document.getElementById(id),xss=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let lib={fichas:[],insumos:[],categorias:[]},state={id:'',versao:0,status:'NOVA',nome:'',categoria:'',base:{qtd:'',unidade:'G',pdv:''},variacoes:[],componentes:[],preparo:'',observacoes:''};
+let dirty=false,tab='BASE',quickInsumoSaving=false,originalSnapshot='',csmModalResolver=null,csmModalCancelHandler=null,costPromptOpen=false;
+function api(name,...args){return localApi.call(name,...args);}
+function msg(t,err){$('message').textContent=t;$('message').className='status'+(err?' alert':' success');}
+function popup(title,html){$('modalTitle').textContent=title;$('modalBody').innerHTML=html;$('modal').showModal();}
+function resolveCSMModal(value){const resolver=csmModalResolver;csmModalResolver=null;if(csmModalCancelHandler){$('modal').removeEventListener('cancel',csmModalCancelHandler);csmModalCancelHandler=null;}if($('modal').open)$('modal').close();if(resolver)resolver(value);}
+function requestCSMModal(title,html,actions,focusId=''){return new Promise(resolve=>{const modal=$('modal');csmModalResolver=resolve;csmModalCancelHandler=()=>{if(csmModalResolver!==resolve)return;csmModalResolver=null;csmModalCancelHandler=null;resolve(null);};modal.addEventListener('cancel',csmModalCancelHandler,{once:true});const buttons=actions.map(action=>'<button type="button" class="btn '+(action.className||'soft')+'" onclick="resolveCSMModal(\''+action.value+'\')">'+xss(action.label)+'</button>').join('');popup(title,html+(buttons?'<div class="flex flexend csm-modal-actions">'+buttons+'</div>':''));if(focusId)setTimeout(()=>$(focusId)?.focus(),30);});}
+async function confirmCSM(title,message,confirmLabel='CONFIRMAR'){return await requestCSMModal(title,'<p>'+xss(message).replace(/\n/g,'<br>')+'</p>',[{value:'yes',label:confirmLabel,className:'gold'},{value:'no',label:'CANCELAR',className:'soft'}])==='yes';}
+async function promptCSM(title,label,defaultValue=''){const result=await requestCSMModal(title,'<label for="csmPromptInput">'+xss(label)+'</label><input id="csmPromptInput" value="'+xss(defaultValue)+'" autocomplete="off">',[{value:'prompt-yes',label:'CONFIRMAR',className:'gold'},{value:'prompt-no',label:'CANCELAR',className:'soft'}],'csmPromptInput');return result==='prompt-yes'?($('csmPromptInput')?.value??''):null;}
+function editableSnapshot(){return JSON.stringify({nome:state.nome||'',categoria:state.categoria||'',base:state.base||{},variacoes:state.variacoes||[],componentes:state.componentes||[],preparo:state.preparo||'',observacoes:state.observacoes||''});}
+function hasUnsavedChanges(){if(!$('editor')||$('editor').classList.contains('hide'))return false;readFields();return editableSnapshot()!==originalSnapshot;}
+let costTimer, previewSequence=0;
+function formatPDV(el){const raw=el.value.trim();if(!raw)return;const text=raw.replace(/\s|R\$/gi,'');const normalized=text.includes(',')?text.replace(/\./g,'').replace(',','.'):text;const amount=Number(normalized);if(!Number.isFinite(amount)||amount<0){msg('Informe um R$ PDV válido.',true);el.focus();return;}el.value=amount.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});readFields();schedulePreview();}
+function pdvValue(raw){if(raw===null||raw===undefined||String(raw).trim()==='')return null;const text=String(raw);const n=Number(text.includes(',')?text.replace(/\./g,'').replace(',','.'):text);return Number.isFinite(n)&&n>=0?n:null;}
+function pdvFor(key){return pdvValue(key==='BASE'?state.base.pdv:state.variacoes.find(v=>v.key===key)?.pdv);}
+function schedulePreview(){if(!$('editor')||$('editor').classList.contains('hide'))return;clearTimeout(costTimer);const seq=++previewSequence;costTimer=setTimeout(async()=>{try{readFields();if(!state.nome||!state.base.qtd)return;const result=await api('ftPrevia',state);if(seq===previewSequence)renderCostData(result);}catch(e){if(seq===previewSequence)$('costBody').textContent='Prévia indisponível: '+e.message;}},450);}
+function markDirty(){dirty=true;schedulePreview();}
+function switchFTView(editor){$('listPanel').classList.toggle('hide',editor);$('editor').classList.toggle('hide',!editor);$('resultsPanel').classList.toggle('hide',!editor);if(!editor)closeSimulation();}
+async function refreshConsultation(){if(dirty&&!await checkLeave())return;dirty=false;switchFTView(false);await loadLib();}
+async function backToFTList(){if(!await checkLeave())return;dirty=false;switchFTView(false);renderList();}
+function suggestNames(){const term=$('ftName').value.trim().toLocaleUpperCase('pt-BR'),box=$('nameSuggestions');if(term.length<2){box.classList.add('hide');return;}const found=lib.fichas.filter(f=>f.nome.toLocaleUpperCase('pt-BR').includes(term)&&f.id!==state.id).slice(0,7);box.innerHTML=found.map(f=>'<button type="button" onclick="openSuggestedFT(\''+xss(f.id)+'\')">'+xss(f.nome)+' · '+xss(f.id)+' · '+xss(f.status)+'</button>').join('')||'<div class="sub" style="padding:9px">NENHUMA FT SEMELHANTE ENCONTRADA</div>';box.classList.remove('hide');}
+async function openSuggestedFT(id){$('nameSuggestions').classList.add('hide');await openFT(id);}
+function suggestCategories(){const termo=$('ftCat').value.trim().toLocaleUpperCase('pt-BR'),matches=lib.categorias.filter(c=>c.toLocaleUpperCase('pt-BR').includes(termo));$('categories').innerHTML=matches.map(c=>'<option value="'+xss(c)+'"></option>').join('');}
+
+async function checkLeave(){if(!hasUnsavedChanges()){dirty=false;return true;}return await confirmCSM('ALTERAÇÕES NÃO SALVAS','Existem alterações não salvas. Deseja descartá-las e continuar?','DESCARTAR E CONTINUAR');}
+async function loadLib(){try{lib=await api('ftBiblioteca');renderList();$('categories').innerHTML=lib.categorias.map(c=>'<option value="'+xss(c)+'"></option>').join('');$('filterCat').innerHTML='<option value="">TODAS</option>'+lib.categorias.map(c=>'<option value="'+xss(c)+'">'+xss(c)+'</option>').join('');$('filterComp').innerHTML='<option value="">TODOS</option>'+lib.insumos.map(i=>'<option value="'+xss(i.id)+'">'+xss(i.descricao)+'</option>').join('')+lib.fichas.map(i=>'<option value="'+xss(i.id)+'">FT · '+xss(i.nome)+'</option>').join('');if($('ftCat'))suggestCategories();}catch(e){msg(e.message,true);}}
+function renderList(){
+ const busca=$('search').value.toLocaleLowerCase('pt-BR').trim(),situacao=$('filter').value;
+ const cat=$('filterCat')?.value||'',comp=$('filterComp').value,sort=$('sortList').value;
+ const lista=lib.fichas.filter(x=>(!situacao||x.status===situacao)&&(!cat||x.categoria===cat)&&
+   (!comp||(lib.componentesFT?.[x.id]||[]).includes(comp))&&
+   (!busca||(x.nome+' '+x.id).toLocaleLowerCase('pt-BR').includes(busca)));
+ if(sort==='DATA')lista.sort((a,b)=>b.atualizado.localeCompare(a.atualizado));
+ const categoriaDe=x=>String(x.categoria||'').trim()||'SEM CATEGORIA';
+ const categoriasBase=busca||situacao||comp?lista.map(categoriaDe):[...lib.categorias,...lista.map(categoriaDe)];
+ const categorias=[...new Set(categoriasBase)].sort((a,b)=>{
+  const ia=lib.categorias.indexOf(a),ib=lib.categorias.indexOf(b);
+  if(ia>=0&&ib<0)return -1;if(ia<0&&ib>=0)return 1;if(ia!==ib)return ia-ib;
+  return a.localeCompare(b,'pt-BR');
+ });
+ const grupos=categorias.map(catNome=>{
+  const itens=lista.filter(x=>categoriaDe(x)===catNome),multiplas=itens.length>1;
+  if(!itens.length)return '<div class="ft-category-group"><button type="button" class="ft-category-button" disabled><span>'+xss(catNome)+'</span><span class="sub">NENHUMA FICHA CADASTRADA</span></button></div>';
+  const acao=multiplas?'onclick="toggleFTCategory(this)"':'onclick="openFT(\''+xss(itens[0].id)+'\')"';
+  const filhos=multiplas?'<div class="ft-category-list">'+itens.map(x=>'<button type="button" class="ft-category-item" onclick="openFT(\''+xss(x.id)+'\')"><strong>'+xss(x.nome)+' · '+xss(x.id)+'</strong><span class="sub">'+xss(x.status)+(x.pendencia?' · ⚠ PENDENTE DE REVISÃO':'')+'</span></button>').join('')+'</div>':'';
+  return '<div class="ft-category-group'+(multiplas?' has-children':'')+'"><button type="button" class="ft-category-button" '+acao+(multiplas?' aria-expanded="false"':'')+'><span>'+xss(catNome)+'</span>'+(multiplas?'<span class="ft-category-chevron" aria-hidden="true">⌄</span>':'')+'</button>'+filhos+'</div>';
+ }).join('');
+ $('list').innerHTML=grupos||'<p class="sub ft-category-empty">'+(busca?'REFERÊNCIA NÃO LOCALIZADA.':'NENHUMA FICHA TÉCNICA CADASTRADA.')+'</p>';
+}
+function toggleFTCategory(button){const group=button.closest('.ft-category-group');if(!group)return;const aberto=group.classList.toggle('open');button.setAttribute('aria-expanded',String(aberto));}
+async function newFT(){if(!await checkLeave())return;$('ftGlobalNotice').textContent='';state={id:'',versao:0,status:'NOVA',nome:'',categoria:'',base:{qtd:'',unidade:'G',pdv:''},variacoes:[],componentes:[],preparo:'',observacoes:''};tab='BASE';dirty=false;originalSnapshot=editableSnapshot();switchFTView(true);closeSimulation();renderEditor();$('costBody').textContent='Preencha e salve a FT para consultar os custos.';$('costTabs').innerHTML='';}
+async function openFT(id){if(!await checkLeave())return;try{const f=await api('ftObter',id);state={...f.receita,id:f.id,versao:f.versao,status:f.status};tab='BASE';dirty=false;switchFTView(true);closeSimulation();renderEditor();try{const precos=await api('ftPrecosConsultar',id);state.base.pdv=precos.BASE??'';state.variacoes.forEach(v=>v.pdv=precos[v.key]??'');renderEditor();}catch(e){msg('Consulta de preços indisponível: '+e.message,true);}originalSnapshot=editableSnapshot();await showCosts();}catch(e){msg(e.message,true);}}
+function readFields(){state.nome=$('ftName').value.trim();state.categoria=$('ftCat').value.trim();state.base={qtd:$('baseQty').value.trim(),unidade:$('baseUnit').value,pdv:$('basePDV').value.trim()};state.preparo=$('ftPrep').value;state.observacoes=$('ftObs').value;}
+function renderEditor(){ $('nameSuggestions').classList.add('hide'); $('ftName').value=state.nome||'';$('ftCat').value=state.categoria||'';$('baseQty').value=state.base.qtd||'';$('baseUnit').value=state.base.unidade||'G';$('basePDV').value=state.base.pdv??'';$('ftPrep').value=state.preparo||'';$('ftObs').value=state.observacoes||'';$('formTitle').textContent=state.id?'EDITAR FICHA TÉCNICA':'CADASTRAR FICHA TÉCNICA';$('statusTag').textContent=state.status;$('codeTag').textContent=state.id||'SEM CÓDIGO';renderVariations();renderComponents();msg('');}
+function addVariation(){state.variacoes.push({key:'V'+Date.now(),nome:'',qtd:'',unidade:'UN',modo:'DIVIDIR',pdv:''});markDirty();renderVariations();renderComponents();}
+function updateVariation(i,field,value){state.variacoes[i][field]=value;markDirty();if(field==='modo')renderComponents();}
+function removeVariation(i){const variation=state.variacoes[i];if(!variation)return;const nome=xss(variation.nome||'este rendimento');popup('REMOVER RENDIMENTO','<p>Deseja remover <strong>'+nome+'</strong>?</p><div class="flex flexend variation-confirm-actions"><button type="button" class="btn soft" onclick="closeCSMModal()">CANCELAR</button><button type="button" class="btn danger" onclick="confirmRemoveVariation('+i+')">REMOVER</button></div>');}
+function confirmRemoveVariation(i){closeCSMModal();if(!state.variacoes[i])return;state.variacoes.splice(i,1);markDirty();renderVariations();renderComponents();}
+function renderVariations(){$('variations').innerHTML=state.variacoes.map((v,i)=>'<div class="sm-fields" style="margin:7px 0"><div><label>DESCRIÇÃO LIVRE</label><input value="'+xss(v.nome)+'" oninput="updateVariation('+i+',\'nome\',this.value)"></div><div><label>QUANTIDADE</label><input inputmode="decimal" value="'+xss(v.qtd)+'" oninput="updateVariation('+i+',\'qtd\',this.value)"></div><div><label>UNIDADE</label><select onchange="updateVariation('+i+',\'unidade\',this.value)">'+['G','KG','ML','L','UN'].map(u=>'<option '+(v.unidade===u?'selected':'')+'>'+u+'</option>').join('')+'</select></div><div><label>TIPO</label><select title="Divisão do mesmo custo ou composição específica" onchange="updateVariation('+i+',\'modo\',this.value)"><option value="DIVIDIR" '+(v.modo==='DIVIDIR'?'selected':'')+'>DIVIDIR RECEITA</option><option value="COMPOSICAO" '+(v.modo==='COMPOSICAO'?'selected':'')+'>COMPOSIÇÃO PRÓPRIA</option></select></div><div><label>R$ PDV (ADM)</label><input inputmode="decimal" value="'+xss(v.pdv??'')+'" oninput="updateVariation('+i+',\'pdv\',this.value)" onblur="formatPDVVariation('+i+',this)" placeholder="OPCIONAL"></div><div class="variation-remove"><button type="button" class="btn danger variation-remove-button" title="Remover rendimento" aria-label="Remover rendimento" onclick="removeVariation('+i+')">×</button></div></div>').join('')||'<p class="sub">Sem rendimentos adicionais. A FT calculará usando somente o rendimento principal.</p>';}
+function formatPDVVariation(i,el){formatPDV(el);state.variacoes[i].pdv=el.value;markDirty();}
+function addComponent(tipo,focusNew=false,preferredId=''){let id=preferredId;if(tipo==='INSUMO'&&!preferredId&&!lib.insumos.length){openQuickInsumo();return;}if(tipo==='FT'&&!id)id=lib.fichas.filter(x=>x.id!==state.id&&x.status==='ATIVA')[0]?.id||'';if(tipo==='FT'&&!id){popup('CADASTRO NECESSÁRIO','Não há componentes disponíveis desse tipo.');return;}const index=state.componentes.length;state.componentes.push({tipo,id,configKey:'BASE',quantidades:{BASE:''},etapa:''});markDirty();renderComponents();if(focusNew)setTimeout(()=>document.querySelector('#compTable select[data-component-select="'+index+'"]')?.focus(),0);}
+function setComponent(i,f,value){state.componentes[i][f]=value;if(f==='tipo'||f==='id')state.componentes[i].configKey='BASE';markDirty();if(f!=='etapa')renderComponents();}
+function normalizeQuantityInput(value){return String(value??'').replace(/[^\d.,]/g,'');}
+function preventInvalidQuantityKey(event){if(event.ctrlKey||event.metaKey||event.altKey)return;if(['Backspace','Delete','ArrowLeft','ArrowRight','Home','End','Tab','Enter','Escape'].includes(event.key))return;if(!/^[\d.,]$/.test(event.key))event.preventDefault();}
+function setQuantity(i,key,value){state.componentes[i].quantidades[key]=normalizeQuantityInput(value);markDirty();}
+function delComponent(i){state.componentes.splice(i,1);markDirty();renderComponents();}
+function compOptions(c){const list=c.tipo==='INSUMO'?lib.insumos:lib.fichas.filter(x=>x.id!==state.id);const vazio=!c.id?'<option value="" selected>SELECIONE...</option>':'';return vazio+list.map(x=>'<option value="'+xss(x.id)+'" '+(x.id===c.id?'selected':'')+'>'+xss(x.descricao||x.nome)+' · '+xss(x.id)+'</option>').join('');}
+function reorderComponents(from,to){if(from===to||from<0||to<0||from>=state.componentes.length||to>=state.componentes.length)return;const [moved]=state.componentes.splice(from,1);state.componentes.splice(to,0,moved);markDirty();renderComponents();}
+function bindComponentOrdering(){let draggedIndex=null;const tbody=$('compTable').tBodies[0];if(!tbody)return;const clearDropMarkers=()=>tbody.querySelectorAll('tr').forEach(row=>row.classList.remove('component-dragging','component-drop-before','component-drop-after'));tbody.querySelectorAll('[data-component-drag]').forEach(handle=>{handle.addEventListener('dragstart',event=>{draggedIndex=Number(handle.dataset.componentIndex);const row=handle.closest('tr');row?.classList.add('component-dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',String(draggedIndex));});handle.addEventListener('dragend',()=>{draggedIndex=null;clearDropMarkers();});});tbody.querySelectorAll('tr[data-component-index]').forEach(row=>{row.addEventListener('dragover',event=>{if(draggedIndex===null)return;event.preventDefault();event.dataTransfer.dropEffect='move';const target=Number(row.dataset.componentIndex);row.classList.remove('component-drop-before','component-drop-after');if(target===draggedIndex)return;const after=event.clientY>row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;row.classList.add(after?'component-drop-after':'component-drop-before');});row.addEventListener('dragleave',()=>row.classList.remove('component-drop-before','component-drop-after'));row.addEventListener('drop',event=>{event.preventDefault();const from=draggedIndex;const target=Number(row.dataset.componentIndex);const after=row.classList.contains('component-drop-after');const insertionIndex=target+(after?1:0);const to=from<insertionIndex?insertionIndex-1:insertionIndex;draggedIndex=null;clearDropMarkers();reorderComponents(from,to);});});}
+function renderComponents(){const vari=state.variacoes.filter(v=>v.modo==='COMPOSICAO');const cols=['BASE',...vari.map(v=>v.key)];$('compTable').innerHTML='<thead><tr><th style="width:115px">TIPO</th><th style="width:270px">COMPONENTE</th><th>REFERÊNCIA</th>'+cols.map(k=>'<th>'+xss(k==='BASE'?'PRINCIPAL':state.variacoes.find(v=>v.key===k).nome||'VARIAÇÃO')+'</th>').join('')+'<th></th></tr></thead><tbody>'+state.componentes.map((c,i)=>'<tr data-component-index="'+i+'"><td><select onchange="setComponent('+i+',\'tipo\',this.value)"><option '+(c.tipo==='INSUMO'?'selected':'')+'>INSUMO</option><option value="FT" '+(c.tipo==='FT'?'selected':'')+'>FT</option></select></td><td><select onchange="setComponent('+i+',\'id\',this.value)">'+compOptions(c)+'</select></td><td>'+ (c.tipo==='INSUMO' ? '<span class="sub">'+xss(lib.insumos.find(x=>x.id===c.id)?.unidade||'')+'</span>' : '<select title="Selecione explicitamente o rendimento da FT intermediária" onchange="setComponent('+i+',\'configKey\',this.value)">'+(lib.rendimentosFT?.[c.id]||[{key:'BASE',nome:'PRINCIPAL'}]).map(v=>'<option value="'+xss(v.key)+'" '+((c.configKey||'BASE')===v.key?'selected':'')+'>'+xss(v.nome)+' · '+xss(v.unidade||'')+'</option>').join('')+'</select>')+'</td>'+cols.map(k=>'<td><input inputmode="decimal" value="'+xss(c.quantidades[k]??'')+'" placeholder="—" oninput="setQuantity('+i+',\''+k+'\',this.value)"></td>').join('')+'<td><div class="component-row-actions"><button type="button" class="btn danger mini" title="Remover componente" aria-label="Remover componente" onclick="delComponent('+i+')">×</button><button type="button" class="component-drag-handle" draggable="true" data-component-drag data-component-index="'+i+'" title="Arrastar para reordenar" aria-label="Arrastar componente">&#8942;</button></div></td></tr>').join('')+'</tbody>';}
+const renderComponentsBase=renderComponents;
+renderComponents=function(){renderComponentsBase();const quantityKeys=['BASE',...state.variacoes.filter(v=>v.modo==='COMPOSICAO').map(v=>v.key)];document.querySelectorAll('#compTable thead th').forEach(th=>{if(th.textContent.trim()==='PRINCIPAL')th.textContent='QUANTIDADE';});document.querySelectorAll('#compTable tbody tr').forEach((tr,index)=>{const selects=tr.querySelectorAll('select');if(selects[1])selects[1].dataset.componentSelect=index;tr.querySelector('button.btn.danger')?.setAttribute('tabindex','-1');tr.querySelectorAll('input[inputmode="decimal"]').forEach((input,quantityIndex)=>{input.addEventListener('keydown',preventInvalidQuantityKey);input.addEventListener('input',()=>{const clean=normalizeQuantityInput(input.value);if(clean!==input.value){input.value=clean;setQuantity(index,quantityKeys[quantityIndex],clean);}});});});bindComponentOrdering();};
+async function copyVariation(){const c=state.variacoes.find(v=>v.modo==='COMPOSICAO');if(!c){popup('COPIAR VARIAÇÃO','Cadastre uma variação com COMPOSIÇÃO PRÓPRIA antes de copiar.');return;}const from=await promptCSM('COPIAR VARIAÇÃO','Chave da variação de origem (BASE ou ID de uma variação)','BASE');if(from===null)return;for(const co of state.componentes)co.quantidades[c.key]=co.quantidades[from]??'';markDirty();renderComponents();}
+async function openQuickInsumo(){
+ try{
+  const categorias=await api('listarCategoriasInsumos');
+  popup('CADASTRAR INSUMO','<p class="sub">Cadastre o insumo sem sair da Ficha Técnica. As mesmas validações do módulo INSUMOS serão aplicadas.</p><div class="grid"><div><label>DESCRIÇÃO *</label><input id="quickInsumoDescricao" maxlength="150" autocomplete="off" placeholder="DESCRIÇÃO DO INSUMO"></div><div><label>CATEGORIA *</label><select id="quickInsumoCategoria">'+categorias.map(c=>'<option value="'+xss(c)+'">'+xss(c)+'</option>').join('')+'</select></div></div><div class="grid three"><div><label>UNIDADE *</label><select id="quickInsumoUnidade"><option value="G">G</option><option value="ML">ML</option><option value="UN">UN</option><option value="CM">CM</option><option value="KWH">kWh</option></select></div><div><label>FC *</label><input id="quickInsumoFc" inputmode="decimal" value="1,00"></div><div><label>CONTROLA ESTOQUE?</label><select id="quickInsumoControla"><option value="SIM">SIM</option><option value="NÃO">NÃO</option></select></div></div><label>OBSERVAÇÃO</label><textarea id="quickInsumoObservacao" rows="3" placeholder="OBSERVAÇÃO OPCIONAL"></textarea><div id="quickInsumoFeedback" class="status" role="alert"></div><div id="quickInsumoActions" class="flex flexend"><button class="btn soft" type="button" onclick="closeCSMModal()">CANCELAR</button><button class="btn gold" type="button" data-quick-save onclick="submitQuickInsumo(false)">SALVAR INSUMO</button></div>');
+  ['quickInsumoDescricao','quickInsumoObservacao'].forEach(id=>$(id).addEventListener('input',e=>{const a=e.target.selectionStart,b=e.target.selectionEnd;e.target.value=e.target.value.toLocaleUpperCase('pt-BR');try{e.target.setSelectionRange(a,b);}catch(_){}}));
+  $('quickInsumoDescricao').focus();
+ }catch(e){msg(e.message,true);}
+}
+async function submitQuickInsumo(forcarNovo=false){
+ if(quickInsumoSaving)return;
+ const descricao=$('quickInsumoDescricao')?.value.toLocaleUpperCase('pt-BR').trim().replace(/\s+/g,' ')||'';
+ const feedback=$('quickInsumoFeedback');
+ if(!descricao){feedback.textContent='Informe a descrição do insumo.';$('quickInsumoDescricao').focus();return;}
+ quickInsumoSaving=true;
+ try{
+  const payload={descricao,categoria:$('quickInsumoCategoria').value,unidade:$('quickInsumoUnidade').value,fc:$('quickInsumoFc').value,controlaEstoque:$('quickInsumoControla').value,observacao:$('quickInsumoObservacao').value.toLocaleUpperCase('pt-BR').trim()};
+  const result=await api('salvarInsumo',payload,forcarNovo);
+  if(result?.status==='POSSIVEL_DUPLICIDADE'){
+   feedback.textContent='Possível duplicidade: '+result.insumo.descricao+' ('+result.insumo.id+').';
+   document.querySelector('[data-quick-force]')?.remove();
+   const force=document.createElement('button');force.type='button';force.className='btn danger';force.dataset.quickForce='1';force.textContent='CADASTRAR MESMO ASSIM';force.onclick=()=>submitQuickInsumo(true);$('quickInsumoActions').insertBefore(force,$('[data-quick-save]'));return;
+  }
+  const salvo=result?.insumo;
+  closeCSMModal();
+  await loadLib();
+  msg('Insumo '+(salvo?.descricao||descricao)+' cadastrado e adicionado à composição.');
+  if(salvo?.id){
+   addComponent('INSUMO',true,salvo.id);
+   try{const referencia=await api('ftConsultaReferenciaManual',salvo.id);if(referencia?.podeEditar&&!String(referencia.manual||'').trim())await askCost([{id:salvo.id,nome:salvo.descricao}]);}
+   catch(e){msg('Insumo adicionado, mas não foi possível consultar o custo de referência: '+e.message,true);}
+  }
+ }catch(e){feedback.textContent=e.message||'Não foi possível cadastrar o insumo.';}
+ finally{quickInsumoSaving=false;}
+}
+function closeCSMModal(){costPromptOpen=false;resolveCSMModal(null);}
+function approveFTActivation(){closeCSMModal();saveFT(true,false,false,true);}
+function createCategory(){
+ popup('INSERIR CATEGORIA','<label>NOME DA NOVA CATEGORIA</label><input id="newCategory" maxlength="100" list="categories" placeholder="DIGITE OU SELECIONE" autocomplete="off"><div id="catFeedback" class="sub" style="margin:8px 0"></div><div class="flex flexend"><button class="btn soft" onclick="closeCSMModal()">CANCELAR</button><button class="btn gold" onclick="submitCategory()">SALVAR CATEGORIA</button></div>');
+ $('newCategory').addEventListener('input',function(){this.value=this.value.toLocaleUpperCase('pt-BR');const iguais=lib.categorias.filter(c=>c.includes(this.value.trim()));$('catFeedback').textContent=iguais.length?'CATEGORIAS EXISTENTES: '+iguais.slice(0,5).join(' · '):'Nenhuma categoria semelhante.';});$('newCategory').focus();
+}
+async function submitCategory(){const c=$('newCategory').value.toLocaleUpperCase('pt-BR').trim();if(!c){$('catFeedback').textContent='Informe a categoria.';return;}
+ const match=lib.categorias.find(x=>x===c);if(match){$('ftCat').value=match;document.getElementById('modal').close();markDirty();msg('Categoria existente selecionada.');return;}
+ try{await api('ftSalvarCategoria',c);document.getElementById('modal').close();await loadLib();$('ftCat').value=c;markDirty();msg('Categoria cadastrada.');}catch(e){$('catFeedback').textContent=e.message;}
+}
+function renameCategory(){
+ popup('ALTERAR CATEGORIA','<label>CATEGORIA EXISTENTE</label><select id="oldCategory">'+lib.categorias.map(c=>'<option>'+xss(c)+'</option>').join('')+'</select><label style="margin-top:10px">NOVO NOME</label><input id="renCategory" maxlength="100" autocomplete="off"><div id="catFeedback" class="alert" style="margin:8px 0"></div><div class="flex flexend"><button class="btn soft" onclick="closeCSMModal()">CANCELAR</button><button class="btn gold" onclick="submitRenameCategory()">SALVAR ALTERAÇÃO</button></div>');
+ if(lib.categorias.includes($('ftCat').value))$('oldCategory').value=$('ftCat').value;
+ $('renCategory').addEventListener('input',function(){this.value=this.value.toLocaleUpperCase('pt-BR');});
+}
+async function submitRenameCategory(){const old=$('oldCategory').value,c=$('renCategory').value.toLocaleUpperCase('pt-BR').trim();if(!c){$('catFeedback').textContent='Informe o novo nome.';return;}
+ try{await api('ftRenomearCategoria',old,c);document.getElementById('modal').close();await loadLib();if($('ftCat').value===old){$('ftCat').value=c;state.categoria=c;}msg('Categoria renomeada sem criar versão da receita.');}
+ catch(e){$('catFeedback').textContent=e.message;}
+}
+
+function parseCostMissing(value){
+ const raw=String(value||'');
+ if(raw.startsWith('CUSTO_AUSENTE:')){const partes=raw.split(':'),id=partes[1]||'';return id?[{id,nome:partes.slice(2).join(':')||id}]:[];}
+ if(raw.startsWith('CUSTOS_AUSENTES:'))return raw.slice('CUSTOS_AUSENTES:'.length).split('|').map(item=>{const partes=item.split(':'),id=partes.shift()||'';return id?{id,nome:partes.join(':')||id}:null;}).filter(Boolean);
+ return [];
+}
+function missingCostsFromResults(items){const found=new Map();(items||[]).forEach(item=>{const list=Array.isArray(item?.custosAusentes)&&item.custosAusentes.length?item.custosAusentes:parseCostMissing(item?.erro);list.forEach(cost=>{if(cost?.id&&!found.has(String(cost.id)))found.set(String(cost.id),{id:String(cost.id),nome:String(cost.nome||cost.id)});});});return [...found.values()];}
+async function askCost(source){
+ if(costPromptOpen)return;const missing=Array.isArray(source)?(source.length&&source.every(item=>item?.id&&!item.erro&&!item.custosAusentes)?source:missingCostsFromResults(source)):parseCostMissing(source);if(!missing.length)return;costPromptOpen=true;
+ const rows=missing.map(item=>{const unidade=lib.insumos.find(x=>x.id===item.id)?.unidade||'UN';return '<div class="ft-cost-missing"><h3>'+xss(item.nome)+' <span class="sub">('+xss(item.id)+' · '+xss(unidade)+')</span></h3><div class="grid"><div><label>TAMANHO DA EMBALAGEM ('+xss(unidade)+')</label><input data-cost-package="'+xss(item.id)+'" inputmode="decimal" placeholder="EX.: 500"></div><div><label>VALOR PAGO (R$)</label><input data-cost-paid="'+xss(item.id)+'" inputmode="decimal" placeholder="EX.: 10,00"></div></div></div>';}).join('');
+ popup('CUSTOS DE REFERÊNCIA','<p>Preencha o tamanho da embalagem e o valor pago de cada insumo. O sistema converterá cada custo para a unidade cadastrada.</p><div id="ftCustoLista">'+rows+'</div><div id="ftCustoFeedback" class="status" role="alert"></div><div class="flex flexend"><button class="btn gold" type="button" id="ftCustoAtualizar">ATUALIZAR CUSTOS</button></div>');
+ $('ftCustoAtualizar').onclick=()=>submitCostReferences(missing);$('ftCustoLista').querySelector('input[data-cost-package]')?.focus();
+}
+async function submitCostReferences(missing){
+ const values=missing.map(item=>({item,embalagem:document.querySelector('[data-cost-package="'+CSS.escape(item.id)+'"]')?.value.trim()||'',valorPago:document.querySelector('[data-cost-paid="'+CSS.escape(item.id)+'"]')?.value.trim()||''}));
+ const vazio=values.find(value=>!value.embalagem||!value.valorPago);if(vazio){$('ftCustoFeedback').textContent='Preencha o tamanho da embalagem e o valor pago de todos os insumos.';document.querySelector('[data-cost-package="'+CSS.escape(vazio.item.id)+'"]')?.focus();return;}
+ try{for(const value of values)await api('ftSalvarCustoManual',value.item.id,'','Referências digitadas pela Ficha Técnica',value.embalagem,value.valorPago);closeCSMModal();msg(values.length+' custo(s) de referência atualizado(s).');await showCosts();}catch(e){$('ftCustoFeedback').textContent=e.message||'Não foi possível atualizar todos os custos.';}
+}
+async function saveFT(ativar,confirmarImpactos,confirmarDuplicidade,jaConfirmado){
+ readFields();
+ if(!hasUnsavedChanges()){dirty=false;closeSimulation();switchFTView(false);renderList();return;}
+ if(ativar&&!jaConfirmado){
+  popup('CONFIRMAR ATIVAÇÃO','<p>DESEJA ATIVAR ESTA FICHA TÉCNICA?</p><p class="sub">O sistema validará os ingredientes, rendimentos e custos antes de concluir.</p><div class="flex flexend"><button class="btn soft" onclick="closeCSMModal()">CANCELAR</button><button class="btn gold" onclick="approveFTActivation()">SIM, ATIVAR</button></div>');return;
+ }
+ try{
+  const ft=await api('ftSalvar',{id:state.id,versao:state.versao,receita:state,confirmarImpactos:!!confirmarImpactos,confirmarDuplicidade:!!confirmarDuplicidade},ativar);
+  const precos={BASE:state.base.pdv,...Object.fromEntries(state.variacoes.map(v=>[v.key,v.pdv??'']))};await api('ftPrecosSalvar',ft.id,precos);state={...ft.receita,id:ft.id,versao:ft.versao,status:ft.status};state.base.pdv=precos.BASE;state.variacoes.forEach(v=>v.pdv=precos[v.key]??'');dirty=false;originalSnapshot=editableSnapshot();
+  await loadLib();
+  if(ativar){switchFTView(false);$('search').value='';renderList();$('ftGlobalNotice').textContent='FICHA TÉCNICA ATIVADA COM SUCESSO.';return;}
+  renderEditor();closeSimulation();await showCosts();msg('Ficha técnica salva. Custos consultados novamente com os dados atuais.');
+ }catch(e){
+  msg(e.message,true);
+  if(e.message?.startsWith('CUSTO_AUSENTE:')||e.message?.startsWith('CUSTOS_AUSENTES:'))await askCost(e.message);
+  if(e.message?.startsWith('CONFIRMAR_IMPACTO:')&&await confirmCSM('CONFIRMAR IMPACTO','A alteração afeta FTs dependentes: '+e.message.slice(18)+'\nDeseja confirmar e sinalizar para revisão?','CONFIRMAR'))await saveFT(ativar,true,!!confirmarDuplicidade,true);
+  if(e.message?.startsWith('CONFIRMAR_DUPLICIDADE:')&&await confirmCSM('NOME DUPLICADO','Já existe uma FT com este nome: '+e.message.slice(23)+'\nDeseja manter o nome duplicado?','MANTER NOME'))await saveFT(ativar,!!confirmarImpactos,true,true);
+  if(/atualizada em outra sessão/i.test(e.message)){msg('CONFLITO DE EDIÇÃO: Esta FT mudou desde sua abertura. Seus dados não foram sobrescritos. Copie as alterações importantes e reabra a FT antes de salvar.',true);}
+ }
+}
+
+async function showCosts(){closeSimulation();try{readFields();const itens=await api('ftPrevia',state);renderCostData(itens);}catch(e){msg(e.message,true);}}
+function renderCostData(items){window.latestCosts=items;if(!items.length){$('costBody').textContent='Sem cálculo disponível.';return;}if(!items.some(x=>x.key===tab))tab=items[0].key;$('costTabs').innerHTML=items.map(v=>'<button class="btn '+(tab===v.key?'chosen':'')+'" onclick="selectCostTab(\''+xss(v.key)+'\')">'+xss(v.nome)+'</button>').join('');const v=items.find(x=>x.key===tab);if(v.erro){$('costBody').innerHTML='<div class="error">'+xss(v.erro)+'</div>';return;}
+const price=pdvFor(tab),unit=Number(String(v.custoUnitario).replace(',','.')),gross=price===null?null:price-unit,rate=price>0?100*gross/price:null;
+const money=n=>Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const card=(label,value,extra='')=>'<div><div class="sub">'+label+'</div><div class="money">'+value+'</div>'+extra+'</div>';
+$('costBody').innerHTML='<div class="csmResults">'+card('CUSTO TOTAL',money(Number(String(v.custoTotal).replace(',','.'))))+card('CUSTO POR '+xss(v.unidade),money(unit))+card('R$ PDV',price===null?'—':money(price))+card('LUCRO BRUTO',gross===null?'—':'<span class="amountAndRate" style="color:'+(gross<0?'#A02B2B':'#071D2C')+'">'+money(gross)+' <small>'+(rate===null?'—':rate.toFixed(1).replace('.',',')+'%')+'</small></span>')+'</div>'+(gross!==null&&gross<0?'<p class="alert">PREÇO DE VENDA ABAIXO DO CUSTO ESTIMADO.</p>':'')+'<h3>INGREDIENTES E FTs INTERMEDIÁRIAS</h3>'+v.detalhes.map(d=>'<div class="cardline"><div>'+xss(d.nome)+'<div class="sub">'+xss(d.quantidade)+' '+xss(d.unidade)+'</div></div><strong>R$ '+xss(d.subtotal)+'</strong></div>').join('');}
+
+function fichaNumero(value){const raw=String(value??'').replace(/[^0-9,.-]/g,'');const normalized=raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw;const n=Number(normalized);return Number.isFinite(n)?n:0;}
+function fichaMoney(value,arredondarCima=false){let n=fichaNumero(value);if(arredondarCima)n=Math.ceil((n-1e-10)*100)/100;return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2});}
+function renderCostData(items){window.latestCosts=items;if(!items.length){$('costBody').textContent='Sem cálculo disponível.';return;}if(!items.some(x=>x.key===tab))tab=items[0].key;$('costTabs').innerHTML=items.map(v=>'<button class="btn '+(tab===v.key?'chosen':'')+'" onclick="selectCostTab(\''+xss(v.key)+'\')">'+xss(v.nome)+'</button>').join('');const v=items.find(x=>x.key===tab);if(v.erro){$('costBody').innerHTML='<div class="error">'+xss(v.erro)+'</div>';const missing=missingCostsFromResults(items);if(missing.length)askCost(missing);return;}const price=pdvFor(tab),unitExato=fichaNumero(v.custoUnitario),gross=price===null?null:price-unitExato,rate=price>0?100*gross/price:null;const card=(label,value,extra='')=>'<div><div class="sub">'+label+'</div><div class="money">'+value+'</div>'+extra+'</div>';$('costBody').innerHTML='<div class="csmResults">'+card('CUSTO TOTAL',fichaMoney(v.custoTotal,true))+card('CUSTO POR '+xss(v.unidade),fichaMoney(v.custoUnitarioExibido||v.custoUnitario,true))+card('R$ PDV',price===null?'—':fichaMoney(price))+card('LUCRO BRUTO',gross===null?'—':'<span class="amountAndRate" style="color:'+(gross<0?'#A02B2B':'#071D2C')+'">'+fichaMoney(gross)+' <small>'+(rate===null?'—':rate.toFixed(1).replace('.',',')+'%')+'</small></span>')+'</div>'+(gross!==null&&gross<0?'<p class="alert">PREÇO DE VENDA ABAIXO DO CUSTO ESTIMADO.</p>':'')+'<h3>INGREDIENTES E FTs INTERMEDIÁRIAS</h3>'+v.detalhes.map(d=>'<div class="cardline"><div>'+xss(d.nome)+'<div class="sub">'+xss(d.quantidade)+' '+xss(d.unidade)+'</div></div><strong>'+xss(d.subtotal)+'</strong></div>').join('');}
+function selectCostTab(k){tab=k;renderCostData(window.latestCosts||[]);}
+let simulationKeys=[];
+async function simulateFT(){
+ if(!state.id){msg('Salve primeiro a FT para simular.',true);return;}
+ if(dirty){msg('Há alterações não salvas. Salve ou descarte antes de simular.',true);return;}
+ try{
+  const r=await api('ftResumo',state.id),configs=r.configuracoes||[];
+  if(!configs.length){msg('FT sem configurações disponíveis para simular.',true);return;}
+  simulationKeys=configs.map(c=>c.key);
+  $('resultsTitle').textContent='SIMULAÇÃO DE RECEITAS';$('costArea').classList.add('hide');$('costActions').classList.add('hide');$('simulateArea').classList.remove('hide');
+  $('simulateArea').innerHTML='<p class="sub">Preencha QUANT. RECEITAS em múltiplos de 0,25; use 0 para não incluir. Esta simulação não é salva e não movimenta estoque.</p><div class="simGrid">'+configs.map((c,i)=>'<div class="simBox"><label>'+xss(c.nome)+'</label><input id="simQ'+i+'" inputmode="decimal" value="'+(i===0?'1':'0')+'" aria-label="QUANT. RECEITAS '+xss(c.nome)+'"><div class="sub">QUANT. RECEITAS</div></div>').join('')+'</div><div id="simError" class="simError" role="alert"></div><div class="flex"><button class="btn gold" onclick="runSimulation()">CALCULAR QUANTIDADES</button><button class="btn soft" onclick="closeSimulation()">VOLTAR AOS CUSTOS</button></div><div id="simResult" style="margin-top:12px"></div>';
+  await runSimulation();
+ }catch(e){msg(e.message,true);}
+}
+async function runSimulation(){
+ const itens=[];for(let i=0;i<simulationKeys.length;i++){
+  const raw=$('simQ'+i).value.trim(),n=Number(raw.replace(',','.'));
+  if(!/^\d+(?:[.,]\d+)?$/.test(raw)||!Number.isFinite(n)||n<0||Math.abs(n*4-Math.round(n*4))>1e-7){$('simError').textContent='Informe 0 ou um múltiplo positivo de 0,25 para cada configuração.';$('simResult').innerHTML='';return;}
+  if(n>0)itens.push({key:simulationKeys[i],receitas:String(n)});
+ }
+ if(!itens.length){$('simError').textContent='Selecione ao menos uma configuração com quantidade maior que zero.';$('simResult').innerHTML='';return;}
+ $('simError').textContent='';$('simResult').innerHTML='<p class="sub">Calculando ingredientes...</p>';
+ try{
+  const r=await api('ftSimular',state.id,itens);
+  $('simResult').innerHTML='<p class="sub">CONSULTA: '+xss(r.data)+' · SOMENTE INGREDIENTES E QUANTIDADES</p><div style="overflow:auto"><table class="simTable"><thead><tr><th>INGREDIENTE / PREPARAÇÃO</th><th class="qty">QUANTIDADE</th></tr></thead><tbody>'+r.materiais.map(m=>'<tr><td>'+xss(m.nome)+'</td><td class="qty">'+xss(m.quantidade)+' '+xss(m.unidade)+'</td></tr>').join('')+'</tbody></table></div>';
+ }catch(e){$('simError').textContent=e.message;$('simResult').innerHTML='';}
+}
+function closeSimulation(){if(!$('simulateArea')||!$('costArea'))return;$('simulateArea').classList.add('hide');$('costArea').classList.remove('hide');$('costActions').classList.remove('hide');$('resultsTitle').textContent='CONSULTA DE CUSTOS ESTIMADOS';$('simulateArea').innerHTML='';}
+
+async function showHistory(){if(!state.id)return;try{
+ const versions=await api('ftHistorico',state.id);
+ popup('HISTÓRICO DE VERSÕES','<p class="sub">Para comparar duas versões, clique em COMPARAR.</p><button class="btn soft" onclick="compareVersions()">COMPARAR DUAS VERSÕES</button>'+versions.map(v=>'<div class="cardline">V'+v.versao+' · '+xss(v.data)+' <button class="btn soft" onclick="viewVersion('+v.versao+')">VER</button></div>').join(''));
+ }catch(e){msg(e.message,true);}}
+async function compareVersions(){const a=await promptCSM('COMPARAR VERSÕES','PRIMEIRA VERSÃO (ex.: 1)','1');if(a===null)return;const b=await promptCSM('COMPARAR VERSÕES','SEGUNDA VERSÃO (ex.: 2)','2');if(b===null)return;
+ try{const d=await api('ftCompararVersoes',state.id,Number(a),Number(b));popup('COMPARAÇÃO V'+d.a+' × V'+d.b,d.diferencas.map(item=>'<h3>'+xss(item.campo)+'</h3><div class="grid"><pre style="white-space:pre-wrap;word-break:break-word">'+xss(JSON.stringify(item.antes,null,2))+'</pre><pre style="white-space:pre-wrap;word-break:break-word">'+xss(JSON.stringify(item.depois,null,2))+'</pre></div>').join('')||'<p>As versões possuem a mesma composição, rendimento e preparo.</p>');}
+ catch(e){msg(e.message,true);}}
+
+async function viewVersion(v){try{const f=await api('ftObter',state.id,v);popup('FT · V'+v,'<pre style="white-space:pre-wrap;font-size:12px">'+xss(JSON.stringify(f.receita,null,2))+'</pre>');}catch(e){msg(e.message,true);}}
+async function changeStatus(){if(!state.id)return;const next=state.status==='INATIVA'?'ATIVA':'INATIVA';if(!await confirmCSM('ALTERAR SITUAÇÃO','Alterar situação para '+next+'? FTs dependentes podem ficar pendentes.','ALTERAR'))return;try{const r=await api('ftAlterarSituacao',state.id,next);state.status=r.status;renderEditor();await loadLib();msg('Situação alterada. Dependentes: '+(r.dependentes?.map(x=>x.nome).join(', ')||'nenhum'));}catch(e){msg(e.message,true);}}
+async function deleteDraft(){if(!state.id||!await confirmCSM('EXCLUIR RASCUNHO','Deseja excluir esse Rascunho?','EXCLUIR'))return;try{await api('ftExcluirRascunho',state.id);dirty=false;switchFTView(false);await loadLib();$('ftGlobalNotice').textContent='RASCUNHO EXCLUÍDO COM SUCESSO.';}catch(e){msg(e.message,true);}}
+function duplicateFT(){readFields();state.id='';state.versao=0;state.status='NOVA';state.nome=state.nome+' — CÓPIA';dirty=true;renderEditor();msg('Cópia independente ainda não salva.');}
+async function printFT(){
+ if(!state.id){msg('Salve a FT antes de imprimir.',true);return;}
+ try{
+  const detail=await api('ftObter',state.id),cost=await api('ftResumo',state.id);
+  const todas=await confirmCSM('OPÇÕES DE IMPRESSÃO','Imprimir todas as variações?','TODAS AS VARIAÇÕES');
+  const comCustos=await confirmCSM('OPÇÕES DE IMPRESSÃO','Exibir os custos na impressão?','EXIBIR CUSTOS');
+  const extras=await confirmCSM('OPÇÕES DE IMPRESSÃO','Incluir modo de preparo e observações?','INCLUIR INFORMAÇÕES');
+  const escolhidas=todas?cost.configuracoes:cost.configuracoes.filter(v=>v.key===tab);
+  if(!escolhidas.length)throw new Error('Selecione uma variação para imprimir.');
+  $('printSheet').innerHTML='<header><h1>CASA SÃO MIGUEL</h1><p>FICHA TÉCNICA · '+xss(detail.receita.nome)+' · '+xss(detail.id)+' · V'+detail.versao+'</p></header>'+escolhidas.map(v=>{
+   if(v.erro)return '<h2>'+xss(v.nome)+'</h2><p>Informações incompletas: '+xss(v.erro)+'</p>';
+   return '<h2>'+xss(v.nome)+'</h2><p>Rendimento: '+xss(v.rendimento)+' '+xss(v.unidade)+'</p>'+
+    (comCustos?'<p><strong>Custo da receita: '+xss(v.custoTotal)+' · Por '+xss(v.unidade)+': R$ '+xss(v.custoUnitarioExibido||v.custoUnitario)+'</strong></p>':'')+
+    v.detalhes.map(c=>'<div class="cardline"><span>'+xss(c.nome)+'</span><strong>'+xss(c.quantidade)+' '+xss(c.unidade)+(comCustos?' · R$ '+xss(c.subtotal):'')+'</strong></div>').join('');
+  }).join('')+(extras?'<h2>MODO DE PREPARO</h2><p style="white-space:pre-wrap">'+xss(detail.receita.preparo||'—')+'</p><h2>OBSERVAÇÕES</h2><p style="white-space:pre-wrap">'+xss(detail.observacoes||'—')+'</p>':'');
+  window.print();
+ }catch(e){msg(e.message,true);}
+}
+function fold(id){$(id).classList.toggle('open');}
+switchFTView(false);loadLib();
+</script><script>
+/* Normalização visual e efetiva de texto livre. Campos estruturados (datas, valores, e-mails, XML) preservam seu formato. */
+document.addEventListener('input',function(ev){
+ const e=ev.target;if(!e || !e.matches || !e.matches('textarea,input[type=text],input:not([type]) ,input[type=search]'))return;
+ if(e.readOnly||e.disabled||e.dataset.csmCase==='original'||e.inputMode==='decimal'||e.inputMode==='numeric'||e.type==='email')return;
+ const t=e.value,novo=t.toLocaleUpperCase('pt-BR');if(t===novo)return;
+ const a=e.selectionStart,b=e.selectionEnd;e.value=novo;
+ try{if(a!==null&&b!==null)e.setSelectionRange(a,b)}catch(_){}
+},true);
+/* Um módulo incluído na área à direita notifica altura, sem comandar a navegação do menu. */
+
+(function(){
+ let ultima=0;
+ const raiz=()=>document.querySelector('main')||document.querySelector('.app')||document.body;
+ function altura(){const area=raiz(),r=area.getBoundingClientRect(),n=Math.ceil(Math.max(100,r.bottom));if(n!==ultima){ultima=n;window.parent.postMessage({tipo:'CSM_ALTURA_MODULO',altura:n},'*')}}
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(altura).observe(raiz());
+ window.addEventListener('load',altura);new MutationObserver(altura).observe(document.body,{childList:true,subtree:true,attributes:false});altura();})();
+
+</script>
+</body></html>
