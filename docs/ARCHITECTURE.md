@@ -34,3 +34,9 @@ O frontend não acessa SQLite diretamente. O servidor não conhece detalhes de a
 ## Dados externos
 
 Consultas de CEP e CNPJ são integrações opcionais isoladas em `external-lookups.js`. A indisponibilidade desses provedores não deve corromper dados locais.
+
+## Fichas técnicas offline
+
+Alterações da FICHA TÉCNICA também podem ser preservadas localmente no navegador quando a API estiver indisponível. Esses rascunhos são exibidos na categoria original com a identificação `RASCUNHO LOCAL — NÃO SINCRONIZADO` e são removidos do armazenamento local somente após a sincronização confirmada no servidor.
+
+O rendimento principal mantém a unidade física produzida e pode ter uma unidade de venda compatível (por exemplo, `2650 G` vendido em `KG`). O custo unitário e o preço são calculados na unidade de venda; rendimentos adicionais continuam representando suas próprias unidades comerciais, como `12 UN` de fatias.

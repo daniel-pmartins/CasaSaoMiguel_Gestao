@@ -75,6 +75,7 @@
       case 'ftImpactoInsumo': return requestJson(`/api/v2/ficha/impacto/${id(args[0])}`);
       case 'ftConsultaReferenciaManual': return requestJson(`/api/v2/ficha/referencia/${id(args[0])}`);
       case 'ftSalvarCustoManual': return requestJson('/api/v2/ficha/custos', { method: 'POST', body: JSON.stringify({ insumoId: args[0], valor: args[1], observacao: args[2], embalagem: args[3], valorPago: args[4] }) });
+      case 'ftAtualizarCustoManual': return requestJson('/api/v2/ficha/custos', { method: 'POST', body: JSON.stringify({ insumoId: args[0], embalagem: args[1], valorPago: args[2], alteracaoManual: true, observacao: args[3] || 'Atualização manual pelo módulo INSUMOS' }) });
       case 'ftPrecosConsultar': return requestJson(`/api/v2/ficha/${id(args[0])}/precos`);
       case 'ftPrecosSalvar': return requestJson(`/api/v2/ficha/${id(args[0])}/precos`, { method: 'POST', body: JSON.stringify({ valores: args[1] }) });
       case 'ftPrevia': return requestJson('/api/v2/ficha/previa', { method: 'POST', body: JSON.stringify({ dados: args[0] }) });

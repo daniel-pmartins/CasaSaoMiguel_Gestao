@@ -27,6 +27,8 @@ test('cria, lista e detecta duplicidade de insumo', () => {
     assert.equal(created.status, 'CRIADO');
     assert.equal(created.insumo.id, 'INS0001');
     assert.equal(created.insumo.descricao, 'FARINHA DE TRIGO');
+    assert.equal(created.insumo.conversao, 'NÃO');
+    assert.equal(created.insumo.fatorConversaoGml, '');
     assert.equal(service.listarInsumos().length, 1);
 
     const duplicate = service.salvarInsumo({
@@ -37,6 +39,23 @@ test('cria, lista e detecta duplicidade de insumo', () => {
       controlaEstoque: true
     });
     assert.equal(duplicate.status, 'POSSIVEL_DUPLICIDADE');
+  } finally {
+    db.close();
+  }
+});
+
+test('salva fator opcional de conversão G/ML', () => {
+  const { db, service } = serviceForTest();
+  try {
+    const created = service.salvarInsumo({
+      descricao: 'ÓLEO DE SOJA', unidade: 'G', categoria: 'INGREDIENTE', fc: 1,
+      controlaEstoque: 'NÃO', conversao: 'SIM', fatorConversaoGml: '0,920'
+    });
+    assert.equal(created.insumo.conversao, 'SIM');
+    assert.equal(created.insumo.fatorConversaoGml, 0.92);
+    const updated = service.salvarInsumo({ ...created.insumo, conversao: 'NÃO', fatorConversaoGml: '' }, true);
+    assert.equal(updated.insumo.conversao, 'NÃO');
+    assert.equal(updated.insumo.fatorConversaoGml, '');
   } finally {
     db.close();
   }

@@ -333,7 +333,9 @@ function createApiServer({ db, normalizedStock = null, normalizedPurchases = nul
         }
         if (parts.length === 4 && parts[3] === 'custos' && request.method === 'POST') {
           const body = await parseBody(request);
-          sendJson(response, 200, normalizedFicha.saveManualCost(body.insumoId, body.valor, body.observacao, body.embalagem, body.valorPago));
+          sendJson(response, 200, body.alteracaoManual
+            ? normalizedFicha.updateManualCost(body.insumoId, body.embalagem, body.valorPago, body.observacao)
+            : normalizedFicha.saveManualCost(body.insumoId, body.valor, body.observacao, body.embalagem, body.valorPago));
           return;
         }
         if (parts.length === 5 && parts[3] === 'referencia' && request.method === 'GET') {

@@ -300,6 +300,13 @@ input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible
         </div>
 
         <div class="campo">
+          <label for="conversao">CONVERSÃO G/ML</label>
+          <select id="conversao" onchange="alterarConversao()"><option value="NÃO" selected>NÃO</option><option value="SIM">SIM</option></select>
+          <input id="fatorConversaoGml" type="hidden" value="">
+          <p id="conversaoResumo" style="color:#284150;font-size:12px;margin:6px 0 0">Sem conversão de volume para massa.</p>
+        </div>
+
+        <div class="campo">
           <label>CUSTO DE REFERÊNCIA (FICHA TÉCNICA)</label>
           <button type="button" class="acao cancelar" onclick="consultarCustoFT()">CONSULTAR / ATUALIZAR CUSTO MANUAL</button>
           <p style="color:#284150;font-size:12px">Disponível para insumo já salvo. Custos efetivos de compras/estoque têm prioridade e não serão sobrescritos.</p>
@@ -357,6 +364,7 @@ input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible
     el('unidade').addEventListener('change', atualizarBotaoSalvar);
     el('fc').addEventListener('input', atualizarBotaoSalvar);
     el('fc').addEventListener('blur', formatarFc); 
+    el('conversao').addEventListener('change', atualizarBotaoSalvar);
     el('descricao').addEventListener('keydown', teclaDescricao);
     el('descricao').addEventListener('blur', () => {
       // Fecha sugestões ao avançar por Tab, sem atrapalhar o clique em um item.
@@ -375,16 +383,19 @@ input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible
   function atualizarBotaoSalvar() {
     el('btnSalvar').disabled = !(
       el('descricao').value.trim() && el('categoria').value && el('unidade').value &&
-      fcValido(el('fc').value)
+      fcValido(el('fc').value) &&
+      (el('conversao').value !== 'SIM' || fatorConversaoValido(el('fatorConversaoGml').value))
     ) || salvando;
   }
 
   function limparFormulario() {
     el('formInsumos').reset();
-    ['id', 'dataCadastro', 'dataAlteracao', 'descricao', 'categoria', 'unidade', 'observacao']
+    ['id', 'dataCadastro', 'dataAlteracao', 'descricao', 'categoria', 'unidade', 'observacao', 'fatorConversaoGml']
       .forEach(id => { el(id).value = ''; });
     el('fc').value = '1,00';
     el('controlaEstoque').value = 'SIM';
+    el('conversao').value = 'NÃO';
+    atualizarResumoConversao();
     categoriaPendente = '';
     custoManualPendente = null;
     podeExibirSugestoes = false;
@@ -414,6 +425,42 @@ input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible
     const numero = Number(String(valor == null || valor === '' ? 1 : valor).replace(',', '.'));
     return Number.isFinite(numero) && numero >= 1
       ? numero.toFixed(2).replace('.', ',') : '';
+  }
+
+  function fatorConversaoValido(valor) {
+    const raw = String(valor || '').trim().replace(',', '.');
+    if (!/^\d+(?:\.\d{1,6})?$/.test(raw)) return false;
+    const numero = Number(raw);
+    return Number.isFinite(numero) && numero > 0 && numero <= 100;
+  }
+
+  function atualizarResumoConversao() {
+    const ativo = el('conversao').value === 'SIM';
+    el('conversaoResumo').textContent = ativo
+      ? 'Fator G/ML: ' + (el('fatorConversaoGml').value || 'não informado')
+      : 'Sem conversão de volume para massa.';
+  }
+
+  function alterarConversao() {
+    if (el('conversao').value !== 'SIM') {
+      el('fatorConversaoGml').value = '';
+      atualizarResumoConversao();
+      atualizarBotaoSalvar();
+      return;
+    }
+    const anterior = el('fatorConversaoGml').value || '';
+    abrirModal('FATOR DE CONVERSÃO G/ML', [
+      { texto: 'CANCELAR', classe: 'cancelar', acao: () => { el('conversao').value = anterior ? 'SIM' : 'NÃO'; if (!anterior) el('fatorConversaoGml').value = ''; fecharModal(); atualizarResumoConversao(); atualizarBotaoSalvar(); } },
+      { texto: 'CONFIRMAR', classe: 'salvar', acao: () => { const campo = el('fatorConversaoModal'); if (!fatorConversaoValido(campo?.value)) { mostrarStatus('Informe um fator G/ML positivo com até 6 casas decimais.', 'erro'); return; } el('fatorConversaoGml').value = campo.value.replace(',', '.'); fecharModal(); atualizarResumoConversao(); atualizarBotaoSalvar(); } }
+    ]);
+    const corpo = el('modalConteudo');
+    const explicacao = document.createElement('p');
+    explicacao.textContent = 'Informe quantos gramas correspondem a 1 ml deste insumo.';
+    corpo.appendChild(explicacao);
+    const input = document.createElement('input');
+    input.id = 'fatorConversaoModal'; input.inputMode = 'decimal'; input.placeholder = 'Ex.: 0,920'; input.value = anterior;
+    corpo.appendChild(input);
+    setTimeout(() => input.focus(), 30);
   }
 
   function dataVisivel(valor) {
@@ -650,6 +697,9 @@ input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible
     el('unidade').value = item.unidade || '';
     el('fc').value = mostrarFc(item.fc);
     el('controlaEstoque').value = item.controlaEstoque || 'SIM';
+    el('conversao').value = item.conversao || 'NÃO';
+    el('fatorConversaoGml').value = item.fatorConversaoGml || '';
+    atualizarResumoConversao();
     el('observacao').value = (item.observacao || '').toLocaleUpperCase('pt-BR');
     mostrarStatus('Editando o insumo ' + item.id + '.');
     atualizarBotaoSalvar();
@@ -667,6 +717,8 @@ input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible
       unidade: el('unidade').value,
       fc: el('fc').value,
       controlaEstoque: el('controlaEstoque').value,
+      conversao: el('conversao').value,
+      fatorConversaoGml: el('fatorConversaoGml').value,
       observacao: el('observacao').value.toLocaleUpperCase('pt-BR').trim()
     };
     if (!dados.descricao || !dados.categoria || !dados.unidade || !fcValido(dados.fc)) {
@@ -804,6 +856,27 @@ document.addEventListener('input',function(ev){
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(altura).observe(raiz());
  window.addEventListener('load',altura);new MutationObserver(altura).observe(document.body,{childList:true,subtree:true,attributes:false});altura();})();
 
+</script>
+<script>
+/* Consulta e alteração manual do custo de referência no cadastro de INSUMOS. */
+(function(){
+  function dataCurta(valor){const texto=String(valor||'');const m=texto.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:(texto||'—');}
+  function custoVisivel(valor){const n=Number(String(valor??'').replace(',','.'));return Number.isFinite(n)?n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:8}):'—';}
+  function valorPagoNormalizado(valor){const bruto=String(valor||'').trim().replace(/\s|R\$/gi,'');const normalizado=bruto.includes(',')?bruto.replace(/\./g,'').replace(',','.'):bruto;if(!/^\d+(?:\.\d{1,2})?$/.test(normalizado))return '';const n=Number(normalizado);return Number.isFinite(n)&&n>0?n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'';}
+  function campo(corpo,id,label,valor,placeholder){const bloco=document.createElement('div');const rotulo=document.createElement('label');rotulo.textContent=label;const input=document.createElement('input');input.id=id;input.type='text';input.inputMode='decimal';input.className='campo';input.value=valor||'';input.placeholder=placeholder||'';bloco.appendChild(rotulo);bloco.appendChild(input);corpo.appendChild(bloco);return input;}
+  function abrirAtualizacao(id,reg){
+    abrirModal('ATUALIZAR CUSTO — '+reg.insumo,[{texto:'FECHAR',classe:'cancelar',acao:fecharModal},{texto:'SALVAR',classe:'salvar',acao:()=>{const embalagem=el('manualEmbalagemInput')?.value.trim()||'',valorPago=valorPagoNormalizado(el('manualValorPagoInput')?.value||'');if(!/^\d+(?:[,.]\d{1,18})?$/.test(embalagem)||Number(embalagem.replace(',','.'))<=0||!valorPago){mostrarStatus('Informe tamanho da embalagem e valor pago válidos. Exemplo: 3,7 será R$ 3,70.','erro');return;}localApi.withSuccessHandler(res=>{fecharModal();atualizarCacheInsumos();mostrarStatus('Custo atualizado manualmente: R$ '+custoVisivel(res.valor)+' por '+reg.unidade+'.','sucesso');}).withFailureHandler(e=>mostrarStatus(e.message||'Não foi possível atualizar o custo.','erro')).ftAtualizarCustoManual(id,embalagem,valorPago,'Atualização manual pelo módulo INSUMOS');}}]);const corpo=el('modalConteudo');const info=document.createElement('p');info.textContent='Informe o tamanho da embalagem na unidade '+reg.unidade+' e o valor pago. A quantidade física do estoque não será alterada.';corpo.appendChild(info);campo(corpo,'manualEmbalagemInput','TAMANHO DA EMBALAGEM ('+reg.unidade+')','','Ex.: 200');const valor=campo(corpo,'manualValorPagoInput','VALOR PAGO (R$)','','Ex.: 3,50');valor.addEventListener('blur',()=>{const normalizado=valorPagoNormalizado(valor.value);if(normalizado)valor.value=normalizado;});setTimeout(()=>el('manualEmbalagemInput')?.focus(),30);
+  }
+  window.consultarCustoFT=function(){
+    const id=el('id').value.trim();
+    if(!id){mostrarStatus('Salve o insumo antes de consultar o custo de referência.','erro');return;}
+    localApi.withSuccessHandler(reg=>{
+      abrirModal('CUSTO DE REFERÊNCIA — '+reg.insumo,[{texto:'FECHAR',classe:'cancelar',acao:fecharModal},{texto:'ATUALIZAR',classe:'salvar',acao:()=>abrirAtualizacao(id,reg)}]);
+      const corpo=el('modalConteudo');
+      [['Custo Existente:','R$ '+custoVisivel(reg.custoExistente||reg.operacional)+' / '+reg.unidade],['Data da Última atualização:',dataCurta(reg.dataUltimaAtualizacao||reg.atualizado)],['Origem da Alteração:',reg.origemAlteracao||'NÃO INFORMADA']].forEach(([label,value])=>{const linha=document.createElement('p');const forte=document.createElement('strong');forte.textContent=label+' ';linha.appendChild(forte);linha.appendChild(document.createTextNode(value));corpo.appendChild(linha);});
+    }).withFailureHandler(e=>mostrarStatus(e.message||'Não foi possível consultar o custo.','erro')).ftConsultaReferenciaManual(id);
+  };
+})();
 </script>
 </body>
 </html>

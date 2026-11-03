@@ -44,6 +44,39 @@ function moneyText(value) {
   return `R$ ${decimalCeilText(value, 2).replace('.', ',')}`;
 }
 
+const FT_PREPARO_CATEGORY = 'FT DE PREPARO';
+const SALE_UNITS = ['KG', 'G', 'L', 'ML', 'UN'];
+const COMPOSITION_MODEL = 'VINCULO_V1';
+
+function unitScale(unit) {
+  return { G: 1, KG: 1000, ML: 1, L: 1000, UN: 1 }[String(unit || '').toUpperCase()] || 0;
+}
+
+function quantityInUnit(value, fromUnit, toUnit) {
+  const from = String(fromUnit || '').toUpperCase();
+  const to = String(toUnit || '').toUpperCase();
+  const fromScale = unitScale(from);
+  const toScale = unitScale(to);
+  if (!fromScale || !toScale || ((from === 'G' || from === 'KG') !== (to === 'G' || to === 'KG')) || ((from === 'ML' || from === 'L') !== (to === 'ML' || to === 'L')) || (from === 'UN' || to === 'UN') && from !== to) {
+    throw new FichaValidationError(`Unidade de venda incompatível com o rendimento: ${from} → ${to}.`);
+  }
+  return multiply(parseFraction(value), fraction(BigInt(fromScale), BigInt(toScale)));
+}
+
+function normalizeStoredRecipe(recipe) {
+  const data = recipe || {};
+  if (data.modeloComposicao === COMPOSITION_MODEL) return data;
+  const componentes = (Array.isArray(data.componentes) ? data.componentes : []).map((component) => {
+    const { quantidades, ...rest } = component || {};
+    return { ...rest, quantidade: String(component?.quantidade ?? quantidades?.BASE ?? ''), vinculo: 'COMUM' };
+  });
+  const variacoes = (Array.isArray(data.variacoes) ? data.variacoes : []).map((variation) => {
+    const { modo, ...rest } = variation || {};
+    return rest;
+  });
+  return { ...data, modeloComposicao: COMPOSITION_MODEL, componentes, variacoes };
+}
+
 function nextId(db) {
   const rows = db.prepare("SELECT ft_id FROM ft_cadastros WHERE ft_id LIKE 'FT%'").all();
   let max = 0;
@@ -52,6 +85,16 @@ function nextId(db) {
     if (match) max = Math.max(max, Number(match[1]));
   }
   return `FT${String(max + 1).padStart(6, '0')}`;
+}
+
+function nextOperationalId(db, table, prefix) {
+  const rows = db.prepare(`SELECT id FROM ${table} WHERE id LIKE ?`).all(`${prefix}%`);
+  let max = 0;
+  for (const row of rows) {
+    const match = String(row.id).match(new RegExp(`^${prefix}(\\d+)$`));
+    if (match) max = Math.max(max, Number(match[1]));
+  }
+  return `${prefix}${String(max + 1).padStart(6, '0')}`;
 }
 
 function publicRow(row) {
@@ -67,6 +110,25 @@ function publicRow(row) {
 }
 
 function createNormalizedFichaService(db) {
+  function ensureFixedCategory() {
+    db.prepare('INSERT OR IGNORE INTO ft_categorias (nome, criado_em) VALUES (?, ?)').run(FT_PREPARO_CATEGORY, now());
+  }
+
+  ensureFixedCategory();
+
+  function migrateStoredRecipes() {
+    const rows = db.prepare('SELECT ft_id, versao, receita_json FROM ft_versoes').all();
+    const update = db.prepare('UPDATE ft_versoes SET receita_json = ? WHERE ft_id = ? AND versao = ?');
+    for (const row of rows) {
+      let recipe;
+      try { recipe = JSON.parse(row.receita_json); } catch { continue; }
+      const normalized = normalizeStoredRecipe(recipe);
+      if (JSON.stringify(recipe) !== JSON.stringify(normalized)) update.run(JSON.stringify(normalized), row.ft_id, row.versao);
+    }
+  }
+
+  migrateStoredRecipes();
+
   function list() {
     return db.prepare("SELECT * FROM ft_cadastros WHERE excluido = 0 ORDER BY nome COLLATE NOCASE").all().map(publicRow);
   }
@@ -75,7 +137,7 @@ function createNormalizedFichaService(db) {
     const row = db.prepare('SELECT * FROM ft_versoes WHERE ft_id = ? AND versao = ?').get(id, version);
     if (!row) return null;
     let recipe;
-    try { recipe = JSON.parse(row.receita_json); } catch { throw new FichaValidationError(`Versão corrompida: ${id}`); }
+    try { recipe = normalizeStoredRecipe(JSON.parse(row.receita_json)); } catch { throw new FichaValidationError(`Versão corrompida: ${id}`); }
     return { versao: Number(row.versao), data: row.data || '', receita: recipe, motivo: row.motivo || '' };
   }
 
@@ -88,12 +150,14 @@ function createNormalizedFichaService(db) {
     if (result.receita) {
       result.receita.nome = row.nome;
       result.receita.categoria = row.categoria;
+      result.receita.base = { ...(result.receita.base || {}), unidadeVenda: result.receita.base?.unidadeVenda || result.receita.base?.unidade || '' };
       result.receita.observacoes = row.observacoes || '';
     }
     return result;
   }
 
   function categories() {
+    ensureFixedCategory();
     return db.prepare('SELECT nome FROM ft_categorias ORDER BY nome COLLATE NOCASE').all().map((row) => row.nome);
   }
 
@@ -108,6 +172,9 @@ function createNormalizedFichaService(db) {
     const before = text(previous, 100).toUpperCase();
     const after = text(next, 100).toUpperCase();
     if (!before || !after) throw new FichaValidationError('Informe ambos os nomes de categoria.');
+    if (before === FT_PREPARO_CATEGORY || after === FT_PREPARO_CATEGORY) {
+      throw new FichaValidationError(`A categoria ${FT_PREPARO_CATEGORY} é fixa e não pode ser renomeada.`);
+    }
     if (!db.prepare('SELECT 1 FROM ft_categorias WHERE nome = ?').get(before)) throw new FichaValidationError('Categoria anterior não localizada.');
     if (db.prepare('SELECT 1 FROM ft_categorias WHERE nome = ?').get(after)) throw new FichaValidationError('Já existe categoria com este nome.');
     db.exec('BEGIN');
@@ -125,19 +192,50 @@ function createNormalizedFichaService(db) {
     const category = text(data.categoria, 100).toUpperCase();
     const base = data.base || {};
     const components = Array.isArray(data.componentes) ? data.componentes : [];
+    const unidadeBase = text(base.unidade, 12).toUpperCase();
+    const unidadeVenda = text(base.unidadeVenda || unidadeBase, 12).toUpperCase();
     if (!name) throw new FichaValidationError('Informe o nome da ficha técnica.');
     if (!category) throw new FichaValidationError('Informe a categoria.');
+    if (!SALE_UNITS.includes(unidadeVenda)) throw new FichaValidationError('Selecione uma unidade de venda válida.');
+    if (unidadeBase) quantityInUnit('1', unidadeBase, unidadeVenda);
     if (activating && (!base.qtd || !base.unidade || !components.length)) throw new FichaValidationError('Rendimento principal e componentes são obrigatórios para ativar.');
+    const variations = (Array.isArray(data.variacoes) ? data.variacoes : []).map((variation) => {
+      const { modo, ...rest } = variation || {};
+      return rest;
+    });
+    const validLinks = new Set(['COMUM', 'PRINCIPAL', ...variations.map((variation) => String(variation.key || ''))]);
+    const normalizedComponents = components.map((component) => {
+      const { quantidades, ...rest } = component || {};
+      const vinculo = String(component?.vinculo || 'COMUM');
+      if (!validLinks.has(vinculo)) throw new FichaValidationError(`Vínculo de composição inválido: ${vinculo}.`);
+      return { ...rest, vinculo, quantidade: text(component?.quantidade ?? quantidades?.BASE, 40) };
+    });
     return {
       ...data,
+      modeloComposicao: COMPOSITION_MODEL,
       nome: name,
       categoria: category,
-      base: { qtd: text(base.qtd, 40), unidade: text(base.unidade, 12).toUpperCase() },
-      variacoes: Array.isArray(data.variacoes) ? data.variacoes : [],
-      componentes: components,
+      base: { qtd: text(base.qtd, 40), unidade: unidadeBase, unidadeVenda },
+      variacoes: variations,
+      componentes: normalizedComponents,
       preparo: text(data.preparo, 30000),
       observacoes: text(data.observacoes, 10000)
     };
+  }
+
+  function validateCompositionTypes(recipe, allowedLegacyFTIds = new Set()) {
+    for (const [index, component] of (recipe.componentes || []).entries()) {
+      const type = String(component?.tipo || '').toUpperCase();
+      if (!['INSUMO', 'FT'].includes(type)) throw new FichaValidationError(`Tipo de componente inválido na linha ${index + 1}.`);
+      if (type !== 'FT') continue;
+      const id = text(component.id, 50);
+      const child = db.prepare('SELECT ft_id, categoria, status, excluido FROM ft_cadastros WHERE ft_id = ?').get(id);
+      if (!child || Number(child.excluido) === 1) throw new FichaValidationError(`FT intermediária não localizada na linha ${index + 1}.`);
+      const category = String(child.categoria || '').trim().toUpperCase();
+      if (category !== FT_PREPARO_CATEGORY && !allowedLegacyFTIds.has(id)) {
+        throw new FichaValidationError(`A linha ${index + 1} só pode usar uma FT da categoria ${FT_PREPARO_CATEGORY}.`);
+      }
+    }
   }
 
   function save(data, activate = false) {
@@ -145,10 +243,15 @@ function createNormalizedFichaService(db) {
     const current = id ? db.prepare('SELECT * FROM ft_cadastros WHERE ft_id = ? AND excluido = 0').get(id) : null;
     if (id && !current) throw new FichaValidationError('FT para edição não encontrada.');
     const statusBefore = current?.status || 'RASCUNHO';
-    const recipe = validateRecipe(data?.receita || data, Boolean(activate || statusBefore === 'ATIVA'));
-    if (current && Number(data.versao || 0) !== Number(current.versao_atual || 0)) throw new FichaValidationError('Esta FT foi atualizada em outra sessão. Reabra antes de salvar.');
-    const serialized = JSON.stringify(recipe);
     const currentSnapshot = current ? snapshot(id, current.versao_atual) : null;
+    const allowedLegacyFTIds = new Set((currentSnapshot?.receita?.componentes || [])
+      .filter((component) => String(component?.tipo || '').toUpperCase() === 'FT' && component.id)
+      .map((component) => String(component.id)));
+    const recipe = validateRecipe(data?.receita || data, Boolean(activate || statusBefore === 'ATIVA'));
+    validateCompositionTypes(recipe, allowedLegacyFTIds);
+    if (current && Number(data.versao || 0) !== Number(current.versao_atual || 0)) throw new FichaValidationError('Esta FT foi atualizada em outra sessão. Reabra antes de salvar.');
+    if (activate) costModel(recipe, 'BASE', [], true);
+    const serialized = JSON.stringify(recipe);
     const changed = !currentSnapshot || JSON.stringify(currentSnapshot.receita) !== serialized;
     const timestamp = now();
     const status = activate ? 'ATIVA' : statusBefore;
@@ -177,7 +280,9 @@ function createNormalizedFichaService(db) {
   }
 
   function library() {
-    const fichas = list().filter((item) => item.status !== 'INATIVA');
+    const todas = list();
+    const fichas = todas.filter((item) => item.status !== 'INATIVA');
+    const rascunhos = todas.filter((item) => item.status === 'RASCUNHO');
     const rendimentos = {};
     const components = {};
     for (const ficha of fichas.filter((item) => item.status === 'ATIVA')) {
@@ -185,7 +290,7 @@ function createNormalizedFichaService(db) {
       rendimentos[ficha.id] = [{ key: 'BASE', nome: 'PRINCIPAL', unidade: result.receita?.base?.unidade || '' }, ...(result.receita?.variacoes || []).map((variation) => ({ key: variation.key, nome: variation.nome, unidade: variation.unidade }))];
       components[ficha.id] = (result.receita?.componentes || []).map((component) => component.id);
     }
-    return { fichas, insumos: db.prepare('SELECT id, descricao, unidade, controla_estoque AS controla FROM insumos ORDER BY descricao COLLATE NOCASE').all().map((row) => ({ ...row, controla: Number(row.controla) === 1 ? 'SIM' : 'NÃO' })), categorias: categories(), rendimentosFT: rendimentos, componentesFT: components };
+    return { fichas, rascunhos, insumos: db.prepare('SELECT id, descricao, unidade, controla_estoque AS controla FROM insumos ORDER BY descricao COLLATE NOCASE').all().map((row) => ({ ...row, controla: Number(row.controla) === 1 ? 'SIM' : 'NÃO' })), categorias: categories(), rendimentosFT: rendimentos, componentesFT: components };
   }
 
   function changeStatus(id, status) {
@@ -207,9 +312,7 @@ function createNormalizedFichaService(db) {
     return db.prepare('SELECT versao, data, motivo FROM ft_versoes WHERE ft_id = ? ORDER BY versao').all(id).map((row) => ({ versao: Number(row.versao), data: row.data, motivo: row.motivo }));
   }
 
-  function saveManualCost(insumoId, value, observation, packageSize, paidValue) {
-    const insumo = db.prepare('SELECT id, unidade FROM insumos WHERE id = ?').get(insumoId);
-    if (!insumo) throw new FichaValidationError('Insumo não encontrado.');
+  function calculateManualCost(value, packageSize, paidValue) {
     const embalagem = text(packageSize, 40);
     const pago = text(paidValue, 40);
     let cost;
@@ -231,6 +334,15 @@ function createNormalizedFichaService(db) {
       cost = parseFraction(rawCost);
       displayValue = rawCost;
     }
+    return { cost, displayValue };
+  }
+
+  function saveManualCost(insumoId, value, observation, packageSize, paidValue) {
+    const insumo = db.prepare('SELECT id, unidade FROM insumos WHERE id = ?').get(insumoId);
+    if (!insumo) throw new FichaValidationError('Insumo não encontrado.');
+    const calculated = calculateManualCost(value, packageSize, paidValue);
+    const cost = calculated.cost;
+    const displayValue = calculated.displayValue;
     const exact = fractionText(cost);
     db.prepare(`
       INSERT INTO ft_custos_manuais (insumo_id, unidade, custo_exato, data, origem, observacao)
@@ -240,20 +352,97 @@ function createNormalizedFichaService(db) {
     return { ok: true, id: insumoId, unidade: insumo.unidade, valor: displayValue, custoExato: exact };
   }
 
+  function originLabel(origin) {
+    const value = String(origin || '').toUpperCase();
+    if (value.includes('COMPRA')) return 'COMPRAS';
+    if (value.includes('ESTOQUE') || value.includes('ENTRADA MANUAL') || value.includes('AQUISIÇÃO')) return 'ESTOQUE';
+    if (value.includes('MANUAL FT') || value.includes('FICHA')) return 'FICHA TÉCNICA';
+    if (value.includes('ALTERAÇÃO MANUAL')) return 'ALTERAÇÃO MANUAL';
+    return value || 'NÃO INFORMADA';
+  }
+
+  function updateManualCost(insumoId, packageSize, paidValue, observation = 'Atualização manual pelo módulo INSUMOS') {
+    const insumo = db.prepare('SELECT * FROM insumos WHERE id = ?').get(insumoId);
+    if (!insumo) throw new FichaValidationError('Insumo não encontrado.');
+    const calculated = calculateManualCost('', packageSize, paidValue);
+    const cost = calculated.cost;
+    const exact = fractionText(cost);
+    const timestamp = now();
+    const balance = db.prepare('SELECT * FROM estoque_saldos WHERE insumo_id = ?').get(insumo.id);
+    const quantityMili = BigInt(balance?.quantidade_mili || '0');
+    const beforeValue = parseFraction(balance?.valor_exato || '0/1');
+    const afterValue = quantityMili > 0n ? multiply(cost, fraction(quantityMili, 1000n)) : beforeValue;
+    const pending = parseFraction(balance?.pendente_exato || '0/1');
+    const lastCost = quantityMili > 0n ? cost : parseFraction(balance?.ultimo_custo_exato || '0/1');
+    const reference = db.prepare('SELECT * FROM estoque_custos_referencia WHERE insumo_id = ?').get(insumo.id);
+    db.exec('BEGIN');
+    try {
+      if (balance && quantityMili > 0n) {
+        db.prepare(`
+          UPDATE estoque_saldos
+          SET valor_exato = ?, ultimo_custo_exato = ?, atualizado_em = ?
+          WHERE insumo_id = ?
+        `).run(fractionText(afterValue), fractionText(lastCost), timestamp, insumo.id);
+      }
+      db.prepare(`
+        INSERT INTO estoque_custos_referencia (insumo_id, unidade, custo_exato, atualizado_em, origem, referencia)
+        VALUES (?, ?, ?, ?, 'ALTERAÇÃO MANUAL', ?)
+        ON CONFLICT(insumo_id) DO UPDATE SET unidade = excluded.unidade, custo_exato = excluded.custo_exato,
+          atualizado_em = excluded.atualizado_em, origem = excluded.origem, referencia = excluded.referencia
+      `).run(insumo.id, insumo.unidade, exact, timestamp, 'INSUMOS');
+      db.prepare(`
+        INSERT INTO ft_custos_manuais (insumo_id, unidade, custo_exato, data, origem, observacao)
+        VALUES (?, ?, ?, ?, 'ALTERAÇÃO MANUAL', ?)
+        ON CONFLICT(insumo_id) DO UPDATE SET unidade = excluded.unidade, custo_exato = excluded.custo_exato,
+          data = excluded.data, origem = excluded.origem, observacao = excluded.observacao
+      `).run(insumo.id, insumo.unidade, exact, timestamp, text(observation, 400));
+      if (balance && quantityMili > 0n) {
+        const operationId = nextOperationalId(db, 'estoque_operacoes', 'MOV');
+        const movementId = nextOperationalId(db, 'estoque_movimentacoes', 'DET');
+        const impact = subtract(afterValue, beforeValue);
+        db.prepare(`
+          INSERT INTO estoque_operacoes (id, data, movimento, tipo, referencia, valor_impacto_exato, observacao)
+          VALUES (?, ?, 'AJUSTE', 'ALTERAÇÃO MANUAL DE CUSTO', ?, ?, ?)
+        `).run(operationId, timestamp, insumo.id, fractionText(impact), text(observation, 400));
+        db.prepare(`
+          INSERT INTO estoque_movimentacoes (
+            id, operacao_id, data, insumo_id, quantidade_mili, valor_antes_exato, valor_depois_exato,
+            pendente_antes_exato, pendente_depois_exato, descricao
+          ) VALUES (?, ?, ?, ?, '0', ?, ?, ?, ?, ?)
+        `).run(movementId, operationId, timestamp, insumo.id, fractionText(beforeValue), fractionText(afterValue), fractionText(pending), fractionText(pending), 'ALTERAÇÃO MANUAL DE CUSTO');
+      }
+      db.exec('COMMIT');
+    } catch (error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
+    return { ok: true, id: insumo.id, unidade: insumo.unidade, valor: calculated.displayValue, custoExato: exact, quantidadeMili: String(quantityMili), valorEstoqueExato: fractionText(afterValue), origem: 'ALTERAÇÃO MANUAL', atualizado: timestamp };
+  }
+
   function referenceManual(insumoId) {
     const insumo = db.prepare('SELECT * FROM insumos WHERE id = ?').get(insumoId);
     if (!insumo) throw new FichaValidationError('Selecione um insumo cadastrado.');
-    let operational = { cost: fraction(0n), method: 'AGUARDANDO NOVA AQUISIÇÃO' };
-    try { operational = costReference(insumo); } catch {}
+    const balance = db.prepare('SELECT * FROM estoque_saldos WHERE insumo_id = ?').get(insumo.id);
+    const reference = db.prepare('SELECT * FROM estoque_custos_referencia WHERE insumo_id = ? AND unidade = ?').get(insumo.id, insumo.unidade);
     const manual = db.prepare('SELECT * FROM ft_custos_manuais WHERE insumo_id = ? AND unidade = ?').get(insumo.id, insumo.unidade);
+    let operational = { cost: fraction(0n), method: 'AGUARDANDO NOVA AQUISIÇÃO', date: '', origin: '' };
+    try {
+      const current = costReference(insumo);
+      const date = reference?.atualizado_em || manual?.data || balance?.atualizado_em || '';
+      const origin = originLabel(reference?.origem || manual?.origem || current.method);
+      operational = { ...current, date, origin };
+    } catch {}
     return {
       insumo: insumo.descricao,
       unidade: insumo.unidade,
       operacional: decimalText(operational.cost, 18),
       metodo: operational.method,
+      custoExistente: decimalText(operational.cost, 18),
+      dataUltimaAtualizacao: operational.date || '',
+      origemAlteracao: operational.origin || 'NÃO INFORMADA',
       manual: manual ? decimalText(parseFraction(manual.custo_exato), 18) : '',
       atualizado: manual?.data || '',
-      podeEditar: operational.cost.n === 0n
+      podeEditar: true
     };
   }
 
@@ -306,7 +495,7 @@ function createNormalizedFichaService(db) {
   }
 
   function variation(recipe, key) {
-    if (key === 'BASE') return { key: 'BASE', nome: 'PRINCIPAL', qtd: recipe.base?.qtd, unidade: recipe.base?.unidade, modo: 'COMPOSICAO' };
+    if (key === 'BASE') return { key: 'BASE', nome: 'PRINCIPAL', qtd: recipe.base?.qtd, unidade: recipe.base?.unidade };
     const found = (recipe.variacoes || []).find((item) => item.key === key);
     if (!found) throw new FichaValidationError(`Rendimento não encontrado: ${key}`);
     return found;
@@ -324,9 +513,10 @@ function createNormalizedFichaService(db) {
     });
     const insumos = new Map(db.prepare('SELECT * FROM insumos').all().map((row) => [row.id, row]));
     for (const component of components) {
-      const raw = key !== 'BASE' && current.modo === 'DIVIDIR'
-        ? component.quantidades?.BASE
-        : key === 'BASE' ? component.quantidades?.BASE : component.quantidades?.[key];
+      const vinculo = String(component.vinculo || 'COMUM');
+      const applies = vinculo === 'COMUM' || (key === 'BASE' ? vinculo === 'PRINCIPAL' : vinculo === key);
+      if (!applies) continue;
+      const raw = component.quantidade ?? component.quantidades?.BASE ?? (key === 'BASE' ? component.quantidades?.BASE : component.quantidades?.[key]);
       if (raw === undefined || raw === '' || Number(raw) === 0) continue;
       const quantity = parseFraction(raw);
       let unitCost;
@@ -339,9 +529,10 @@ function createNormalizedFichaService(db) {
         const childRow = db.prepare("SELECT * FROM ft_cadastros WHERE ft_id = ? AND status = 'ATIVA' AND excluido = 0").get(component.id);
         if (!childRow) throw new FichaValidationError(`FT intermediária ausente ou inativa: ${component.id}`);
         const child = get(component.id);
+        const isPreparationFT = String(childRow.categoria || '').trim().toUpperCase() === FT_PREPARO_CATEGORY;
         let nested;
         try {
-          nested = costModel(child.receita, component.configKey || 'BASE', path.concat([component.id]), required);
+          nested = costModel(child.receita, isPreparationFT ? 'BASE' : (component.configKey || 'BASE'), path.concat([component.id]), required);
         } catch (error) {
           if (Array.isArray(error.custosAusentes)) { addMissing(error.custosAusentes); continue; }
           throw error;
@@ -349,7 +540,7 @@ function createNormalizedFichaService(db) {
         unitCost = nested.unit;
         label = `FT · ${child.receita.nome}`;
         unit = nested.unidade;
-        method = `${component.id} V${child.versao}`;
+        method = `${component.id} V${child.versao}${isPreparationFT ? ' · PRINCIPAL' : ''}`;
       } else {
         const insumo = insumos.get(component.id);
         if (!insumo) throw new FichaValidationError(`Insumo não encontrado: ${component.id}`);
@@ -368,7 +559,7 @@ function createNormalizedFichaService(db) {
       }
       const subtotal = multiply(quantity, unitCost);
       total = add(total, subtotal);
-      details.push({ tipo: component.tipo || 'INSUMO', id: component.id, nome: label, quantidade: Number(raw), unidade: unit, fc: Number(decimalText(factor, 6)), subtotal: moneyText(subtotal), referencia: method, configKey: component.configKey || 'BASE', etapa: component.etapa || '' });
+      details.push({ tipo: component.tipo || 'INSUMO', id: component.id, nome: label, quantidade: Number(raw), unidade: unit, fc: Number(decimalText(factor, 6)), subtotal: moneyText(subtotal), referencia: method, configKey: component.configKey || 'BASE', vinculo, etapa: component.etapa || '' });
     }
     if (missing.size) {
       const custosAusentes = [...missing.values()];
@@ -377,8 +568,24 @@ function createNormalizedFichaService(db) {
       throw error;
     }
     if (required && !details.length) throw new FichaValidationError('A configuração não possui componentes com quantidades.');
-    const unit = divide(total, parseFraction(current.qtd));
-    return { total, unit, nome: current.nome, rendimento: Number(current.qtd), unidade: current.unidade, custoTotal: moneyText(total), custoUnitario: decimalText(unit, 18), custoUnitarioExibido: decimalCeilText(unit, 2), detalhes: details };
+    const unidadeVenda = key === 'BASE' ? (recipe.base?.unidadeVenda || current.unidade) : current.unidade;
+    const rendimentoVenda = quantityInUnit(current.qtd, current.unidade, unidadeVenda);
+    const unit = divide(total, rendimentoVenda);
+    return {
+      total,
+      unit,
+      nome: current.nome,
+      rendimento: Number(current.qtd),
+      unidade: current.unidade,
+      rendimentoVenda: decimalText(rendimentoVenda, 6),
+      unidadeVenda,
+      custoTotal: moneyText(total),
+      custoTotalExato: decimalText(total, 18),
+      custoUnitario: decimalText(unit, 18),
+      custoUnitarioExato: decimalText(unit, 18),
+      custoUnitarioExibido: decimalCeilText(unit, 2),
+      detalhes: details
+    };
   }
 
   function preview(data) {
@@ -387,7 +594,7 @@ function createNormalizedFichaService(db) {
     return configurations.map((configuration) => {
       try {
         const result = costModel(recipe, configuration.key, [], false);
-        return { ...configuration, custoTotal: result.custoTotal, custoUnitario: result.custoUnitario, custoUnitarioExibido: result.custoUnitarioExibido, rendimento: result.rendimento, unidade: result.unidade, detalhes: result.detalhes };
+        return { ...configuration, custoTotal: result.custoTotal, custoTotalExato: result.custoTotalExato, custoUnitario: result.custoUnitario, custoUnitarioExato: result.custoUnitarioExato, custoUnitarioExibido: result.custoUnitarioExibido, rendimento: result.rendimento, rendimentoVenda: result.rendimentoVenda, unidade: result.unidade, unidadeVenda: result.unidadeVenda, detalhes: result.detalhes };
       } catch (error) { return { ...configuration, erro: error.message, custosAusentes: error.custosAusentes || [] }; }
     });
   }
@@ -401,7 +608,7 @@ function createNormalizedFichaService(db) {
       configuracoes: configurations.map((configuration) => {
         try {
           const result = costModel(ficha.receita, configuration.key, [id], false);
-          return { ...configuration, custoTotal: result.custoTotal, custoUnitario: result.custoUnitario, custoUnitarioExibido: result.custoUnitarioExibido, rendimento: result.rendimento, unidade: result.unidade, detalhes: result.detalhes };
+          return { ...configuration, custoTotal: result.custoTotal, custoTotalExato: result.custoTotalExato, custoUnitario: result.custoUnitario, custoUnitarioExato: result.custoUnitarioExato, custoUnitarioExibido: result.custoUnitarioExibido, rendimento: result.rendimento, rendimentoVenda: result.rendimentoVenda, unidade: result.unidade, unidadeVenda: result.unidadeVenda, detalhes: result.detalhes };
         } catch (error) { return { ...configuration, erro: error.message, custosAusentes: error.custosAusentes || [] }; }
       })
     };
@@ -440,7 +647,7 @@ function createNormalizedFichaService(db) {
     return { data: now(), linhas: lines, custoTotal: moneyText(total), materiais: materials };
   }
 
-  return { list, get, library, categories, saveCategory, renameCategory, save, changeStatus, deleteDraft, history, saveManualCost, referenceManual, impactInsumo, compareVersions, prices, savePrices, preview, summary, simulate };
+  return { list, get, library, categories, saveCategory, renameCategory, save, changeStatus, deleteDraft, history, saveManualCost, updateManualCost, referenceManual, impactInsumo, compareVersions, prices, savePrices, preview, summary, simulate };
 }
 
-module.exports = { FichaValidationError, createNormalizedFichaService };
+module.exports = { FichaValidationError, FT_PREPARO_CATEGORY, createNormalizedFichaService };

@@ -57,7 +57,12 @@ function asPublicInsumo(row) {
     observacao: row.observacao,
     categoria: row.categoria,
     fc: Number(row.fc),
-    controlaEstoque: Number(row.controla_estoque) === 1 ? 'SIM' : 'NÃO'
+    controlaEstoque: Number(row.controla_estoque) === 1 ? 'SIM' : 'NÃO',
+    conversao: Number(row.conversao_ativa) === 1 ? 'SIM' : 'NÃO',
+    conversaoAtiva: Number(row.conversao_ativa) === 1,
+    fatorConversaoGml: Number(row.conversao_ativa) === 1 && Number(row.fator_conversao_g_ml) > 0
+      ? Number(row.fator_conversao_g_ml)
+      : ''
   };
 }
 
@@ -147,10 +152,16 @@ function validateInsumo(input) {
   const unidade = compareText(input.unidade);
   const observacao = text(input.observacao);
   const fc = Number(String(input.fc ?? '1').replace(',', '.'));
+  const conversaoInformada = Object.prototype.hasOwnProperty.call(input, 'conversao') || Object.prototype.hasOwnProperty.call(input, 'conversaoAtiva') || Object.prototype.hasOwnProperty.call(input, 'fatorConversaoGml') || Object.prototype.hasOwnProperty.call(input, 'densidadeGml');
+  const conversaoAtiva = conversaoInformada ? asBoolean(input.conversao ?? input.conversaoAtiva, false) : false;
+  const fatorConversaoGml = Number(String(input.fatorConversaoGml ?? input.densidadeGml ?? '').replace(',', '.'));
   if (!descricao) throw new ValidationError('A descrição é obrigatória.');
   if (!CATEGORIAS_INSUMOS.includes(categoria)) throw new ValidationError('Selecione uma categoria válida.');
   if (!UNIDADES_INSUMOS.includes(unidade)) throw new ValidationError('Selecione G, ML, UN, CM ou KWH como unidade de medida.');
   if (!Number.isFinite(fc) || fc <= 0 || fc > 1000000) throw new ValidationError('O fator de correção deve ser maior que zero.');
+  if (conversaoAtiva && (!Number.isFinite(fatorConversaoGml) || fatorConversaoGml <= 0 || fatorConversaoGml > 100)) {
+    throw new ValidationError('Informe um fator de conversão G/ML maior que zero.');
+  }
   return {
     id: text(input.id, 40),
     descricao,
@@ -158,7 +169,10 @@ function validateInsumo(input) {
     observacao,
     categoria,
     fc,
-    controlaEstoque: asBoolean(input.controlaEstoque, true)
+    controlaEstoque: asBoolean(input.controlaEstoque, true),
+    conversaoInformada,
+    conversaoAtiva,
+    fatorConversaoGml: conversaoAtiva ? fatorConversaoGml : 0
   };
 }
 
@@ -208,20 +222,26 @@ function createCadastrosService(db) {
     if (data.id) {
       const existing = db.prepare('SELECT * FROM insumos WHERE id = ?').get(data.id);
       if (!existing) throw new ValidationError('O insumo selecionado não foi encontrado.');
+      const conversaoAtiva = data.conversaoInformada ? data.conversaoAtiva : Number(existing.conversao_ativa) === 1;
+      const fatorConversaoGml = data.conversaoInformada ? data.fatorConversaoGml : Number(existing.fator_conversao_g_ml || 0);
       db.prepare(`
         UPDATE insumos
         SET data_ultima_alteracao = ?, descricao = ?, unidade = ?, observacao = ?,
-            categoria = ?, fc = ?, controla_estoque = ?
+            categoria = ?, fc = ?, controla_estoque = ?, conversao_ativa = ?, fator_conversao_g_ml = ?
         WHERE id = ?
-      `).run(now, data.descricao, data.unidade, data.observacao, data.categoria, data.fc, data.controlaEstoque ? 1 : 0, data.id);
+      `).run(now, data.descricao, data.unidade, data.observacao, data.categoria, data.fc,
+        data.controlaEstoque ? 1 : 0, conversaoAtiva ? 1 : 0, fatorConversaoGml, data.id);
       return { status: 'ATUALIZADO', mensagem: 'Insumo atualizado com sucesso.', insumo: obterInsumoPorId(data.id) };
     }
 
     const id = nextId(db, 'insumos', 'INS');
     db.prepare(`
-      INSERT INTO insumos (id, data_cadastro, data_ultima_alteracao, descricao, unidade, observacao, categoria, fc, controla_estoque)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, now, now, data.descricao, data.unidade, data.observacao, data.categoria, data.fc, data.controlaEstoque ? 1 : 0);
+      INSERT INTO insumos (
+        id, data_cadastro, data_ultima_alteracao, descricao, unidade, observacao, categoria, fc,
+        controla_estoque, conversao_ativa, fator_conversao_g_ml
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, now, now, data.descricao, data.unidade, data.observacao, data.categoria, data.fc,
+      data.controlaEstoque ? 1 : 0, data.conversaoAtiva ? 1 : 0, data.fatorConversaoGml);
     return { status: 'CRIADO', mensagem: 'Insumo cadastrado com sucesso.', insumo: obterInsumoPorId(id) };
   }
 

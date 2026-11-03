@@ -33,6 +33,7 @@ create table if not exists public.compras_itens (
   qtd_cancelada_mili bigint not null default 0,
   embalagem_mili bigint not null default 0,
   unidade_embalagem text not null default '',
+  fator_conversao_g_ml numeric(18, 9) not null default 0,
   preco_unit_cent text not null default '0',
   valor_total_cent text not null default '0',
   insumo_id text references public.insumos(id),
@@ -100,6 +101,7 @@ create table if not exists public.compras_recebimentos (
   data timestamptz,
   qtd_comercial_mili bigint not null default 0,
   qtd_base_mili bigint not null default 0,
+  fator_conversao_g_ml numeric(18, 9) not null default 0,
   custo_exato text not null default '0/1',
   movimento_id text not null default ''
 );

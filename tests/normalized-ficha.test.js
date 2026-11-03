@@ -12,14 +12,29 @@ function fichaForTest() {
 test('cria ficha, categoria e versão normalizadas', () => {
   const { db, ficha } = fichaForTest();
   try {
-    assert.deepEqual(ficha.saveCategory('BOLOS'), ['BOLOS']);
+    assert.deepEqual(ficha.saveCategory('BOLOS'), ['BOLOS', 'FT DE PREPARO']);
+    assert.throws(() => ficha.renameCategory('FT DE PREPARO', 'PREPAROS'), /fixa/);
     const saved = ficha.save({ receita: { nome: 'BOLO TESTE', categoria: 'BOLOS', base: { qtd: '1', unidade: 'UN' }, componentes: [{ tipo: 'INSUMO', id: 'INS0001', quantidades: { BASE: '100' } }], variacoes: [], preparo: 'Misturar', observacoes: '' } }, false);
     assert.equal(saved.id, 'FT000001');
     assert.equal(saved.status, 'RASCUNHO');
+    assert.equal(ficha.library().rascunhos[0].id, saved.id);
+    ficha.saveManualCost('INS0001', '2,50', 'CUSTO PARA ATIVAÇÃO');
     const activated = ficha.save({ id: saved.id, versao: saved.versao, receita: saved.receita }, true);
     assert.equal(activated.status, 'ATIVA');
     assert.equal(ficha.history(saved.id).length, 1);
     assert.equal(ficha.library().fichas.length, 1);
+    assert.equal(ficha.library().rascunhos.length, 0);
+  } finally {
+    db.close();
+  }
+});
+
+test('bloqueia ativação quando falta custo de componente', () => {
+  const { db, ficha } = fichaForTest();
+  try {
+    const saved = ficha.save({ nome: 'FT SEM CUSTO', categoria: 'BOLOS', base: { qtd: '1', unidade: 'UN' }, componentes: [{ tipo: 'INSUMO', id: 'INS0001', quantidades: { BASE: '100' } }], variacoes: [], preparo: '' }, false);
+    assert.throws(() => ficha.save({ id: saved.id, versao: saved.versao, receita: saved.receita }, true), /CUSTOS_AUSENTES:INS0001:FARINHA/);
+    assert.equal(ficha.get(saved.id).status, 'RASCUNHO');
   } finally {
     db.close();
   }
@@ -44,6 +59,28 @@ test('converte custo informado por embalagem e valor pago', () => {
     assert.equal(saved.valor, '0.02');
     assert.equal(saved.custoExato, '1/50');
     assert.equal(ficha.referenceManual('INS0001').manual, '0.02');
+  } finally {
+    db.close();
+  }
+});
+
+test('atualiza custo manualmente sem alterar a quantidade física do estoque', () => {
+  const { db, ficha } = fichaForTest();
+  try {
+    db.prepare(`
+      INSERT INTO estoque_saldos (insumo_id, quantidade_mili, valor_exato, pendente_exato, ultimo_custo_exato, atualizado_em)
+      VALUES ('INS0001', '800000', '334/25', '0/1', '167/10000', '2026-11-03T00:00:00.000Z')
+    `).run();
+    const result = ficha.updateManualCost('INS0001', '200', '3,50');
+    assert.equal(result.custoExato, '7/400');
+    const saldo = db.prepare('SELECT quantidade_mili, valor_exato, ultimo_custo_exato FROM estoque_saldos WHERE insumo_id = ?').get('INS0001');
+    assert.equal(saldo.quantidade_mili, '800000');
+    assert.equal(saldo.valor_exato, '14/1');
+    assert.equal(saldo.ultimo_custo_exato, '7/400');
+    const reference = db.prepare('SELECT custo_exato, origem FROM estoque_custos_referencia WHERE insumo_id = ?').get('INS0001');
+    assert.equal(reference.custo_exato, '7/400');
+    assert.equal(reference.origem, 'ALTERAÇÃO MANUAL');
+    assert.equal(ficha.referenceManual('INS0001').origemAlteracao, 'ALTERAÇÃO MANUAL');
   } finally {
     db.close();
   }
@@ -89,6 +126,19 @@ test('preserva custo de alta precisão e arredonda a apresentação para cima', 
     assert.equal(preview[0].custoUnitario, '0.0812857142857143');
     assert.equal(preview[0].custoUnitarioExibido, '0.09');
     assert.equal(preview[0].custoTotal, 'R$ 0,09');
+  } finally {
+    db.close();
+  }
+});
+
+test('calcula custo e lucro na unidade de venda convertida', () => {
+  const { db, ficha } = fichaForTest();
+  try {
+    ficha.saveManualCost('INS0001', '2,50', 'CUSTO POR GRAMA');
+    const preview = ficha.preview({ nome: 'TORTA POR KG', categoria: 'TORTAS', base: { qtd: '2650', unidade: 'G', unidadeVenda: 'KG' }, componentes: [{ tipo: 'INSUMO', id: 'INS0001', quantidades: { BASE: '100' } }], variacoes: [], preparo: '' });
+    assert.equal(preview[0].unidadeVenda, 'KG');
+    assert.equal(preview[0].rendimentoVenda, '2.65');
+    assert.equal(preview[0].custoUnitario, '94.339622641509433962');
   } finally {
     db.close();
   }

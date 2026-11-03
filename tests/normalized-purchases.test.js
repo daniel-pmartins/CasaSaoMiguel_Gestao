@@ -103,6 +103,28 @@ test('recebe compra e atualiza estoque normalizado', () => {
   }
 });
 
+test('converte embalagem em ML para a unidade base G usando o fator do insumo', () => {
+  const { db, purchases } = purchasesForTest();
+  const stock = createNormalizedStockService(db);
+  try {
+    db.prepare(`
+      INSERT INTO insumos (id, descricao, unidade, categoria, fc, controla_estoque, conversao_ativa, fator_conversao_g_ml)
+      VALUES ('INS0002', 'ÓLEO DE SOJA', 'G', 'INGREDIENTE', 1, 1, 1, 0.92)
+    `).run();
+    const saved = purchases.savePurchase({
+      origem: 'MANUAL', fornecedorId: 'FOR0001', numero: '13', totalNota: '9,00', frete: '0,00', desconto: '0,00', outrosXml: '0,00', externos: '0,00',
+      itens: [{ id: 'IT0001', descricao: 'ÓLEO DE SOJA', qtd: '1', embalagem: '900', unidade: 'ML', preco: '9,00', valorTotal: '9,00', insumoId: 'INS0002', recebida: '1' }],
+      pagamentos: [{ forma: 'PIX', valor: '9,00', vencimento: '2026-10-27', pago: true, referencia: 'FORNECEDOR' }]
+    });
+    assert.equal(saved.status, 'RECEBIDA');
+    assert.equal(stock.status().saldos.find((row) => row.id === 'INS0002').quantidadeMili, '828000');
+    assert.equal(db.prepare('SELECT fator_conversao_g_ml FROM compras_itens WHERE compra_id = ?').get(saved.id).fator_conversao_g_ml, 0.92);
+    assert.equal(db.prepare('SELECT qtd_base_mili FROM compras_recebimentos WHERE compra_id = ?').get(saved.id).qtd_base_mili, '828000');
+  } finally {
+    db.close();
+  }
+});
+
 test('cancela saldo pendente e gera crédito normalizado', () => {
   const { db, purchases } = purchasesForTest();
   try {

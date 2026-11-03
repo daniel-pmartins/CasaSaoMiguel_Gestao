@@ -25,7 +25,11 @@ function migrate(db) {
       categoria TEXT NOT NULL,
       fc REAL NOT NULL DEFAULT 1,
       controla_estoque INTEGER NOT NULL DEFAULT 1,
+      conversao_ativa INTEGER NOT NULL DEFAULT 0,
+      fator_conversao_g_ml REAL NOT NULL DEFAULT 0,
       CHECK (fc > 0),
+      CHECK (conversao_ativa IN (0, 1)),
+      CHECK (fator_conversao_g_ml >= 0),
       CHECK (unidade IN ('G', 'ML', 'UN', 'CM', 'KWH'))
     );
 
@@ -236,6 +240,7 @@ function migrate(db) {
       qtd_cancelada_mili TEXT NOT NULL DEFAULT '0',
       embalagem_mili TEXT NOT NULL DEFAULT '0',
       unidade_embalagem TEXT NOT NULL DEFAULT '',
+      fator_conversao_g_ml REAL NOT NULL DEFAULT 0,
       preco_unit_cent TEXT NOT NULL DEFAULT '0',
       valor_total_cent TEXT NOT NULL DEFAULT '0',
       insumo_id TEXT NOT NULL DEFAULT '',
@@ -250,6 +255,7 @@ function migrate(db) {
       data TEXT,
       qtd_comercial_mili TEXT NOT NULL DEFAULT '0',
       qtd_base_mili TEXT NOT NULL DEFAULT '0',
+      fator_conversao_g_ml REAL NOT NULL DEFAULT 0,
       custo_exato TEXT NOT NULL DEFAULT '0/1',
       movimento_id TEXT NOT NULL DEFAULT ''
     );
@@ -401,6 +407,16 @@ function migrate(db) {
 
     CREATE INDEX IF NOT EXISTS ft_cadastros_categoria_idx ON ft_cadastros (categoria, status);
   `);
+
+  // Migração idempotente para bancos SQLite já existentes. Os valores padrão
+  // preservam o comportamento anterior: sem conversão e sem fator informado.
+  const columns = new Set(db.prepare('PRAGMA table_info(insumos)').all().map((column) => column.name));
+  if (!columns.has('conversao_ativa')) db.exec('ALTER TABLE insumos ADD COLUMN conversao_ativa INTEGER NOT NULL DEFAULT 0');
+  if (!columns.has('fator_conversao_g_ml')) db.exec('ALTER TABLE insumos ADD COLUMN fator_conversao_g_ml REAL NOT NULL DEFAULT 0');
+  const purchaseItemColumns = new Set(db.prepare('PRAGMA table_info(compras_itens)').all().map((column) => column.name));
+  if (!purchaseItemColumns.has('fator_conversao_g_ml')) db.exec('ALTER TABLE compras_itens ADD COLUMN fator_conversao_g_ml REAL NOT NULL DEFAULT 0');
+  const receiptColumns = new Set(db.prepare('PRAGMA table_info(compras_recebimentos)').all().map((column) => column.name));
+  if (!receiptColumns.has('fator_conversao_g_ml')) db.exec('ALTER TABLE compras_recebimentos ADD COLUMN fator_conversao_g_ml REAL NOT NULL DEFAULT 0');
 }
 
 module.exports = { createDatabase, migrate };

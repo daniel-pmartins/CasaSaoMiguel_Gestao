@@ -60,12 +60,23 @@ function nextId(db, table, prefix) {
   return `${prefix}${String(max + 1).padStart(6, '0')}`;
 }
 
-function packageSize(value, unit, baseUnit) {
+function packageSize(value, unit, insumo) {
   const normalized = String(unit || '').toUpperCase();
+  const baseUnit = String(insumo?.unidade || '').toUpperCase();
   const allowed = { G: ['G', 'KG'], ML: ['ML', 'L'], UN: ['UN'], CM: ['CM', 'M'], KWH: ['KWH'] }[baseUnit] || [];
-  if (!allowed.includes(normalized)) throw new PurchaseValidationError(`Unidade da embalagem incompatível com ${baseUnit}.`);
+  const volumeToMass = baseUnit === 'G' && ['ML', 'L'].includes(normalized);
+  if (!allowed.includes(normalized) && !volumeToMass) throw new PurchaseValidationError(`Unidade da embalagem incompatível com ${baseUnit}.`);
   const size = parseMilli(value, false);
-  return size * (normalized === 'KG' || normalized === 'L' ? 1000n : normalized === 'M' ? 100n : 1n);
+  const normalizedSize = size * (normalized === 'KG' || normalized === 'L' ? 1000n : normalized === 'M' ? 100n : 1n);
+  if (!volumeToMass) return normalizedSize;
+  if (Number(insumo?.conversao_ativa) !== 1 || Number(insumo?.fator_conversao_g_ml) <= 0) {
+    throw new PurchaseValidationError(`Informe a conversão G/ML para o insumo: ${insumo?.descricao || insumo?.id || 'produto'}.`);
+  }
+  const density = parseFraction(String(insumo.fator_conversao_g_ml));
+  // A quantidade interna é armazenada em milésimos da unidade base. Quando
+  // necessário, arredondamos apenas o milésimo final, preservando a regra de
+  // cálculo exato para os valores representáveis pelo estoque.
+  return (normalizedSize * density.n + density.d / 2n) / density.d;
 }
 
 function createNormalizedPurchaseService(db) {
@@ -98,8 +109,16 @@ function createNormalizedPurchaseService(db) {
   }
 
   function ingredients() {
-    return db.prepare('SELECT id, descricao, unidade, controla_estoque FROM insumos ORDER BY descricao COLLATE NOCASE').all()
-      .map((row) => ({ id: row.id, nome: row.descricao, unidade: row.unidade, controla: Number(row.controla_estoque) === 1 ? 'SIM' : 'NÃO' }));
+    return db.prepare('SELECT id, descricao, unidade, controla_estoque, conversao_ativa, fator_conversao_g_ml FROM insumos ORDER BY descricao COLLATE NOCASE').all()
+      .map((row) => ({
+        id: row.id,
+        nome: row.descricao,
+        unidade: row.unidade,
+        controla: Number(row.controla_estoque) === 1 ? 'SIM' : 'NÃO',
+        conversao: Number(row.conversao_ativa) === 1 ? 'SIM' : 'NÃO',
+        conversaoAtiva: Number(row.conversao_ativa) === 1,
+        fatorConversaoGml: Number(row.conversao_ativa) === 1 ? Number(row.fator_conversao_g_ml || 0) : ''
+      }));
   }
 
   function summaryRows() {
@@ -174,6 +193,7 @@ function createNormalizedPurchaseService(db) {
       cancelada: quantity(item.qtd_cancelada_mili),
       embalagem: quantity(item.embalagem_mili),
       unidade: item.unidade_embalagem,
+      fatorConversaoGml: Number(item.fator_conversao_g_ml || 0) || '',
       preco: amount(item.preco_unit_cent),
       total: amount(item.valor_total_cent),
       insumoId: item.insumo_id
@@ -259,6 +279,7 @@ function createNormalizedPurchaseService(db) {
         unitPrice,
         totalCent,
         insumoId: insumo ? insumo.id : '',
+        conversionFactor: insumo ? Number(insumo.fator_conversao_g_ml || 0) : 0,
         group: text(item.grupo, 120)
       };
     });
@@ -320,10 +341,13 @@ function createNormalizedPurchaseService(db) {
         ) VALUES (?, 'PENDENTE', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(id, origin, text(data.numero, 40), text(data.serie, 15), text(data.emissao, 20), key, supplier.id, supplier.cnpj, supplier.razao_social, String(total), String(freight), String(discount), String(otherXml), String(external), externalJustification, String(creditUsed), timestamp, timestamp, text(data.observacoes, 1000));
       const insertItem = db.prepare(`
-        INSERT INTO compras_itens (compra_id, item_id, codigo_xml, descricao_xml, qtd_comprada_mili, qtd_recebida_mili, embalagem_mili, unidade_embalagem, preco_unit_cent, valor_total_cent, insumo_id, grupo_xml)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO compras_itens (
+          compra_id, item_id, codigo_xml, descricao_xml, qtd_comprada_mili, qtd_recebida_mili,
+          embalagem_mili, unidade_embalagem, fator_conversao_g_ml, preco_unit_cent, valor_total_cent,
+          insumo_id, grupo_xml
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
-      items.forEach((item) => insertItem.run(id, item.id, item.codigo, item.descricao, String(item.quantityMili), '0', String(item.packaging), item.unit, String(item.unitPrice), String(item.totalCent), item.insumoId, item.group));
+      items.forEach((item) => insertItem.run(id, item.id, item.codigo, item.descricao, String(item.quantityMili), '0', String(item.packaging), item.unit, item.conversionFactor, String(item.unitPrice), String(item.totalCent), item.insumoId, item.group));
       const insertPayment = db.prepare(`INSERT INTO compras_pagamentos (compra_id, pagamento_id, forma, valor_cent, vencimento, pago, data_pagamento, cartao_id, parcela, total_parcelas) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
       const insertExternalPayment = db.prepare(`INSERT INTO compras_pagamentos_externos (compra_id, pagamento_id, forma, valor_cent, vencimento, pago, data_pagamento, cartao_id, parcela, total_parcelas) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
       payments.forEach((payment) => {
@@ -374,10 +398,22 @@ function createNormalizedPurchaseService(db) {
       const packageValue = entry.embalagem || quantity(item.embalagem_mili);
       const packageUnit = String(entry.unidade || item.unidade_embalagem || '').toUpperCase();
       if (!packageValue || !packageUnit) throw new PurchaseValidationError(`Informe a embalagem: ${item.descricao_xml}.`);
-      const packageMili = packageSize(packageValue, packageUnit, insumo.unidade);
+      const savedConversionFactor = Number(item.fator_conversao_g_ml || 0);
+      const insumoForPackage = savedConversionFactor > 0
+        ? { ...insumo, conversao_ativa: 1, fator_conversao_g_ml: savedConversionFactor }
+        : insumo;
+      const packageMili = packageSize(packageValue, packageUnit, insumoForPackage);
       const baseQuantity = quantityMili * packageMili / 1000n;
       if (baseQuantity <= 0n) throw new PurchaseValidationError(`Quantidade inválida: ${item.descricao_xml}.`);
-      selected.set(itemId, { item, insumo, quantityMili, packageMili: parseMilli(packageValue, false), packageUnit, baseQuantity });
+      selected.set(itemId, {
+        item,
+        insumo,
+        quantityMili,
+        packageMili: parseMilli(packageValue, false),
+        packageUnit,
+        conversionFactor: savedConversionFactor > 0 ? savedConversionFactor : Number(insumo.fator_conversao_g_ml || 0),
+        baseQuantity
+      });
     }
 
     const itemTotal = allItems.reduce((sum, item) => sum + cents(item.valor_total_cent), 0n);
@@ -431,17 +467,17 @@ function createNormalizedPurchaseService(db) {
         const movementId = nextId(db, 'estoque_movimentacoes', 'DET');
         insertMovement.run(movementId, operationId, nowValue, entry.insumo.id, String(entry.baseQuantity), fractionText(beforeValue), fractionText(afterValue), fractionText(beforePending), fractionText(afterPending), `COMPRA · ${entry.item.descricao_xml}`);
         impact = add(impact, subtract(afterValue, beforeValue));
-        updates.push({ item: entry.item, quantityMili: entry.quantityMili, packageMili: entry.packageMili, packageUnit: entry.packageUnit, insumoId: entry.insumo.id, value });
+        updates.push({ item: entry.item, quantityMili: entry.quantityMili, packageMili: entry.packageMili, packageUnit: entry.packageUnit, conversionFactor: entry.conversionFactor, baseQuantity: entry.baseQuantity, insumoId: entry.insumo.id, value });
         movements.push(movementId);
       }
       insertOperation.run(operationId, nowValue, purchase.id, fractionText(impact), 'Recebimento normalizado de compra.');
-      const updateItem = db.prepare('UPDATE compras_itens SET qtd_recebida_mili = ?, embalagem_mili = ?, unidade_embalagem = ?, insumo_id = ? WHERE compra_id = ? AND item_id = ?');
-      const insertReceipt = db.prepare('INSERT INTO compras_recebimentos (id, compra_id, item_id, data, qtd_comercial_mili, qtd_base_mili, custo_exato, movimento_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+      const updateItem = db.prepare('UPDATE compras_itens SET qtd_recebida_mili = ?, embalagem_mili = ?, unidade_embalagem = ?, fator_conversao_g_ml = ?, insumo_id = ? WHERE compra_id = ? AND item_id = ?');
+      const insertReceipt = db.prepare('INSERT INTO compras_recebimentos (id, compra_id, item_id, data, qtd_comercial_mili, qtd_base_mili, fator_conversao_g_ml, custo_exato, movimento_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
       for (let index = 0; index < updates.length; index += 1) {
         const update = updates[index];
         const receivedTotal = BigInt(update.item.qtd_recebida_mili || '0') + update.quantityMili;
-        updateItem.run(String(receivedTotal), String(update.packageMili), update.packageUnit, update.insumoId, purchase.id, update.item.item_id);
-        insertReceipt.run(nextId(db, 'compras_recebimentos', 'REC'), purchase.id, update.item.item_id, nowValue, String(update.quantityMili), String(update.quantityMili * update.packageMili / 1000n), fractionText(update.value), movements[index]);
+        updateItem.run(String(receivedTotal), String(update.packageMili), update.packageUnit, update.conversionFactor, update.insumoId, purchase.id, update.item.item_id);
+        insertReceipt.run(nextId(db, 'compras_recebimentos', 'REC'), purchase.id, update.item.item_id, nowValue, String(update.quantityMili), String(update.baseQuantity), update.conversionFactor, fractionText(update.value), movements[index]);
       }
       const updatedItems = db.prepare('SELECT qtd_comprada_mili, qtd_recebida_mili, qtd_cancelada_mili FROM compras_itens WHERE compra_id = ?').all(purchase.id);
       const pending = updatedItems.some((item) => BigInt(item.qtd_comprada_mili) > BigInt(item.qtd_recebida_mili) + BigInt(item.qtd_cancelada_mili));
