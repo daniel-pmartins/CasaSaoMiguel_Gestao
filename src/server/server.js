@@ -138,6 +138,18 @@ function createApiServer({ db, normalizedStock = null, normalizedPurchases = nul
         return;
       }
 
+      if (request.method === 'POST' && pathname === '/api/cadastros/categorias') {
+        const body = await parseBody(request);
+        sendJson(response, 200, service.salvarCategoriaInsumo(body.nome));
+        return;
+      }
+
+      if (request.method === 'POST' && pathname === '/api/cadastros/categorias/renomear') {
+        const body = await parseBody(request);
+        sendJson(response, 200, service.renomearCategoriaInsumo(body.anterior, body.novo));
+        return;
+      }
+
       if (request.method === 'GET' && pathname === '/api/insumos/duplicidade') {
         sendJson(response, 200, service.verificarPossivelDuplicidade(searchParams.get('descricao') || '', searchParams.get('idAtual') || ''));
         return;

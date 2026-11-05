@@ -1,9 +1,9 @@
 const CATEGORIAS_INSUMOS = [
   'INGREDIENTE',
   'EMBALAGEM',
-  'DESCARTÁVEL',
+  'DESCARTAVEL',
   'LIMPEZA',
-  'MANUTENÇÃO',
+  'MANUTENCAO',
   'PREPARO'
 ];
 
@@ -27,6 +27,11 @@ function compareText(value) {
     .replace(/[\u0300-\u036f]/g, '')
     .toLocaleUpperCase('pt-BR')
     .replace(/\s+/g, ' ');
+}
+
+function canonicalInsumoCategory(value, categories = CATEGORIAS_INSUMOS) {
+  const normalized = compareText(value);
+  return categories.find((category) => compareText(category) === normalized) || '';
 }
 
 function normalizeCnpj(value) {
@@ -145,10 +150,10 @@ function candidateForDescription(description, rows, currentId = '') {
   return distance <= threshold ? best : null;
 }
 
-function validateInsumo(input) {
+function validateInsumo(input, categories = CATEGORIAS_INSUMOS) {
   if (!input) throw new ValidationError('Não foram recebidos dados para salvar.');
   const descricao = compareText(input.descricao);
-  const categoria = compareText(input.categoria);
+  const categoria = canonicalInsumoCategory(input.categoria, categories);
   const unidade = compareText(input.unidade);
   const observacao = text(input.observacao);
   const fc = Number(String(input.fc ?? '1').replace(',', '.'));
@@ -156,7 +161,7 @@ function validateInsumo(input) {
   const conversaoAtiva = conversaoInformada ? asBoolean(input.conversao ?? input.conversaoAtiva, false) : false;
   const fatorConversaoGml = Number(String(input.fatorConversaoGml ?? input.densidadeGml ?? '').replace(',', '.'));
   if (!descricao) throw new ValidationError('A descrição é obrigatória.');
-  if (!CATEGORIAS_INSUMOS.includes(categoria)) throw new ValidationError('Selecione uma categoria válida.');
+  if (!categoria) throw new ValidationError('Selecione uma categoria válida.');
   if (!UNIDADES_INSUMOS.includes(unidade)) throw new ValidationError('Selecione G, ML, UN, CM ou KWH como unidade de medida.');
   if (!Number.isFinite(fc) || fc <= 0 || fc > 1000000) throw new ValidationError('O fator de correção deve ser maior que zero.');
   if (conversaoAtiva && (!Number.isFinite(fatorConversaoGml) || fatorConversaoGml <= 0 || fatorConversaoGml > 100)) {
@@ -177,8 +182,101 @@ function validateInsumo(input) {
 }
 
 function createCadastrosService(db) {
+  function lerCategoriasInsumos() {
+    return db.prepare('SELECT nome FROM categorias_insumos ORDER BY ordem, nome COLLATE NOCASE').all().map((row) => row.nome);
+  }
+
+  function garantirCatalogoCategorias() {
+    const agora = isoNow();
+    const inserir = db.prepare('INSERT OR IGNORE INTO categorias_insumos (nome, ordem, criado_em) VALUES (?, ?, ?)');
+    const atualizarInsumos = db.prepare('UPDATE insumos SET categoria = ? WHERE categoria = ?');
+    const categoriasAntigas = db.prepare('SELECT DISTINCT categoria FROM insumos').all().map((row) => row.categoria);
+    const categoriasTabela = db.prepare('SELECT nome FROM categorias_insumos ORDER BY ordem, nome COLLATE NOCASE').all().map((row) => row.nome);
+    const catalogoNovo = categoriasTabela.length === 0;
+
+    db.exec('BEGIN');
+    try {
+      for (const categoria of categoriasTabela) {
+        const normalizada = compareText(categoria);
+        if (!normalizada || normalizada === categoria) continue;
+        const conflito = db.prepare('SELECT nome FROM categorias_insumos WHERE nome = ?').get(normalizada);
+        if (conflito) {
+          atualizarInsumos.run(normalizada, categoria);
+          db.prepare('DELETE FROM categorias_insumos WHERE nome = ?').run(categoria);
+        } else {
+          db.prepare('UPDATE categorias_insumos SET nome = ? WHERE nome = ?').run(normalizada, categoria);
+          atualizarInsumos.run(normalizada, categoria);
+        }
+      }
+
+      const existentes = new Set(lerCategoriasInsumos());
+      if (catalogoNovo) {
+        CATEGORIAS_INSUMOS.forEach((categoria, ordem) => {
+          const normalizada = compareText(categoria);
+          if (existentes.has(normalizada)) return;
+          inserir.run(normalizada, ordem, agora);
+          existentes.add(normalizada);
+        });
+      }
+
+      let proximaOrdem = Number(db.prepare('SELECT COALESCE(MAX(ordem), -1) AS maior FROM categorias_insumos').get().maior) + 1;
+      for (const categoria of categoriasAntigas) {
+        const normalizada = compareText(categoria);
+        if (!normalizada) continue;
+        const categoriaOficial = canonicalInsumoCategory(normalizada, [...existentes]);
+        const nomeFinal = categoriaOficial || normalizada;
+        if (!existentes.has(nomeFinal)) {
+          inserir.run(nomeFinal, proximaOrdem, agora);
+          existentes.add(nomeFinal);
+          proximaOrdem += 1;
+        }
+        if (categoria !== nomeFinal) atualizarInsumos.run(nomeFinal, categoria);
+      }
+      db.exec('COMMIT');
+    } catch (error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+
+  garantirCatalogoCategorias();
+
   function listarCategoriasInsumos() {
-    return [...CATEGORIAS_INSUMOS];
+    return lerCategoriasInsumos();
+  }
+
+  function salvarCategoriaInsumo(nome) {
+    const categoria = compareText(nome);
+    if (!categoria) throw new ValidationError('Informe o nome da categoria.');
+    const existente = canonicalInsumoCategory(categoria, listarCategoriasInsumos());
+    if (existente) throw new ValidationError('Essa categoria já está cadastrada.');
+    const maiorOrdem = Number(db.prepare('SELECT COALESCE(MAX(ordem), -1) AS maior FROM categorias_insumos').get().maior);
+    db.prepare('INSERT INTO categorias_insumos (nome, ordem, criado_em) VALUES (?, ?, ?)').run(categoria, maiorOrdem + 1, isoNow());
+    return { status: 'CRIADO', mensagem: 'Categoria cadastrada com sucesso.', categoria, categorias: listarCategoriasInsumos() };
+  }
+
+  function renomearCategoriaInsumo(anterior, novo) {
+    const categorias = listarCategoriasInsumos();
+    const categoriaAnterior = canonicalInsumoCategory(anterior, categorias);
+    const categoriaNova = compareText(novo);
+    if (!categoriaAnterior) throw new ValidationError('Selecione uma categoria cadastrada.');
+    if (!categoriaNova) throw new ValidationError('Informe o novo nome da categoria.');
+    const duplicada = canonicalInsumoCategory(categoriaNova, categorias);
+    if (duplicada && duplicada !== categoriaAnterior) throw new ValidationError('Essa categoria já está cadastrada.');
+    if (categoriaAnterior === categoriaNova) {
+      return { status: 'ATUALIZADO', mensagem: 'A categoria já possui esse nome.', categoria: categoriaNova, categorias };
+    }
+
+    db.exec('BEGIN');
+    try {
+      db.prepare('UPDATE categorias_insumos SET nome = ? WHERE nome = ?').run(categoriaNova, categoriaAnterior);
+      db.prepare('UPDATE insumos SET categoria = ? WHERE categoria = ?').run(categoriaNova, categoriaAnterior);
+      db.exec('COMMIT');
+    } catch (error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
+    return { status: 'ATUALIZADO', mensagem: 'Categoria renomeada com sucesso.', categoria: categoriaNova, categorias: listarCategoriasInsumos() };
   }
 
   function listarInsumos({ categoria = '', q = '' } = {}) {
@@ -208,7 +306,7 @@ function createCadastrosService(db) {
   }
 
   function salvarInsumo(input, forcarNovo = false) {
-    const data = validateInsumo(input);
+    const data = validateInsumo(input, listarCategoriasInsumos());
     const duplicate = verificarPossivelDuplicidade(data.descricao, data.id);
     if (duplicate.encontrado && !forcarNovo) {
       return {
@@ -340,6 +438,8 @@ function createCadastrosService(db) {
 
   return {
     listarCategoriasInsumos,
+    salvarCategoriaInsumo,
+    renomearCategoriaInsumo,
     listarInsumos,
     obterInsumoPorId,
     verificarPossivelDuplicidade,

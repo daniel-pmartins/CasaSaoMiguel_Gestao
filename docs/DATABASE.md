@@ -4,6 +4,8 @@ O banco de execução é SQLite e fica em `database/data/local.sqlite`, diretór
 
 As alterações estruturais ficam em `database/migrations/`, em arquivos SQL numerados e aplicados pelo módulo de banco.
 
+O catálogo de categorias de insumos fica em `categorias_insumos`. Os nomes são gravados em maiúsculas, sem acentos ou cedilhas, e a migração mantém os vínculos dos insumos existentes ao normalizar seus registros.
+
 ## Regras
 
 - Nunca publicar bancos com dados operacionais no repositório público.

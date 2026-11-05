@@ -3,7 +3,7 @@
   'use strict';
 
   const readOnlyMessage = 'A Simulação do Sistema é somente leitura. Nenhuma alteração foi gravada.';
-  const categorias = ['INGREDIENTE', 'EMBALAGEM', 'DESCARTÁVEL', 'PREPARO'];
+  const categorias = ['INGREDIENTE', 'EMBALAGEM', 'DESCARTAVEL', 'PREPARO'];
   const categoriasFicha = ['COOKIES RECHEADOS'];
   const insumos = [
     { id: 'INS0001', descricao: 'NUTELLA', unidade: 'G', categoria: 'INGREDIENTE', controla: 'SIM', controlaEstoque: 'SIM', fc: '1,00', custo: 0.08 },
@@ -96,7 +96,7 @@
   const writeMethods = new Set([
     'salvarInsumo', 'salvarFornecedor', 'excluirFornecedorSemCnpj', 'comprasGravar', 'comprasReceber', 'comprasRascunhoSalvar', 'comprasRascunhoDescartar', 'comprasCancelarPendente',
     'estoqueAbrirInventario', 'estoqueSalvarContagens', 'estoqueSalvarDetalhesContagem', 'estoqueGravarContagens', 'estoqueFinalizarInventario', 'estoqueCancelarInventario', 'estoqueCorrigirSaldoManual', 'estoqueRegistrarMovimentacaoManual', 'estoqueRascunhoSaidaSalvar', 'estoqueRascunhoSaidaDescartar', 'estoqueReabrirContagem',
-    'ftSalvar', 'ftAlterarSituacao', 'ftExcluirRascunho', 'ftSalvarCategoria', 'ftRenomearCategoria', 'ftSalvarCustoManual', 'ftPrecosSalvar'
+    'ftSalvar', 'ftAlterarSituacao', 'ftExcluirRascunho', 'ftSalvarCategoria', 'ftRenomearCategoria', 'ftSalvarCategoriaInsumo', 'ftRenomearCategoriaInsumo', 'ftSalvarCustoManual', 'ftPrecosSalvar'
   ]);
 
   function read(name, args) {

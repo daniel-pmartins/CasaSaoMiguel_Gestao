@@ -97,6 +97,9 @@
     .descricao-conteudo { position: relative; }
     .descricao-linha { display: flex; gap: 8px; }
     .descricao-linha input { flex: 1; }
+    .categoria-linha { display: flex; gap: 6px; align-items: stretch; }
+    .categoria-linha select { flex: 1; min-width: 0; }
+    .categoria-acao { flex: 0 0 40px; width: 40px; padding: 0; font-size: 20px; font-weight: 700; line-height: 1; }
     .lupa {
       flex: 0 0 46px;
       display: flex;
@@ -191,17 +194,18 @@
     .modal h2 { margin: 0 0 10px; color: var(--marrom); font-size: 20px; }
     .modal p { line-height: 1.45; }
     .modal-acoes { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
-    .lista-insumos { display: grid; gap: 8px; margin-top: 14px; height: 310px; max-height: 310px; overflow-y: auto; padding-right: 4px; }
+    .lista-insumos { display: grid; gap: 4px; margin-top: 14px; height: 310px; max-height: 310px; overflow-y: auto; padding-right: 4px; }
     .item-insumo {
       width: 100%;
-      padding: 12px;
+      min-height: 0;
+      padding: 7px 10px;
       border: 1px solid var(--borda);
       border-radius: 8px;
       background: #FFFDF8;
       color: var(--texto);
       text-align: left;
       cursor: pointer;
-      line-height: 1.4;
+      line-height: 1.2;
     }
     .item-insumo:hover { border-color: var(--marrom); background: var(--creme); }
     .item-insumo strong { color: var(--marrom); }
@@ -272,9 +276,13 @@ input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible
         <div class="linha-categoria-unidade">
           <div class="campo">
             <label for="categoria">CATEGORIA *</label>
-            <select id="categoria" required>
-              <option value="" selected></option>
-            </select>
+            <div class="categoria-linha">
+              <select id="categoria" required>
+                <option value="" selected></option>
+              </select>
+              <button class="lupa categoria-acao" type="button" aria-label="Cadastrar categoria" title="Cadastrar categoria" onclick="abrirNovaCategoria()">+</button>
+              <button class="lupa categoria-acao" type="button" aria-label="Alterar categoria" title="Alterar categoria" onclick="abrirRenomearCategoria()">✎</button>
+            </div>
           </div>
           <div class="campo">
             <label for="unidade">UNIDADE *</label>
@@ -497,6 +505,116 @@ input:focus,select:focus,textarea:focus,input:focus-visible,select:focus-visible
         mostrarStatus(erro.message || 'Não foi possível carregar as categorias.', 'erro');
       })
       .listarCategoriasInsumos();
+  }
+
+  function abrirNovaCategoria() {
+    abrirModal('NOVA CATEGORIA', [
+      { texto: 'CANCELAR', classe: 'cancelar', acao: fecharModal },
+      { texto: 'SALVAR', classe: 'salvar', acao: salvarNovaCategoria }
+    ]);
+    const corpo = el('modalConteudo');
+    const label = document.createElement('label');
+    label.setAttribute('for', 'novaCategoriaInput');
+    label.textContent = 'NOME DA CATEGORIA *';
+    const input = document.createElement('input');
+    input.id = 'novaCategoriaInput';
+    input.className = 'texto-maiusculo';
+    input.maxLength = 100;
+    input.placeholder = 'DIGITE O NOME DA CATEGORIA';
+    const feedback = document.createElement('div');
+    feedback.id = 'categoriaModalFeedback';
+    feedback.className = 'status';
+    corpo.append(label, input, feedback);
+    setTimeout(() => input.focus(), 30);
+  }
+
+  function salvarNovaCategoria() {
+    const input = el('novaCategoriaInput');
+    const feedback = el('categoriaModalFeedback');
+    const nome = input?.value.toLocaleUpperCase('pt-BR').trim().replace(/\s+/g, ' ') || '';
+    if (!nome) {
+      feedback.textContent = 'Informe o nome da categoria.';
+      feedback.className = 'status erro';
+      input?.focus();
+      return;
+    }
+    localApi
+      .withSuccessHandler(resultado => {
+        categoriaPendente = resultado.categoria;
+        fecharModal();
+        carregarCategorias();
+        mostrarStatus(resultado.mensagem || 'Categoria cadastrada com sucesso.', 'sucesso');
+      })
+      .withFailureHandler(erro => {
+        feedback.textContent = erro.message || 'Não foi possível cadastrar a categoria.';
+        feedback.className = 'status erro';
+      })
+      .salvarCategoriaInsumo(nome);
+  }
+
+  function abrirRenomearCategoria() {
+    localApi
+      .withSuccessHandler(categorias => {
+        if (!categorias.length) {
+          mostrarStatus('Não há categorias cadastradas para alterar.', 'erro');
+          return;
+        }
+        abrirModal('ALTERAR CATEGORIA', [
+          { texto: 'CANCELAR', classe: 'cancelar', acao: fecharModal },
+          { texto: 'SALVAR', classe: 'salvar', acao: salvarRenomearCategoria }
+        ]);
+        const corpo = el('modalConteudo');
+        const labelAtual = document.createElement('label');
+        labelAtual.setAttribute('for', 'categoriaAtualInput');
+        labelAtual.textContent = 'CATEGORIA EXISTENTE *';
+        const atual = document.createElement('select');
+        atual.id = 'categoriaAtualInput';
+        categorias.forEach(categoria => atual.add(new Option(categoria, categoria)));
+        atual.value = el('categoria').value || categorias[0];
+        const labelNova = document.createElement('label');
+        labelNova.setAttribute('for', 'novaCategoriaInput');
+        labelNova.textContent = 'NOVO NOME *';
+        labelNova.style.marginTop = '12px';
+        const nova = document.createElement('input');
+        nova.id = 'novaCategoriaInput';
+        nova.className = 'texto-maiusculo';
+        nova.maxLength = 100;
+        nova.value = atual.value;
+        const feedback = document.createElement('div');
+        feedback.id = 'categoriaModalFeedback';
+        feedback.className = 'status';
+        atual.addEventListener('change', () => { nova.value = atual.value; });
+        corpo.append(labelAtual, atual, labelNova, nova, feedback);
+        setTimeout(() => nova.focus(), 30);
+      })
+      .withFailureHandler(erro => mostrarStatus(erro.message || 'Não foi possível carregar as categorias.', 'erro'))
+      .listarCategoriasInsumos();
+  }
+
+  function salvarRenomearCategoria() {
+    const atual = el('categoriaAtualInput');
+    const nova = el('novaCategoriaInput');
+    const feedback = el('categoriaModalFeedback');
+    const anterior = atual?.value || '';
+    const nome = nova?.value.toLocaleUpperCase('pt-BR').trim().replace(/\s+/g, ' ') || '';
+    if (!nome) {
+      feedback.textContent = 'Informe o novo nome da categoria.';
+      feedback.className = 'status erro';
+      nova?.focus();
+      return;
+    }
+    localApi
+      .withSuccessHandler(resultado => {
+        categoriaPendente = resultado.categoria;
+        fecharModal();
+        carregarCategorias();
+        mostrarStatus(resultado.mensagem || 'Categoria renomeada com sucesso.', 'sucesso');
+      })
+      .withFailureHandler(erro => {
+        feedback.textContent = erro.message || 'Não foi possível alterar a categoria.';
+        feedback.className = 'status erro';
+      })
+      .renomearCategoriaInsumo(anterior, nome);
   }
 
   function atualizarCacheInsumos() {

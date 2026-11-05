@@ -68,6 +68,7 @@ dialog[open]{position:fixed;top:50%;left:50%;right:auto;bottom:auto;margin:0;tra
 .ft-category-item:hover,.ft-category-item:focus-visible{background:#FFF2D8;border-color:var(--champagne)}
 .ft-category-item strong{font-size:12px}.ft-category-item .sub{font-size:11px}
 .ft-category-empty{margin:0;padding:10px 0}
+.ft-category-preparation-panel{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .ft-category-options{top:calc(100% + 3px);max-height:190px;z-index:8}
 .ft-category-options button{font-size:13px;padding:8px 10px}
 .csm-factor-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:#071D2C8c;z-index:1100}
@@ -156,17 +157,22 @@ function renderList(){
  const categoriaDe=x=>String(x.categoria||'').trim()||'SEM CATEGORIA';
  const categoriasBase=busca||situacao||comp?lista.map(categoriaDe):[...lib.categorias,...lista.map(categoriaDe)];
  const categorias=[...new Set(categoriasBase)].sort((a,b)=>{
+  const aPreparo=a.toLocaleUpperCase('pt-BR')==='FT DE PREPARO',bPreparo=b.toLocaleUpperCase('pt-BR')==='FT DE PREPARO';
+  if(aPreparo&&!bPreparo)return 1;if(!aPreparo&&bPreparo)return -1;
   const ia=lib.categorias.indexOf(a),ib=lib.categorias.indexOf(b);
   if(ia>=0&&ib<0)return -1;if(ia<0&&ib>=0)return 1;if(ia!==ib)return ia-ib;
   return a.localeCompare(b,'pt-BR');
  });
- const grupos=categorias.map(catNome=>{
-  const itens=lista.filter(x=>categoriaDe(x)===catNome),multiplas=itens.length>1;
+ const renderCategoria=catNome=>{
+  const itens=lista.filter(x=>categoriaDe(x)===catNome);
   if(!itens.length)return '<div class="ft-category-group"><button type="button" class="ft-category-button" disabled><span>'+xss(catNome)+'</span><span class="sub">NENHUMA FICHA CADASTRADA</span></button></div>';
-  const acao=multiplas?'data-ft-category-toggle':'data-ft-item="'+xss(itens[0].id)+'"';
-  const filhos=multiplas?'<div class="ft-category-list">'+itens.map(x=>'<button type="button" class="ft-category-item" data-ft-item="'+xss(x.id)+'"><strong>'+xss(x.nome)+' · '+xss(x.id)+'</strong><span class="sub">'+xss(x.status)+(x.pendencia?' · ⚠ PENDENTE DE REVISÃO':'')+'</span></button>').join('')+'</div>':'';
-  return '<div class="ft-category-group'+(multiplas?' has-children':'')+'"><button type="button" class="ft-category-button" '+acao+(multiplas?' aria-expanded="false"':'')+'><span>'+xss(catNome)+'</span>'+(multiplas?'<span class="ft-category-chevron" aria-hidden="true">⌄</span>':'')+'</button>'+filhos+'</div>';
- }).join('');
+  const filhos='<div class="ft-category-list">'+itens.map(x=>'<button type="button" class="ft-category-item" data-ft-item="'+xss(x.id)+'"><strong>'+xss(x.nome)+'</strong><span class="sub">'+xss(x.status)+(x.pendencia?' · ⚠ PENDENTE DE REVISÃO':'')+'</span></button>').join('')+'</div>';
+  return '<div class="ft-category-group has-children"><button type="button" class="ft-category-button" data-ft-category-toggle aria-expanded="false"><span>'+xss(catNome)+'</span><span class="ft-category-chevron" aria-hidden="true">⌄</span></button>'+filhos+'</div>';
+ };
+ const isPreparationCategory=catNome=>catNome.toLocaleUpperCase('pt-BR')==='FT DE PREPARO';
+ const gruposPrincipais=categorias.filter(catNome=>!isPreparationCategory(catNome)).map(renderCategoria).join('');
+ const grupoPreparo=categorias.filter(isPreparationCategory).map(renderCategoria).join('');
+ const grupos=gruposPrincipais+(grupoPreparo?'<div class="ft-category-preparation-panel">'+grupoPreparo+'</div>':'');
  $('list').innerHTML=grupos||'<p class="sub ft-category-empty">'+(busca?'REFERÊNCIA NÃO LOCALIZADA.':'NENHUMA FICHA TÉCNICA CADASTRADA.')+'</p>';
  $('list').onclick=handleFTCategoryClick;
 }
@@ -189,7 +195,7 @@ function preventInvalidQuantityKey(event){if(event.ctrlKey||event.metaKey||event
 function setQuantity(i,value){state.componentes[i].quantidade=normalizeQuantityInput(value);markDirty();}
 function delComponent(i){state.componentes.splice(i,1);markDirty();renderComponents();}
 function isPreparationFT(ficha){return String(ficha?.categoria||'').trim().toLocaleUpperCase('pt-BR')==='FT DE PREPARO';}
-function compOptions(c){let list=c.tipo==='INSUMO'?lib.insumos:lib.fichas.filter(x=>x.id!==state.id&&x.status==='ATIVA'&&isPreparationFT(x));if(c.tipo==='FT'&&c.id&&!list.some(x=>x.id===c.id)){const atual=lib.fichas.find(x=>x.id===c.id);if(atual)list=[atual,...list];}const vazio=!c.id?'<option value="" selected>SELECIONE...</option>':'';return vazio+list.map(x=>'<option value="'+xss(x.id)+'" '+(x.id===c.id?'selected':'')+'>'+xss(x.descricao||x.nome)+' · '+xss(x.id)+'</option>').join('');}
+function compOptions(c){let list=c.tipo==='INSUMO'?lib.insumos:lib.fichas.filter(x=>x.id!==state.id&&x.status==='ATIVA'&&isPreparationFT(x));if(c.tipo==='FT'&&c.id&&!list.some(x=>x.id===c.id)){const atual=lib.fichas.find(x=>x.id===c.id);if(atual)list=[atual,...list];}const vazio=!c.id?'<option value="" selected>SELECIONE...</option>':'';return vazio+list.map(x=>'<option value="'+xss(x.id)+'" '+(x.id===c.id?'selected':'')+'>'+xss(c.tipo==='INSUMO'?x.descricao:(x.descricao||x.nome))+'</option>').join('');}
 function reorderComponents(from,to){if(from===to||from<0||to<0||from>=state.componentes.length||to>=state.componentes.length)return;const [moved]=state.componentes.splice(from,1);state.componentes.splice(to,0,moved);markDirty();renderComponents();}
 function bindComponentOrdering(){let draggedIndex=null;const tbody=$('compTable').tBodies[0];if(!tbody)return;const clearDropMarkers=()=>tbody.querySelectorAll('tr').forEach(row=>row.classList.remove('component-dragging','component-drop-before','component-drop-after'));tbody.querySelectorAll('[data-component-drag]').forEach(handle=>{handle.addEventListener('dragstart',event=>{draggedIndex=Number(handle.dataset.componentIndex);const row=handle.closest('tr');row?.classList.add('component-dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',String(draggedIndex));});handle.addEventListener('dragend',()=>{draggedIndex=null;clearDropMarkers();});});tbody.querySelectorAll('tr[data-component-index]').forEach(row=>{row.addEventListener('dragover',event=>{if(draggedIndex===null)return;event.preventDefault();event.dataTransfer.dropEffect='move';const target=Number(row.dataset.componentIndex);row.classList.remove('component-drop-before','component-drop-after');if(target===draggedIndex)return;const after=event.clientY>row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;row.classList.add(after?'component-drop-after':'component-drop-before');});row.addEventListener('dragleave',()=>row.classList.remove('component-drop-before','component-drop-after'));row.addEventListener('drop',event=>{event.preventDefault();const from=draggedIndex;const target=Number(row.dataset.componentIndex);const after=row.classList.contains('component-drop-after');const insertionIndex=target+(after?1:0);const to=from<insertionIndex?insertionIndex-1:insertionIndex;draggedIndex=null;clearDropMarkers();reorderComponents(from,to);});});}
 function vinculoOptions(component){const options=[{key:'COMUM',nome:'COMUM'},{key:'PRINCIPAL',nome:'PRINCIPAL'},...state.variacoes.map(v=>({key:v.key,nome:v.nome||'VARIAÇÃO'}))];const selected=component.vinculo||'COMUM';return options.map(option=>'<option value="'+xss(option.key)+'" '+(selected===option.key?'selected':'')+'>'+xss(option.nome)+'</option>').join('');}

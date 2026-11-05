@@ -39,6 +39,12 @@ function migrate(db) {
     CREATE INDEX IF NOT EXISTS insumos_categoria_idx
       ON insumos (categoria);
 
+    CREATE TABLE IF NOT EXISTS categorias_insumos (
+      nome TEXT PRIMARY KEY,
+      ordem INTEGER NOT NULL DEFAULT 0,
+      criado_em TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS fornecedores (
       id TEXT PRIMARY KEY,
       cnpj TEXT NOT NULL,

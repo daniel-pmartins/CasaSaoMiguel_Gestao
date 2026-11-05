@@ -38,6 +38,8 @@
       case 'estoqueRascunhoSaidaDescartar': return requestJson(`/api/v2/estoque/rascunhos-saida/${id(args[0])}/descartar`, { method: 'POST', body: '{}' });
       case 'estoqueConferirSaidaManual': return requestJson('/api/v2/estoque/conferir-saida', { method: 'POST', body: JSON.stringify({ itens: args[0] }) });
       case 'listarCategoriasInsumos': return requestJson('/api/cadastros/categorias');
+      case 'salvarCategoriaInsumo': return requestJson('/api/cadastros/categorias', { method: 'POST', body: JSON.stringify({ nome: args[0] }) });
+      case 'renomearCategoriaInsumo': return requestJson('/api/cadastros/categorias/renomear', { method: 'POST', body: JSON.stringify({ anterior: args[0], novo: args[1] }) });
       case 'listarInsumos': return requestJson('/api/insumos');
       case 'obterInsumoPorId': return requestJson(`/api/insumos/${id(args[0])}`);
       case 'listarInsumosPorCategoria': return requestJson(`/api/insumos?categoria=${id(args[0])}`);
