@@ -40,6 +40,21 @@ test('bloqueia ativação quando falta custo de componente', () => {
   }
 });
 
+test('mantém FTs desativadas na biblioteca para consulta e edição', () => {
+  const { db, ficha } = fichaForTest();
+  try {
+    const saved = ficha.save({ nome: 'FT DESATIVADA', categoria: 'BOLOS', base: { qtd: '1', unidade: 'UN' }, componentes: [{ tipo: 'INSUMO', id: 'INS0001', quantidade: '100', vinculo: 'COMUM' }] }, false);
+    ficha.saveManualCost('INS0001', '2,50', 'CUSTO PARA ATIVAÇÃO');
+    const active = ficha.save({ id: saved.id, versao: saved.versao, receita: saved.receita }, true);
+    assert.equal(active.status, 'ATIVA');
+    assert.equal(ficha.changeStatus(saved.id, 'INATIVA').status, 'INATIVA');
+    assert.equal(ficha.library().fichas.find((item) => item.id === saved.id)?.status, 'INATIVA');
+    assert.equal(ficha.get(saved.id).status, 'INATIVA');
+  } finally {
+    db.close();
+  }
+});
+
 test('salva custo manual e preços de ficha', () => {
   const { db, ficha } = fichaForTest();
   try {

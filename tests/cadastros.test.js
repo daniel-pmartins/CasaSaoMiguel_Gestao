@@ -39,6 +39,17 @@ test('cria, lista e detecta duplicidade de insumo', () => {
       controlaEstoque: true
     });
     assert.equal(duplicate.status, 'POSSIVEL_DUPLICIDADE');
+
+    service.salvarInsumo({
+      descricao: 'FARINHA DE TRIGO BRANCA',
+      unidade: 'G',
+      categoria: 'INGREDIENTE',
+      fc: 1,
+      controlaEstoque: true
+    }, true);
+    const updated = service.salvarInsumo({ ...created.insumo, descricao: 'FARINHA DE TRIGO BRANCA', fc: 1.1 });
+    assert.equal(updated.status, 'ATUALIZADO');
+    assert.equal(updated.insumo.id, created.insumo.id);
   } finally {
     db.close();
   }

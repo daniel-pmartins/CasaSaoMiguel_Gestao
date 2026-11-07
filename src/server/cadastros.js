@@ -307,7 +307,7 @@ function createCadastrosService(db) {
 
   function salvarInsumo(input, forcarNovo = false) {
     const data = validateInsumo(input, listarCategoriasInsumos());
-    const duplicate = verificarPossivelDuplicidade(data.descricao, data.id);
+    const duplicate = data.id ? { encontrado: false } : verificarPossivelDuplicidade(data.descricao, data.id);
     if (duplicate.encontrado && !forcarNovo) {
       return {
         status: 'POSSIVEL_DUPLICIDADE',

@@ -281,7 +281,7 @@ function createNormalizedFichaService(db) {
 
   function library() {
     const todas = list();
-    const fichas = todas.filter((item) => item.status !== 'INATIVA');
+    const fichas = todas;
     const rascunhos = todas.filter((item) => item.status === 'RASCUNHO');
     const rendimentos = {};
     const components = {};
